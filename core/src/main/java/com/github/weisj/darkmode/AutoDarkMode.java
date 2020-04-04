@@ -9,15 +9,18 @@ import com.intellij.openapi.util.SystemInfo;
 
 import javax.swing.*;
 
+/**
+ * Automatically changes the IDEA theme based on windows settings.
+ */
 public class AutoDarkMode implements Disposable {
     private static final Logger LOGGER = Logger.getInstance(AutoDarkMode.class);
 
     private final LafManager lafManager;
-    private final AutoDarkModeThemes themes;
+    private final AutoDarkModeOptions options;
     private final ThemeMonitor monitor;
 
     public AutoDarkMode(final LafManager lafManager) {
-        themes = ServiceManager.getService(AutoDarkModeThemes.class);
+        options = ServiceManager.getService(AutoDarkModeOptions.class);
         this.lafManager = lafManager;
         if (!SystemInfo.isWin10OrNewer) {
             LOGGER.error("Plugin only supports Windows 10 or newer");
@@ -35,16 +38,16 @@ public class AutoDarkMode implements Disposable {
 
     private void onThemeChange(final boolean isDark, final boolean isHighContrast) {
         UIManager.LookAndFeelInfo current = lafManager.getCurrentLookAndFeel();
-        UIManager.LookAndFeelInfo target = getInfo(isDark, isHighContrast);
+        UIManager.LookAndFeelInfo target = getTargetLaf(isDark, isHighContrast);
         if (!target.equals(current)) {
             updateLaf(target);
         }
     }
 
-    private UIManager.LookAndFeelInfo getInfo(final boolean dark, final boolean highContrast) {
-        return highContrast ? dark ? themes.getDark()
-                                   : themes.getLight()
-                            : themes.getHighContrast();
+    private UIManager.LookAndFeelInfo getTargetLaf(final boolean dark, final boolean highContrast) {
+        return highContrast && options.getCheckHighContrast() ? options.getHighContrastTheme()
+                                                              : dark ? options.getDarkTheme()
+                                                                     : options.getLightTheme();
     }
 
     private void updateLaf(final UIManager.LookAndFeelInfo targetLaf) {

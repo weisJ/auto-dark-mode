@@ -5,7 +5,6 @@ import com.github.vlsi.gradle.properties.dsl.props
 plugins {
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.gradle-extensions")
-    id("com.github.vlsi.stage-vote-release")
     id("org.jetbrains.intellij")
 }
 
@@ -15,37 +14,7 @@ val enableGradleMetadata by props()
 
 val String.v: String get() = rootProject.extra["$this.version"] as String
 
-val buildVersion = "auto-dark-mode".v + releaseParams.snapshotSuffix
-
-releaseParams {
-    tlp.set("auto-dark-mode")
-    organizationName.set("weisJ")
-    componentName.set("auto-dark-mode")
-    prefixForProperties.set("gh")
-    svnDistEnabled.set(false)
-    sitePreviewEnabled.set(false)
-    nexus {
-        mavenCentral()
-    }
-    voteText.set {
-        """
-        ${it.componentName} v${it.version}-rc${it.rc} is ready for preview.
-
-        Git SHA: ${it.gitSha}
-        Staging repository: ${it.nexusRepositoryUri}
-        """.trimIndent()
-    }
-}
-
-intellij {
-    version = "2019.3.4"
-}
-
-tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
-    changeNotes("""
-        Inital version
-      """)
-}
+val buildVersion = "auto-dark-mode".v
 
 allprojects {
     group = "com.github.weisj"
@@ -81,23 +50,6 @@ allprojects {
         }
     }
 
-    plugins.withId("cpp-library") {
-        listOf(AbstractPublishToMaven::class, GenerateMavenPom::class, GenerateModuleMetadata::class)
-                .forEach { type ->
-                    tasks.withType(type)
-                            .matching {
-                                it.name.startsWith("publishMain") ||
-                                        it.name.startsWith("signMain") ||
-                                        it.name.startsWith("generatePomFileForMain") ||
-                                        it.name.startsWith("generateMetadataFileForMain")
-                            }
-                            .configureEach {
-                                // We don't need to publish CPP artifacts (e.g. header files)
-                                enabled = false
-                            }
-                }
-    }
-
     if (!enableGradleMetadata) {
         tasks.withType<GenerateModuleMetadata> {
             enabled = false
@@ -110,8 +62,6 @@ allprojects {
             targetCompatibility = JavaVersion.VERSION_1_8
             withSourcesJar()
         }
-
-        apply(plugin = "maven-publish")
 
         tasks {
             withType<JavaCompile>().configureEach {
@@ -139,92 +89,6 @@ allprojects {
                             textFrom("$projectDir/LICENSE")
                         } else {
                             textFrom("$rootDir/LICENSE")
-                        }
-                    }
-                }
-            }
-        }
-
-        configure<PublishingExtension> {
-            if (project.path.startsWith(":auto-dark-mode-dependencies-bom") ||
-                    project.path == ":") {
-                // We don't it to Central for now
-                return@configure
-            }
-
-            publications {
-                create<MavenPublication>(project.name) {
-                    artifactId = project.name
-                    version = rootProject.version.toString()
-                    description = project.description
-                    from(project.components["java"])
-                }
-                withType<MavenPublication> {
-                    // Use the resolved versions in pom.xml
-                    // Gradle might have different resolution rules, so we set the versions
-                    // that were used in Gradle build/test.
-                    versionMapping {
-                        usage(Usage.JAVA_RUNTIME) {
-                            fromResolutionResult()
-                        }
-                        usage(Usage.JAVA_API) {
-                            fromResolutionOf("runtimeClasspath")
-                        }
-                    }
-                    pom {
-                        withXml {
-                            val sb = asString()
-                            var s = sb.toString()
-                            // <scope>compile</scope> is Maven default, so delete it
-                            s = s.replace("<scope>compile</scope>", "")
-                            // Cut <dependencyManagement> because all dependencies have the resolved versions
-                            s = s.replace(
-                                    Regex(
-                                            "<dependencyManagement>.*?</dependencyManagement>",
-                                            RegexOption.DOT_MATCHES_ALL
-                                    ),
-                                    ""
-                            )
-                            sb.setLength(0)
-                            sb.append(s)
-                            // Re-format the XML
-                            asNode()
-                        }
-
-
-                        description.set(
-                                project.description
-                                        ?: "IDEA plugin to automatically apply windoes theme settings."
-                        )
-                        name.set(
-                                (project.findProperty("artifact.name") as? String)
-                                        ?: project.name.capitalize().replace("-", " ")
-                        )
-                        url.set("https://github.com/weisJ/auto-dark-mode")
-                        organization {
-                            name.set("com.github.weisj")
-                            url.set("https://github.com/weisj")
-                        }
-                        issueManagement {
-                            system.set("GitHub")
-                            url.set("https://github.com/weisJ/auto-dark-mode/issues")
-                        }
-                        licenses {
-                            license {
-                                name.set("MIT")
-                                url.set("https://github.com/weisJ/auto-dark-mode/blob/master/LICENSE")
-                                distribution.set("repo")
-                            }
-                        }
-                        scm {
-                            url.set("https://github.com/weisJ/auto-dark-mode")
-                            connection.set("scm:git:git://github.com/weisJ/auto-dark-mode.git")
-                            developerConnection.set("scm:git:ssh://git@github.com:weisj/auto-dark-mode.git")
-                        }
-                        developers {
-                            developer {
-                                name.set("Jannis Weis")
-                            }
                         }
                     }
                 }

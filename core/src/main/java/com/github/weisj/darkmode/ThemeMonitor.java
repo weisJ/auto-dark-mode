@@ -1,6 +1,5 @@
 package com.github.weisj.darkmode;
 
-import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.diagnostic.Logger;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,6 +45,7 @@ public class ThemeMonitor {
         dark = DarkModeNative.isDarkThemeEnabled();
         highContrast = DarkModeNative.isHighContrastEnabled();
         eventHandle = DarkModeNative.createEventHandle();
+        onThemeChange.accept(dark, highContrast);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
         this.running.set(true);
         new Thread(this::run).start();

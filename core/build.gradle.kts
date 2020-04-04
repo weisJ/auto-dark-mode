@@ -6,6 +6,16 @@ plugins {
     id("org.jetbrains.intellij")
 }
 
+intellij {
+    version = "2019.3.4"
+}
+
+tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
+    changeNotes("""
+        Initial version
+      """)
+}
+
 fun DependencyHandlerScope.javaImplementation(dep: Any) {
     compileOnly(dep)
     runtimeOnly(dep)
@@ -29,9 +39,7 @@ library {
         )
     }
 }
-repositories {
-    mavenCentral()
-}
+
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     jvmTarget = "1.8"
