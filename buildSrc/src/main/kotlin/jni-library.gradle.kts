@@ -9,8 +9,6 @@ plugins {
 // This configuration might be used for adding cpp-only dependencies
 val jniImplementation by configurations.creating
 
-val defaultLibraryName: String by project
-
 configurations.matching {
     it.name.startsWith("cppCompile") ||
             it.name.startsWith("nativeLink") ||
@@ -74,11 +72,15 @@ afterEvaluate {
         }
     }
     tasks.jar {
-        // Publish non-optimized, debuggable binary to simplify analysis in case of crashes
+        //Disable all task. Tasks are re-enabled if needed.
+        library.binaries.get().forEach {
+            it.compileTask.get().enabled = false
+        }
         library.binaries.get()
             .filter { it.isOptimized }
             .filterIsInstance<CppSharedLibrary>()
             .forEach { binary ->
+                binary.compileTask.get().enabled = true
                 binary.linkTask.get().debuggable.set(false)
                 dependsOn(binary.linkTask)
                 val variantName = binary.targetMachine.let {
