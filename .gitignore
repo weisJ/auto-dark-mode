@@ -1,0 +1,62 @@
+# SVN
+.svn
+repo/
+
+# VIM locks
+*.swp
+
+# LibreOffice locks
+.~lock.*#
+
+*.tmp
+
+# Word temporary
+~$*.doc*
+#
+# # Excel temporary
+~$*.xls*
+#
+# # Excel Backup File
+*.xlk
+
+# intelliJ
+.idea/
+/out/
+/buildSrc/out/
+/*/out/
+*.iml
+
+# VS Code
+.vscode/
+
+# maven
+target/
+
+# gradle
+/.gradle/
+/build/
+/buildSrc/.gradle/
+/*/build/
+
+# Python
+venv/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+/.recommenders/
+/key.gpg
+
+# Project
+/bin/
+/buildSrc/bin/
+/*/bin/
+*.dylib
+*.dll
+
+# Eclipse
+.classpath
+.project
+.settings

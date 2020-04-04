@@ -1,0 +1,27 @@
+<idea-plugin>
+    <id>com.github.weisj.darkmode</id>
+    <name>Auto dark mode windows</name>
+    <description>
+        Automatically change IDEA theme if according to windows dark/light mode and high contrast settings.
+    </description>
+
+    <vendor url="">
+        Jannis Weis
+    </vendor>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <application-components>
+        <component>
+            <implementation-class>com.github.weisj.darkmode.AutoDarkMode</implementation-class>
+        </component>
+    </application-components>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeThemes" />
+        <applicationConfigurable instance="com.github.weisj.darkmode.DarkModeConfigurable"
+                                 os="windows"/>
+    </extensions>
+</idea-plugin>
