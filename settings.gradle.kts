@@ -16,7 +16,7 @@ pluginManagement {
 
 include(
     "dependencies-bom",
-    "core"
+    "plugin"
 )
 
 rootProject.name = "auto-dark-mode"

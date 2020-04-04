@@ -11,9 +11,11 @@ intellij {
 }
 
 tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
-    changeNotes("""
+    changeNotes(
+        """
         Initial version
-      """)
+      """
+    )
 }
 
 fun DependencyHandlerScope.javaImplementation(dep: Any) {

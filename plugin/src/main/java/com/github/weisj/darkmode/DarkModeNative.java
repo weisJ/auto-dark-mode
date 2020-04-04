@@ -1,7 +1,6 @@
 package com.github.weisj.darkmode;
 
 import com.github.weisj.darklaf.platform.NativeUtil;
-import com.intellij.openapi.diagnostic.Logger;
 
 import java.io.IOException;
 

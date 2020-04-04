@@ -42,12 +42,14 @@ library {
         compileTask.get().apply {
             val javaHome = Jvm.current().javaHome.canonicalPath
             includes("$javaHome/include")
-            includes(when {
-                targetOs.isMacOs -> listOf("$javaHome/include/darwin")
-                targetOs.isLinux -> listOf("$javaHome/include/linux")
-                targetOs.isWindows -> listOf("$javaHome/include/win32")
-                else -> emptyList()
-            })
+            includes(
+                when {
+                    targetOs.isMacOs -> listOf("$javaHome/include/darwin")
+                    targetOs.isLinux -> listOf("$javaHome/include/linux")
+                    targetOs.isWindows -> listOf("$javaHome/include/win32")
+                    else -> emptyList()
+                }
+            )
         }
     }
 }

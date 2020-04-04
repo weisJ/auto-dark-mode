@@ -44,7 +44,7 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
         highContrastTheme = lafManager.installedLookAndFeels
             .first { it.name == state.highContrastName && it.className == state.highContrastNameClassName }
             ?: DEFAULT_HIGH_CONTRAST_THEME
-        checkHighContrast = state.checkHighContrast?: DEFAULT_CHECK_HIGH_CONTRAST
+        checkHighContrast = state.checkHighContrast ?: DEFAULT_CHECK_HIGH_CONTRAST
     }
 
     data class State(
