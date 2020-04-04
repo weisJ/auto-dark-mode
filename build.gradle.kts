@@ -18,9 +18,9 @@ val String.v: String get() = rootProject.extra["$this.version"] as String
 val buildVersion = "auto-dark-mode".v + releaseParams.snapshotSuffix
 
 releaseParams {
-    tlp.set("darklaf")
+    tlp.set("auto-dark-mode")
     organizationName.set("weisJ")
-    componentName.set("darklaf")
+    componentName.set("auto-dark-mode")
     prefixForProperties.set("gh")
     svnDistEnabled.set(false)
     sitePreviewEnabled.set(false)
@@ -43,8 +43,8 @@ intellij {
 
 tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
     changeNotes("""
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>""")
+        Inital version
+      """)
 }
 
 allprojects {
@@ -123,10 +123,10 @@ allprojects {
                     attributes["Bundle-License"] = "MIT"
                     attributes["Implementation-Title"] = project.name
                     attributes["Implementation-Version"] = project.version
-                    attributes["Specification-Vendor"] = "Darklaf"
+                    attributes["Specification-Vendor"] = "Auto Dark Mode"
                     attributes["Specification-Version"] = project.version
-                    attributes["Specification-Title"] = "Darklaf"
-                    attributes["Implementation-Vendor"] = "Darklaf"
+                    attributes["Specification-Title"] = "Auto Dark Mode"
+                    attributes["Implementation-Vendor"] = "Auto Dark Mode"
                     attributes["Implementation-Vendor-Id"] = "com.github.weisj"
                 }
 
@@ -194,32 +194,32 @@ allprojects {
 
                         description.set(
                                 project.description
-                                        ?: "A themeable Look and Feel for java swing"
+                                        ?: "IDEA plugin to automatically apply windoes theme settings."
                         )
                         name.set(
                                 (project.findProperty("artifact.name") as? String)
                                         ?: project.name.capitalize().replace("-", " ")
                         )
-                        url.set("https://github.com/weisJ/darklaf")
+                        url.set("https://github.com/weisJ/auto-dark-mode")
                         organization {
                             name.set("com.github.weisj")
                             url.set("https://github.com/weisj")
                         }
                         issueManagement {
                             system.set("GitHub")
-                            url.set("https://github.com/weisJ/darklaf/issues")
+                            url.set("https://github.com/weisJ/auto-dark-mode/issues")
                         }
                         licenses {
                             license {
                                 name.set("MIT")
-                                url.set("https://github.com/weisJ/darklaf/blob/master/LICENSE")
+                                url.set("https://github.com/weisJ/auto-dark-mode/blob/master/LICENSE")
                                 distribution.set("repo")
                             }
                         }
                         scm {
-                            url.set("https://github.com/weisJ/intelliJ-dark") //Todo
-                            connection.set("scm:git:git://github.com/weisJ/darklaf.git")
-                            developerConnection.set("scm:git:ssh://git@github.com:weisj/darklaf.git")
+                            url.set("https://github.com/weisJ/auto-dark-mode")
+                            connection.set("scm:git:git://github.com/weisJ/auto-dark-mode.git")
+                            developerConnection.set("scm:git:ssh://git@github.com:weisj/auto-dark-mode.git")
                         }
                         developers {
                             developer {

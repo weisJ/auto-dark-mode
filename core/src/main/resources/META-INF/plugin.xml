@@ -5,7 +5,7 @@
         Automatically change IDEA theme if according to windows dark/light mode and high contrast settings.
     </description>
 
-    <vendor url="">
+    <vendor url="https://github.com/weisJ/auto-dark-mode">
         Jannis Weis
     </vendor>
 
