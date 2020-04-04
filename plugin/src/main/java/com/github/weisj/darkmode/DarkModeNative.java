@@ -6,6 +6,10 @@ import java.io.IOException;
 
 public final class DarkModeNative {
 
+    private static final String PROJECT_NAME = "auto-dark-mode-plugin";
+    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/";
+    private static final String DLL_NAME = PROJECT_NAME + ".dll";
+
     private static final String jreArchitecture = System.getProperty("sun.arch.data.model");
     private static final boolean isX86;
     private static final boolean isX64;
@@ -30,11 +34,9 @@ public final class DarkModeNative {
     public static boolean loadLibrary() {
         try {
             if (isX86) {
-                NativeUtil.loadLibraryFromJar(
-                    "/com/github/weisj/darkmode/auto-dark-mode-core/windows-x86/auto-dark-mode-core.dll");
+                NativeUtil.loadLibraryFromJar(PATH + "windows-x86/" + DLL_NAME);
             } else if (isX64) {
-                NativeUtil.loadLibraryFromJar(
-                    "/com/github/weisj/darkmode/auto-dark-mode-core/windows-x86-64/auto-dark-mode-core.dll");
+                NativeUtil.loadLibraryFromJar(PATH + "windows-x86-64/" + DLL_NAME);
             }
         } catch (IOException e) {
             e.printStackTrace();
