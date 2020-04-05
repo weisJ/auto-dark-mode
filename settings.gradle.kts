@@ -10,7 +10,6 @@ pluginManagement {
         idv("com.github.vlsi.stage-vote-release", "com.github.vlsi.vlsi-release-plugins")
         idv("org.jetbrains.intellij", "org.jetbrains.intellij")
         idv("jvm", "kotlin")
-        idv("reflect", "kotlin")
     }
 }
 

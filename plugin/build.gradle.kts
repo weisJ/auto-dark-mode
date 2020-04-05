@@ -1,5 +1,3 @@
-import com.github.vlsi.gradle.crlf.CrLfSpec
-import com.github.vlsi.gradle.crlf.LineEndings
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -27,17 +25,7 @@ fun DependencyHandlerScope.javaImplementation(dep: Any) {
 }
 
 dependencies {
-    javaImplementation(kotlin("stdlib-jdk8"))
-    javaImplementation(kotlin("reflect"))
-}
-
-tasks.jar {
-    CrLfSpec(LineEndings.LF).run {
-        into("META-INF") {
-            filteringCharset = "UTF-8"
-            textFrom("$rootDir/licenses/NATIVEUTIL_LICENSE.txt")
-        }
-    }
+    javaImplementation("com.github.weisj:darklaf-native-utils")
 }
 
 library {

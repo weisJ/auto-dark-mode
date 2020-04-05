@@ -72,7 +72,7 @@ afterEvaluate {
         }
     }
     tasks.jar {
-        //Disable all task. Tasks are re-enabled if needed.
+        // Disable all task. Tasks are re-enabled if needed.
         library.binaries.get().forEach {
             it.compileTask.get().enabled = false
         }

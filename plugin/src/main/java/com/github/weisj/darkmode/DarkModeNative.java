@@ -1,5 +1,7 @@
 package com.github.weisj.darkmode;
 
+import com.github.weisj.darklaf.platform.NativeUtil;
+
 import java.io.IOException;
 
 public final class DarkModeNative {
