@@ -2,19 +2,21 @@
     <id>com.github.weisj.darkmode</id>
     <name>Auto Dark Mode Windows</name>
     <description>
-        Automatically change IDEA theme according to Windows theme (dark/light) and high contrast settings.
+        Automatically change IDEA theme according to Windows settings (dark/light/high contrast).
     </description>
 
-    <vendor url="https://github.com/weisJ/auto-dark-mode">
+    <vendor url="https://github.com/weisJ/">
         Jannis Weis
     </vendor>
 
-    <idea-version since-build="2019.3"/>
+    <idea-version since-build="2019.3" until-build="2020.1"/>
     <depends>com.intellij.modules.platform</depends>
 
     <applicationListeners>
         <listener class="com.github.weisj.darkmode.AutoDarkModeStartupListener"
                   topic="com.intellij.ide.AppLifecycleListener"/>
+        <listener class="com.github.weisj.darkmode.AutoDarkModePluginListener"
+                  topic="com.intellij.ide.plugins.DynamicPluginListener"/>
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">

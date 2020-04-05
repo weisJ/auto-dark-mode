@@ -8,14 +8,18 @@ plugins {
 }
 
 intellij {
-    version = "2019.3.4"
+    version = "LATEST-EAP-SNAPSHOT"
 }
 
 tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     changeNotes(
         """
-        Initial version. Change the IDEA theme based on Windows settings.
-      """
+        <ul>
+            <li>Support for 2020.1 dynamic plugin loading.</li>
+            <li>Updated plugin icon.</li>
+            <li>Initial version. Change the IDEA theme based on Windows settings.</li>
+        </ul>
+        """
     )
 }
 

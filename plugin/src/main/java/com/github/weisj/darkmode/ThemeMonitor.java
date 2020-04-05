@@ -9,11 +9,11 @@ public class ThemeMonitor {
     private static final Logger LOGGER = Logger.getInstance(AutoDarkMode.class);
 
     private final BiConsumer<Boolean, Boolean> onThemeChange;
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private boolean dark;
     private boolean highContrast;
 
-    private AtomicBoolean running = new AtomicBoolean(false);
     private long eventHandle;
 
     public ThemeMonitor(BiConsumer<Boolean, Boolean> onThemeChange) {

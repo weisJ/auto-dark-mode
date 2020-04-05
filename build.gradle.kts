@@ -29,7 +29,6 @@ allprojects {
         mavenCentral()
     }
 
-
     tasks.withType<PublishTask> {
         token(intellijPublishToken)
     }
