@@ -48,7 +48,9 @@ public class ThemeMonitor {
         onThemeChange.accept(dark, highContrast);
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
         this.running.set(true);
-        new Thread(this::run).start();
+        Thread notificationThread = new Thread(this::run);
+        notificationThread.setDaemon(true);
+        notificationThread.start();
     }
 
     private void stop() {
