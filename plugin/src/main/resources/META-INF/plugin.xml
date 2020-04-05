@@ -15,9 +15,11 @@
     <applicationListeners>
         <listener class="com.github.weisj.darkmode.AutoDarkModeStartupListener"
                   topic="com.intellij.ide.AppLifecycleListener"
+                  activeInHeadlessMode="false"
                   os="windows"/>
         <listener class="com.github.weisj.darkmode.AutoDarkModePluginListener"
                   topic="com.intellij.ide.plugins.DynamicPluginListener"
+                  activeInHeadlessMode="false"
                   os="windows"/>
     </applicationListeners>
 
