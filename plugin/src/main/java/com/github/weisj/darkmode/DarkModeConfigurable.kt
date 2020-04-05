@@ -34,4 +34,9 @@ class DarkModeConfigurable(private val lafManager: LafManager) : BoundConfigurab
             }
         }
     }
+
+    override fun apply() {
+        super.apply()
+        ServiceManager.getService(AutoDarkMode::class.java).onSettingsChange()
+    }
 }

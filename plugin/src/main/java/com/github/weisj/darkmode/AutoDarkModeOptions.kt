@@ -1,5 +1,6 @@
 package com.github.weisj.darkmode
 
+import com.intellij.ide.plugins.PluginManager
 import com.intellij.ide.ui.LafManager
 import com.intellij.ide.ui.laf.IntelliJLookAndFeelInfo
 import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo
@@ -34,6 +35,7 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     }
 
     override fun loadState(state: State) {
+        PluginManager.getLogger().warn("state changed")
         val lafManager = LafManager.getInstance()
         darkTheme = lafManager.installedLookAndFeels
             .first { it.name == state.darkName && it.className == state.darkClassName }

@@ -1,3 +1,6 @@
+import com.github.vlsi.gradle.crlf.CrLfSpec
+import com.github.vlsi.gradle.crlf.LineEndings
+import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -10,7 +13,7 @@ intellij {
     version = "2019.3.4"
 }
 
-tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
+tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     changeNotes(
         """
         Initial version. Change the IDEA theme based on Windows settings.
@@ -24,9 +27,17 @@ fun DependencyHandlerScope.javaImplementation(dep: Any) {
 }
 
 dependencies {
-    javaImplementation("com.github.weisj:darklaf-native-utils")
     javaImplementation(kotlin("stdlib-jdk8"))
     javaImplementation(kotlin("reflect"))
+}
+
+tasks.jar {
+    CrLfSpec(LineEndings.LF).run {
+        into("META-INF") {
+            filteringCharset = "UTF-8"
+            textFrom("$rootDir/licenses/NATIVEUTIL_LICENSE.txt")
+        }
+    }
 }
 
 library {

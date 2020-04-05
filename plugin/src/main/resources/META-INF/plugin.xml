@@ -9,19 +9,18 @@
         Jannis Weis
     </vendor>
 
-    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-         on how to target different products -->
+    <idea-version since-build="2019.3"/>
     <depends>com.intellij.modules.platform</depends>
 
-    <application-components>
-        <component>
-            <implementation-class>com.github.weisj.darkmode.AutoDarkMode</implementation-class>
-        </component>
-    </application-components>
+    <applicationListeners>
+        <listener class="com.github.weisj.darkmode.AutoDarkModeStartupListener"
+                  topic="com.intellij.ide.AppLifecycleListener"/>
+    </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"/>
         <applicationConfigurable instance="com.github.weisj.darkmode.DarkModeConfigurable"
+                                 dynamic="true"
                                  os="windows"/>
     </extensions>
 </idea-plugin>

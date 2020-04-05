@@ -29,6 +29,5 @@ dependencies {
         // runtime means "the dependency is only for runtime, not for compilation"
         // In other words, marking dependency as "runtime" would avoid accidental
         // dependency on it during compilation
-        apiv("com.github.weisj:darklaf-native-utils", "darklaf")
     }
 }

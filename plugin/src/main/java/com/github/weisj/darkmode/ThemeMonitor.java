@@ -56,6 +56,10 @@ public class ThemeMonitor {
         DarkModeNative.notifyEventHandle(eventHandle);
     }
 
+    public void requestUpdate() {
+        onThemeChange.accept(dark, highContrast);
+    }
+
     public void setRunning(final boolean running) {
         if (running == isRunning()) return;
         if (running) {

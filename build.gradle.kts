@@ -29,6 +29,7 @@ allprojects {
         mavenCentral()
     }
 
+
     tasks.withType<PublishTask> {
         token(intellijPublishToken)
     }
@@ -42,6 +43,7 @@ allprojects {
     }
 
     plugins.withType<JavaLibraryPlugin> {
+
         dependencies {
             // cpp-library is not compatible with java-library
             // they both use api and implementation configurations
@@ -90,7 +92,7 @@ allprojects {
                     into("META-INF") {
                         filteringCharset = "UTF-8"
                         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                        // This includes either project-specific license or a default one
+                        // This includes either project-specific license, or a default one
                         if (file("$projectDir/LICENSE").exists()) {
                             textFrom("$projectDir/LICENSE")
                         } else {
