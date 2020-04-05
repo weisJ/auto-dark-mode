@@ -1,6 +1,7 @@
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
 import com.github.vlsi.gradle.properties.dsl.props
+import org.jetbrains.intellij.tasks.PublishTask
 
 plugins {
     id("com.github.vlsi.crlf")
@@ -11,6 +12,7 @@ plugins {
 val skipJavadoc by props()
 val enableMavenLocal by props()
 val enableGradleMetadata by props()
+val intellijPublishToken: String by props("")
 
 val String.v: String get() = rootProject.extra["$this.version"] as String
 
@@ -25,6 +27,10 @@ allprojects {
             mavenLocal()
         }
         mavenCentral()
+    }
+
+    tasks.withType<PublishTask> {
+        token(intellijPublishToken)
     }
 
     tasks.withType<AbstractArchiveTask>().configureEach {
