@@ -13,6 +13,8 @@ By default, the following themes are used:
 | High Contrast | High Contrast |
 
 ## Building
-``
+````
+
 ./gradlew build
-``
+
+````
