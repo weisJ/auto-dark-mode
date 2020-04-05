@@ -13,7 +13,7 @@ intellij {
 tasks.getByName<org.jetbrains.intellij.tasks.PatchPluginXmlTask>("patchPluginXml") {
     changeNotes(
         """
-        Initial version
+        Initial version. Change the IDEA theme based on Windows settings.
       """
     )
 }

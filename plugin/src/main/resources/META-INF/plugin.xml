@@ -2,7 +2,7 @@
     <id>com.github.weisj.darkmode</id>
     <name>Auto Dark Mode Windows</name>
     <description>
-        Automatically change IDEA theme according to windows theme and high contrast settings.
+        Automatically change IDEA theme according to Windows theme (dark/light) and high contrast settings.
     </description>
 
     <vendor url="https://github.com/weisJ/auto-dark-mode">
