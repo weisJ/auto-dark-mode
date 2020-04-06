@@ -2,60 +2,53 @@ package com.github.weisj.darkmode;
 
 import com.intellij.openapi.diagnostic.Logger;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 public class ThemeMonitor {
     private static final Logger LOGGER = Logger.getInstance(AutoDarkMode.class);
 
     private final BiConsumer<Boolean, Boolean> onThemeChange;
-    private final AtomicBoolean running = new AtomicBoolean(false);
 
     private boolean dark;
     private boolean highContrast;
 
-    private long eventHandle;
+    private long eventHandler;
+    private boolean running;
 
     public ThemeMonitor(BiConsumer<Boolean, Boolean> onThemeChange) {
         this.onThemeChange = onThemeChange;
     }
 
-    private void run() {
-        LOGGER.info("Started theme monitoring.");
-        while (running.get() && DarkModeNative.waitThemeChange(eventHandle)) {
-            boolean newDark = DarkModeNative.isDarkThemeEnabled();
-            boolean newHighContrast = DarkModeNative.isHighContrastEnabled();
-            boolean hasChanged = highContrast != newHighContrast
-                                 || (!newHighContrast && dark != newDark);
-            if (hasChanged) {
-                dark = newDark;
-                highContrast = newHighContrast;
-                onThemeChange.accept(dark, highContrast);
-            }
-        }
-        if (running.get()) {
-            LOGGER.error("Monitor encountered an error. Stopping theme monitoring.");
-            running.set(false);
-        } else {
-            LOGGER.info("Stopped theme monitoring.");
+    private void onNotification() {
+        boolean newDark = DarkModeNative.isDarkThemeEnabled();
+        boolean newHighContrast = DarkModeNative.isHighContrastEnabled();
+        boolean hasChanged = highContrast != newHighContrast
+                             || (!newHighContrast && dark != newDark);
+        if (hasChanged) {
+            dark = newDark;
+            highContrast = newHighContrast;
+            onThemeChange.accept(dark, highContrast);
         }
     }
 
     private void start() {
         dark = DarkModeNative.isDarkThemeEnabled();
         highContrast = DarkModeNative.isHighContrastEnabled();
-        eventHandle = DarkModeNative.createEventHandle();
+        eventHandler = DarkModeNative.createEventHandler(this::onNotification);
+        if (eventHandler == 0) {
+            LOGGER.error("Could not create notification listener. Monitoring will not be started");
+            return;
+        }
+        running = true;
         onThemeChange.accept(dark, highContrast);
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
-        this.running.set(true);
-        Thread notificationThread = new Thread(this::run);
-        notificationThread.setDaemon(true);
-        notificationThread.start();
+        LOGGER.info("Started theme monitoring.");
     }
 
     private void stop() {
-        this.running.set(false);
-        DarkModeNative.notifyEventHandle(eventHandle);
+        if (!running) return;
+        LOGGER.info("Stopped theme monitoring.");
+        running = false;
+        DarkModeNative.deleteEventHandler(eventHandler);
     }
 
     public void requestUpdate() {
@@ -72,6 +65,6 @@ public class ThemeMonitor {
     }
 
     public boolean isRunning() {
-        return running.get();
+        return running;
     }
 }

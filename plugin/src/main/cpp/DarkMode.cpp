@@ -24,9 +24,12 @@
 #include "com_github_weisj_darkmode_DarkModeNative.h"
 
 #include <string>
+#include <iostream>
 #include <windows.h>
 #include <winreg.h>
 #include <winuser.h>
+#include <thread>
+#include <atomic>
 
 #define HIGH_CONTRAST_PATH ("Control Panel\\Accessibility\\HighContrast")
 #define DARK_MODE_PATH ("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize")
@@ -109,23 +112,93 @@ Java_com_github_weisj_darkmode_DarkModeNative_isHighContrastEnabled(JNIEnv *env,
     return (jboolean) IsHighContrastMode();
 }
 
+struct EventHandler {
+    JavaVM *jvm;
+    JNIEnv *env;
+    jobject callback;
+    HANDLE eventHandle;
+    std::thread notificationLoop;
+    std::atomic<bool> running = FALSE;
+
+    void runCallBack()
+    {
+        jclass runnableClass = env->GetObjectClass(callback);
+        jmethodID runMethodId = env->GetMethodID(runnableClass, "run", "()V");
+        if (runMethodId) {
+            env->CallVoidMethod(callback, runMethodId);
+        }
+    }
+
+    bool awaitPreferenceChange()
+    {
+        if (!RegisterRegistryEvent(DARK_MODE_PATH, eventHandle)) return FALSE;
+        if (!RegisterRegistryEvent(HIGH_CONTRAST_PATH, eventHandle)) return FALSE;
+        return WaitForSingleObject(eventHandle, INFINITE) != WAIT_FAILED;
+    }
+
+    void run()
+    {
+        int getEnvStat = jvm->GetEnv((void **)&env, JNI_VERSION_1_6);
+        if (getEnvStat == JNI_EDETACHED)
+        {
+            if (jvm->AttachCurrentThread((void **) &env, NULL) != 0) return;
+        }
+        else if (getEnvStat == JNI_EVERSION)
+        {
+            return;
+        }
+        while(running && awaitPreferenceChange())
+        {
+            if (running)
+            {
+                runCallBack();
+                if (env->ExceptionCheck())
+                {
+                    env->ExceptionDescribe();
+                    break;
+                }
+            }
+        }
+        jvm->DetachCurrentThread();
+    }
+
+    void stop()
+    {
+        running = FALSE;
+        SetEvent(eventHandle);
+        notificationLoop.join();
+    }
+
+    EventHandler(JavaVM *jvm_, jobject callback_, HANDLE eventHandle_)
+    {
+        jvm = jvm_;
+        callback = callback_;
+        eventHandle = eventHandle_;
+        running = TRUE;
+        notificationLoop = std::thread(&EventHandler::run, this);
+    }
+};
+
 JNIEXPORT jlong JNICALL
-Java_com_github_weisj_darkmode_DarkModeNative_createEventHandle(JNIEnv *env, jclass obj)
+Java_com_github_weisj_darkmode_DarkModeNative_createEventHandler(JNIEnv *env, jclass obj, jobject callback)
 {
-    return (jlong) CreateEvent(NULL, FALSE, FALSE, NULL);
+  JavaVM *jvm;
+  if (env->GetJavaVM(&jvm) == 0) {
+      jobject callbackRef = env->NewGlobalRef(callback);
+      HANDLE event = CreateEvent(NULL, FALSE, FALSE, NULL);
+      EventHandler* eventHandler = new EventHandler(jvm, callbackRef, event);
+      return reinterpret_cast<jlong>(eventHandler);
+  }
+  return (jlong) 0;
 }
 
 JNIEXPORT void JNICALL
-Java_com_github_weisj_darkmode_DarkModeNative_notifyEventHandle(JNIEnv *env, jclass obj, jlong eventHandle)
+Java_com_github_weisj_darkmode_DarkModeNative_deleteEventHandler(JNIEnv *env, jclass obj, jlong eventHandler)
 {
-    SetEvent(reinterpret_cast<HANDLE>(eventHandle));
-}
-
-JNIEXPORT jboolean JNICALL
-Java_com_github_weisj_darkmode_DarkModeNative_waitThemeChange(JNIEnv *env, jclass obj, jlong eventHandle)
-{
-    HANDLE event = reinterpret_cast<HANDLE>(eventHandle);
-    if (!RegisterRegistryEvent(DARK_MODE_PATH, event)) return (jboolean) false;
-    if (!RegisterRegistryEvent(HIGH_CONTRAST_PATH, event)) return (jboolean) false;
-    return (jboolean) (WaitForSingleObject(event, INFINITE) != WAIT_FAILED);
+  EventHandler *handler = reinterpret_cast<EventHandler *>(eventHandler);
+  if (handler) {
+      env->DeleteGlobalRef(handler->callback);
+      handler->stop();
+      delete handler;
+  }
 }

@@ -12,4 +12,9 @@ public class AutoDarkModeStartupListener implements AppLifecycleListener {
     public void appFrameCreated(@NotNull List<String> commandLineArgs) {
         ServiceManager.getService(AutoDarkMode.class).start();
     }
+
+    @Override
+    public void appClosing() {
+        ServiceManager.getService(AutoDarkMode.class).stop();
+    }
 }

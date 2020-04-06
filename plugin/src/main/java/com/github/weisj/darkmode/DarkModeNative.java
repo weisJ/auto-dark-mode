@@ -25,11 +25,10 @@ public final class DarkModeNative {
 
     public static native boolean isHighContrastEnabled();
 
-    public static native long createEventHandle();
+    public static native long createEventHandler(final Runnable callback);
 
-    public static native void notifyEventHandle(final long handle);
+    public static native void deleteEventHandler(final long handle);
 
-    public static native boolean waitThemeChange(final long handle);
 
     public static boolean loadLibrary() {
         try {

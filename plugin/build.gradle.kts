@@ -8,13 +8,14 @@ plugins {
 }
 
 intellij {
-    version = "LATEST-EAP-SNAPSHOT"
+    version = "2019.3"
 }
 
 tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     changeNotes(
         """
         <ul>
+            <li>Disable plugin on non windows operating systems and in headless mode.</li>
             <li>Support for 2020.1 dynamic plugin loading.</li>
             <li>Updated plugin icon.</li>
             <li>Initial version. Change the IDEA theme based on Windows settings.</li>

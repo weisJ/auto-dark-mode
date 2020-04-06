@@ -17,15 +17,13 @@ import javax.swing.*;
 public final class AutoDarkMode implements Disposable {
     private static final Logger LOGGER = Logger.getInstance(AutoDarkMode.class);
 
-    private final LafManager lafManager;
-    private final AutoDarkModeOptions options;
-    private final ThemeMonitor monitor;
+    private AutoDarkModeOptions options;
+    private ThemeMonitor monitor;
     private UIManager.LookAndFeelInfo currentLaf;
 
     public AutoDarkMode() {
         options = ServiceManager.getService(AutoDarkModeOptions.class);
-        this.lafManager = LafManager.getInstance();
-        this.currentLaf = lafManager.getCurrentLookAndFeel();
+        this.currentLaf = LafManager.getInstance().getCurrentLookAndFeel();
         if (!SystemInfo.isWin10OrNewer) {
             LOGGER.error("Plugin only supports Windows 10 or newer");
             monitor = null;
@@ -66,7 +64,7 @@ public final class AutoDarkMode implements Disposable {
     }
 
     private void updateLaf(final UIManager.LookAndFeelInfo targetLaf) {
-        QuickChangeLookAndFeel.switchLafAndUpdateUI(lafManager, targetLaf, true);
+        QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, true);
     }
 
     @Override

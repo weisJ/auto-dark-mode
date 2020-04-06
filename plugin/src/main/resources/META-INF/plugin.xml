@@ -24,7 +24,10 @@
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"/>
+        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkMode"
+                            os="windows"/>
+        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"
+                            os="windows"/>
         <applicationConfigurable instance="com.github.weisj.darkmode.DarkModeConfigurable"
                                  dynamic="true"
                                  os="windows"/>
