@@ -15,10 +15,8 @@ tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     changeNotes(
         """
         <ul>
-            <li>Disable plugin on non windows operating systems and in headless mode.</li>
-            <li>Support for 2020.1 dynamic plugin loading.</li>
-            <li>Updated plugin icon.</li>
-            <li>Initial version. Change the IDEA theme based on Windows settings.</li>
+            <li>Improved lightweight polling system.</li>
+            <li>Removed use of Light Services as they currently block dynamic plugin loading.</li>
         </ul>
         """
     )
