@@ -14,6 +14,7 @@ tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     changeNotes(
         """
         <ul>
+            <li>Support for macOS.</li>
             <li>Improved lightweight polling system.</li>
             <li>Removed use of Light Services as they currently block dynamic plugin loading.</li>
         </ul>
