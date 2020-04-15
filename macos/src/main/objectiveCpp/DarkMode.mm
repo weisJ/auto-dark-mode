@@ -32,7 +32,6 @@
 
 #define EVENT_THEME_CHANGE @"AppleInterfaceThemeChangedNotification"
 #define EVENT_HIGH_CONTRAST @"AXInterfaceIncreaseContrastStatusDidChange"
-
 #define VALUE_DARK @"Dark"
 
 @interface PreferenceChangeListener:NSObject {
