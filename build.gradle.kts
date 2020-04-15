@@ -1,6 +1,8 @@
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
 import com.github.vlsi.gradle.properties.dsl.props
+import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
+import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
 
 plugins {
@@ -29,8 +31,14 @@ allprojects {
         mavenCentral()
     }
 
+    val isPublished by props()
+
+    listOf(BuildSearchableOptionsTask::class, PrepareSandboxTask::class)
+        .forEach { tasks.withType(it).configureEach { enabled = isPublished } }
+
     tasks.withType<PublishTask> {
         token(intellijPublishToken)
+        channels("pre-release")
     }
 
     tasks.withType<AbstractArchiveTask>().configureEach {
