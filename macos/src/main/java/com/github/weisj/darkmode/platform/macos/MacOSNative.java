@@ -43,7 +43,7 @@ public class MacOSNative {
     public static boolean loadLibrary() {
         try {
             if (JREInfo.isX64) {
-                NativeUtil.loadLibraryFromJar(PATH + "windows-x86/" + DLL_NAME);
+                NativeUtil.loadLibraryFromJar(PATH + "macos-x86-64/" + DLL_NAME);
                 return true;
             }
         } catch (Throwable ignored) {
