@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "com_github_weisj_darkmode_DarkModeNative.h"
+#include "com_github_weisj_darkmode_platform_windows_WindowsNative.h"
 
 #include <string>
 #include <iostream>
@@ -101,13 +101,13 @@ bool RegisterRegistryEvent(const LPCSTR subKey, HANDLE event)
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_github_weisj_darkmode_DarkModeNative_isDarkThemeEnabled(JNIEnv *env, jclass obj)
+Java_com_github_weisj_darkmode_platform_windows_WindowsNative_isDarkThemeEnabled(JNIEnv *env, jclass obj)
 {
     return (jboolean) IsDarkMode();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_github_weisj_darkmode_DarkModeNative_isHighContrastEnabled(JNIEnv *env, jclass obj)
+Java_com_github_weisj_darkmode_platform_windows_WindowsNative_isHighContrastEnabled(JNIEnv *env, jclass obj)
 {
     return (jboolean) IsHighContrastMode();
 }
@@ -180,7 +180,7 @@ struct EventHandler {
 };
 
 JNIEXPORT jlong JNICALL
-Java_com_github_weisj_darkmode_DarkModeNative_createEventHandler(JNIEnv *env, jclass obj, jobject callback)
+Java_com_github_weisj_darkmode_platform_windows_WindowsNative_createEventHandler(JNIEnv *env, jclass obj, jobject callback)
 {
   JavaVM *jvm;
   if (env->GetJavaVM(&jvm) == 0) {
@@ -193,7 +193,7 @@ Java_com_github_weisj_darkmode_DarkModeNative_createEventHandler(JNIEnv *env, jc
 }
 
 JNIEXPORT void JNICALL
-Java_com_github_weisj_darkmode_DarkModeNative_deleteEventHandler(JNIEnv *env, jclass obj, jlong eventHandler)
+Java_com_github_weisj_darkmode_platform_windows_WindowsNative_deleteEventHandler(JNIEnv *env, jclass obj, jlong eventHandler)
 {
   EventHandler *handler = reinterpret_cast<EventHandler *>(eventHandler);
   if (handler) {

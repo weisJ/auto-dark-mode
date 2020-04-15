@@ -1,8 +1,9 @@
 <idea-plugin>
     <id>com.github.weisj.darkmode</id>
-    <name>Auto Dark Mode Windows</name>
+    <name>Auto Dark Mode</name>
     <description>
-        Automatically change IDEA theme according to Windows settings (dark/light/high contrast).
+        Automatically change IDEA theme according to OS settings (dark/light/high contrast).
+        Currently works on Windows and macOS.
     </description>
 
     <vendor url="https://github.com/weisJ/">
@@ -15,21 +16,22 @@
     <applicationListeners>
         <listener class="com.github.weisj.darkmode.AutoDarkModeStartupListener"
                   topic="com.intellij.ide.AppLifecycleListener"
-                  activeInHeadlessMode="false"
-                  os="windows"/>
+                  activeInHeadlessMode="false"/>
         <listener class="com.github.weisj.darkmode.AutoDarkModePluginListener"
                   topic="com.intellij.ide.plugins.DynamicPluginListener"
-                  activeInHeadlessMode="false"
-                  os="windows"/>
+                  activeInHeadlessMode="false"/>
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkMode"
+        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorService"
+                            serviceImplementation="com.github.weisj.darkmode.platform.windows.WindowsThemeMonitorService"
                             os="windows"/>
-        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"
-                            os="windows"/>
+        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorService"
+                            serviceImplementation="com.github.weisj.darkmode.platform.macos.MacOSThemeMonitorService"
+                            os="mac"/>
+        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkMode"/>
+        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"/>
         <applicationConfigurable instance="com.github.weisj.darkmode.DarkModeConfigurable"
-                                 dynamic="true"
-                                 os="windows"/>
+                                 dynamic="true"/>
     </extensions>
 </idea-plugin>

@@ -5,6 +5,8 @@ import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.openapi.components.ServiceManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+
 public class AutoDarkModePluginListener implements DynamicPluginListener {
 
     @Override
@@ -14,6 +16,6 @@ public class AutoDarkModePluginListener implements DynamicPluginListener {
 
     @Override
     public void beforePluginUnload(@NotNull IdeaPluginDescriptor pluginDescriptor, boolean isUpdate) {
-        ServiceManager.getService(AutoDarkMode.class).stop();
+        Optional.ofNullable(ServiceManager.getServiceIfCreated(AutoDarkMode.class)).ifPresent(AutoDarkMode::stop);
     }
 }

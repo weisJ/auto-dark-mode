@@ -1,12 +1,14 @@
 package com.github.weisj.darkmode;
 
+import com.github.weisj.darkmode.platform.ThemeCallback;
+import com.github.weisj.darkmode.platform.ThemeMonitor;
+import com.github.weisj.darkmode.platform.ThemeMonitorService;
 import com.intellij.ide.actions.QuickChangeLookAndFeel;
 import com.intellij.ide.ui.LafManager;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.SystemInfo;
 
 import javax.swing.*;
 
@@ -14,46 +16,47 @@ import javax.swing.*;
  * Automatically changes the IDEA theme based on windows settings.
  */
 @Service
-public final class AutoDarkMode implements Disposable {
+public final class AutoDarkMode implements Disposable, ThemeCallback {
     private static final Logger LOGGER = Logger.getInstance(AutoDarkMode.class);
 
     private AutoDarkModeOptions options;
     private ThemeMonitor monitor;
-    private UIManager.LookAndFeelInfo currentLaf;
 
     public AutoDarkMode() {
         options = ServiceManager.getService(AutoDarkModeOptions.class);
-        this.currentLaf = LafManager.getInstance().getCurrentLookAndFeel();
-        if (!SystemInfo.isWin10OrNewer) {
-            LOGGER.error("Plugin only supports Windows 10 or newer");
-            monitor = null;
-            return;
+    }
+
+    private ThemeMonitor createMonitor() {
+        try {
+            ThemeMonitorService service = ServiceManager.getService(ThemeMonitorService.class);
+            return new ThemeMonitor(service, this);
+        } catch (IllegalStateException e) {
+            LOGGER.error(e);
+            return null;
         }
-        if (!DarkModeNative.loadLibrary()) {
-            LOGGER.error("Could not load library.");
-            monitor = null;
-            return;
-        }
-        monitor = new ThemeMonitor(this::onThemeChange);
     }
 
     public void start() {
+        if (monitor == null) monitor = createMonitor();
         if (monitor != null) monitor.setRunning(true);
     }
 
     public void stop() {
-        if (monitor != null) monitor.setRunning(false);
+        if (monitor != null) {
+            monitor.setRunning(false);
+            monitor = null;
+        }
     }
 
     public void onSettingsChange() {
         if (monitor != null) monitor.requestUpdate();
     }
 
-    public void onThemeChange(final boolean isDark, final boolean isHighContrast) {
+    @Override
+    public void themeChanged(boolean isDark, boolean isHighContrast) {
         UIManager.LookAndFeelInfo target = getTargetLaf(isDark, isHighContrast);
-        if (!target.equals(currentLaf)) {
+        if (!target.equals(LafManager.getInstance().getCurrentLookAndFeel())) {
             updateLaf(target);
-            currentLaf = target;
         }
     }
 
@@ -70,5 +73,7 @@ public final class AutoDarkMode implements Disposable {
     @Override
     public void dispose() {
         stop();
+        monitor = null;
+        options = null;
     }
 }

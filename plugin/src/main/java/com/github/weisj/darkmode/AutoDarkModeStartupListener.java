@@ -5,6 +5,7 @@ import com.intellij.openapi.components.ServiceManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 
 public class AutoDarkModeStartupListener implements AppLifecycleListener {
 
@@ -15,6 +16,6 @@ public class AutoDarkModeStartupListener implements AppLifecycleListener {
 
     @Override
     public void appClosing() {
-        ServiceManager.getService(AutoDarkMode.class).stop();
+        Optional.ofNullable(ServiceManager.getServiceIfCreated(AutoDarkMode.class)).ifPresent(AutoDarkMode::stop);
     }
 }

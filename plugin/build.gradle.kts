@@ -2,13 +2,12 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    `jni-library`
     kotlin("jvm")
     id("org.jetbrains.intellij")
 }
 
 intellij {
-    version = "2019.3"
+    version = "2020.1"
 }
 
 tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
@@ -22,26 +21,20 @@ tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     )
 }
 
-fun DependencyHandlerScope.javaImplementation(dep: Any) {
-    compileOnly(dep)
-    runtimeOnly(dep)
+tasks.buildPlugin {
+    project.rootProject.subprojects.forEach {
+        dependsOn(it.tasks.withType<Jar>())
+    }
 }
 
 dependencies {
-    javaImplementation("com.github.weisj:darklaf-native-utils")
+    implementation(project(":auto-dark-mode-base"))
+    implementation(project(":auto-dark-mode-windows"))
+    implementation(project(":auto-dark-mode-macos"))
 }
 
-library {
-    targetMachines.addAll(machines.windows.x86, machines.windows.x86_64)
-    binaries.whenElementFinalized(CppSharedLibrary::class) {
-        linkTask.get().linkerArgs.addAll(
-            when (toolChain) {
-                is Gcc, is Clang -> listOf("-luser32", "-ladvapi32")
-                is VisualCpp -> listOf("user32.lib", "Advapi32.lib")
-                else -> emptyList()
-            }
-        )
-    }
+tasks.buildPlugin {
+    dependsOn(project.rootProject.tasks.jar)
 }
 
 val compileKotlin: KotlinCompile by tasks
