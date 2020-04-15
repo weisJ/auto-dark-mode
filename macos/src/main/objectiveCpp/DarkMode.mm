@@ -100,15 +100,6 @@ JNF_COCOA_ENTER(env);
         NSString *interfaceStyle = [[NSUserDefaults standardUserDefaults] stringForKey:KEY_APPLE_INTERFACE_STYLE];
         // interfaceStyle can be nil (light mode) or "Dark" (dark mode).
         BOOL isDark = [VALUE_DARK caseInsensitiveCompare:interfaceStyle] == NSOrderedSame;
-        if (@available(macOS 10.15, *)) {
-            // Catalina
-            BOOL switchesAutomatically = [[NSUserDefaults standardUserDefaults] boolForKey:KEY_SWITCHES_AUTOMATICALLY];
-            if (switchesAutomatically) {
-                // If switchesAutomatically == YES the roles of "Dark" and nil are changed.
-                return (jboolean) !isDark;
-            }
-        }
-        // Mojave or switchesAutomatically == NO.
         return (jboolean) isDark;
     } else {
         return (jboolean) NO;
