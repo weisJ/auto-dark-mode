@@ -27,7 +27,7 @@ jobs:
         with:
           java-version: 11
       - name: Build
-        run: ./gradlew :auto-dark-mode-windows:build
+        run: ./gradlew :auto-dark-mode-windows:build -x :auto-dark-mode-windows:buildSearchableOptions
       - name: Upload x86 artifact
         uses: actions/upload-artifact@v1
         with:
@@ -51,7 +51,7 @@ jobs:
         with:
           java-version: 11
       - name: Build
-        run: ./gradlew :auto-dark-mode-macos:build
+        run: ./gradlew :auto-dark-mode-macos:build -x :auto-dark-mode-macos:buildSearchableOptions
       - name: Upload artifact
         uses: actions/upload-artifact@v1
         with:
