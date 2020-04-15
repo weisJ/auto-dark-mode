@@ -5,10 +5,12 @@ on:
     paths:
       - '**.cpp'
       - '**.mm'
+      - '**.yml'
   pull_request:
     paths:
       - '**.cpp'
       - '**.mm'
+      - '**.yml'
   release:
     types:
       - published
