@@ -6,7 +6,6 @@ import com.github.weisj.darkmode.platform.ThemeMonitorService;
 import com.intellij.ide.actions.QuickChangeLookAndFeel;
 import com.intellij.ide.ui.LafManager;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 
@@ -15,7 +14,6 @@ import javax.swing.*;
 /**
  * Automatically changes the IDEA theme based on windows settings.
  */
-@Service
 public final class AutoDarkMode implements Disposable, ThemeCallback {
     private static final Logger LOGGER = Logger.getInstance(AutoDarkMode.class);
 
