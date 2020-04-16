@@ -69,7 +69,7 @@ public final class AutoDarkMode implements Disposable, ThemeCallback {
     private void updateLaf(final UIManager.LookAndFeelInfo targetLaf) {
         alarm.cancelAllRequests();
         alarm.addRequest(
-            () -> QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, true), 0);
+            () -> QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, false), 0);
     }
 
     @Override
