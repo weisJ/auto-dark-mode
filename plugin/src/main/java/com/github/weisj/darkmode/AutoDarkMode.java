@@ -8,6 +8,7 @@ import com.intellij.ide.ui.LafManager;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.registry.Registry;
 import com.intellij.util.Alarm;
 
 import javax.swing.*;
@@ -69,7 +70,8 @@ public final class AutoDarkMode implements Disposable, ThemeCallback {
     private void updateLaf(final UIManager.LookAndFeelInfo targetLaf) {
         alarm.cancelAllRequests();
         alarm.addRequest(
-            () -> QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, false), 0);
+            () -> QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, false),
+            Registry.get("ide.instant.theme.switch.delay").asInteger());
     }
 
     @Override
