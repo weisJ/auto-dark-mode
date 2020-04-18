@@ -38,7 +38,6 @@ allprojects {
 
     tasks.withType<PublishTask> {
         token(intellijPublishToken)
-        channels("pre-release")
     }
 
     tasks.withType<AbstractArchiveTask>().configureEach {
