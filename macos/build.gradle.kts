@@ -31,7 +31,7 @@ library {
         compileTask.get().apply {
             dependsOn(macPath)
             compilerArgs.addAll("-x", "objective-c++")
-            compilerArgs.addAll("-mmacosx-version-min=10.10")
+            compilerArgs.addAll("-mmacosx-version-min=10.14")
             compilerArgs.addJavaFrameworks()
             source.from(
                 file("src/main/objectiveCpp/DarkMode.mm")

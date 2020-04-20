@@ -97,10 +97,9 @@ JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if(@available(macOS 10.14, *)) {
-        NSString *interfaceStyle = [[NSUserDefaults standardUserDefaults] stringForKey:KEY_APPLE_INTERFACE_STYLE];
-        // interfaceStyle can be nil (light mode) or "Dark" (dark mode).
-        BOOL isDark = [VALUE_DARK caseInsensitiveCompare:interfaceStyle] == NSOrderedSame;
-        return (jboolean) isDark;
+        NSAppearanceName appearanceName = [[NSApp effectiveAppearance]
+                                           bestMatchFromAppearanceWithNames:@[NSAppearanceNameAqua, NSAppearanceNameDarkAqua]];
+        return (jboolean) [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
     } else {
         return (jboolean) NO;
     }

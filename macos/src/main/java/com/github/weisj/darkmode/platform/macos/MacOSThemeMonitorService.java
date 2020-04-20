@@ -5,7 +5,7 @@ import com.intellij.openapi.util.SystemInfo;
 
 public class MacOSThemeMonitorService implements ThemeMonitorService {
 
-    private static final boolean loaded = SystemInfo.isMacOSYosemite && MacOSNative.loadLibrary();
+    private static final boolean loaded = SystemInfo.isMacOSMojave && MacOSNative.loadLibrary();
 
     @Override
     public boolean isDarkThemeEnabled() {
