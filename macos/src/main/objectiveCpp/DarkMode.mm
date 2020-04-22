@@ -99,7 +99,9 @@ JNF_COCOA_ENTER(env);
     if(@available(macOS 10.14, *)) {
         NSApplication *app = [NSApplication sharedApplication];
         NSAppearance *current = app.appearance;
-        app.appearance = nil; // Make sure the system appearance is used.
+        [JNFRunLoop performOnMainThreadWaiting:YES withBlock:^{
+            app.appearance = nil; // Make sure the system appearance is used.
+        }];
         NSAppearance *appearance = app.effectiveAppearance;
         NSAppearanceName appearanceName = [appearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,
                                                                                           NSAppearanceNameDarkAqua]];
