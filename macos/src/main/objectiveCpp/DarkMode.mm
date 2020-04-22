@@ -107,7 +107,7 @@ JNF_COCOA_ENTER(env);
                                                                                           NSAppearanceNameDarkAqua]];
         app.appearance = current; // Restore original appearance.
         NSLog(@"Effective appearance: %@", appearance.name);
-        NSLog(@"Current appearance: %@", [[NSAppearance current] name]);
+        NSLog(@"Current appearance: %@", [[NSAppearance currentAppearance] name]);
         return (jboolean) [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
     } else {
         return (jboolean) NO;
