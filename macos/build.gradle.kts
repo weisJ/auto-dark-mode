@@ -11,10 +11,10 @@ library {
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
         jvmImplementation("com.github.weisj:darklaf-native-utils")
-        nativeImplementation("dev.nokee.framework:JavaVM:10.15")
-        nativeImplementation("dev.nokee.framework:JavaVM:10.15") {
+        nativeImplementation("dev.nokee.framework:JavaVM:10.15.4")
+        nativeImplementation("dev.nokee.framework:JavaVM:10.15.4") {
             capabilities {
-                requireCapability("JavaVM:JavaNativeFoundation:10.15")
+                requireCapability("JavaVM:JavaNativeFoundation:10.15.4")
             }
         }
     }
@@ -24,7 +24,7 @@ library {
         resourcePath.set("com/github/weisj/darkmode/platform/${project.name}/${asVariantName(targetMachine)}")
         sharedLibrary {
             compileTasks.configureEach {
-                compilerArgs.addAll("-mmacosx-version-min=10.15")
+                compilerArgs.addAll("-mmacosx-version-min=10.14")
 
                 // Build type not modeled yet, assuming release
                 compilerArgs.addAll(toolChain.map {
