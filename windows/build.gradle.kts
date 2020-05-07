@@ -1,27 +1,49 @@
+import UberJniJarPlugin.asVariantName
+
 plugins {
-    `jni-library`
+    java
+    id("dev.nokee.jni-library")
+    id("dev.nokee.cpp-language")
+    `uber-jni-jar`
     id("org.jetbrains.intellij")
 }
 
-fun DependencyHandlerScope.javaImplementation(dep: Any) {
-    compileOnly(dep)
-    runtimeOnly(dep)
-}
-
-dependencies {
-    javaImplementation(project(":auto-dark-mode-base"))
-    javaImplementation("com.github.weisj:darklaf-native-utils")
-}
-
 library {
+    dependencies {
+        jvmImplementation(project(":auto-dark-mode-base"))
+        jvmImplementation("com.github.weisj:darklaf-native-utils")
+    }
     targetMachines.addAll(machines.windows.x86, machines.windows.x86_64)
-    binaries.whenElementFinalized(CppSharedLibrary::class) {
-        linkTask.get().linkerArgs.addAll(
-            when (toolChain) {
-                is Gcc, is Clang -> listOf("-luser32", "-ladvapi32")
-                is VisualCpp -> listOf("user32.lib", "Advapi32.lib")
-                else -> emptyList()
+    variants.configureEach {
+        resourcePath.set("com/github/weisj/darklaf/platform/${project.name}/${asVariantName(targetMachine)}")
+        sharedLibrary {
+            compileTasks.configureEach {
+                compilerArgs.addAll(toolChain.map {
+                    when (it) {
+                        is Gcc, is Clang -> listOf("--std=c++11")
+                        is VisualCpp -> listOf("/EHsc")
+                        else -> emptyList()
+                    }
+                })
+
+                // Build type not modeled yet, assuming release
+                compilerArgs.addAll(toolChain.map {
+                    when (it) {
+                        is Gcc, is Clang -> listOf("-O2")
+                        is VisualCpp -> listOf("/O2")
+                        else -> emptyList()
+                    }
+                })
             }
-        )
+            linkTask.configure {
+                linkerArgs.addAll(toolChain.map {
+                    when (it) {
+                        is Gcc, is Clang -> listOf("-luser32", "-ladvapi32")
+                        is VisualCpp -> listOf("user32.lib", "Advapi32.lib")
+                        else -> emptyList()
+                    }
+                })
+            }
+        }
     }
 }

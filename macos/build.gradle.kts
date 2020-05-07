@@ -1,48 +1,43 @@
+import UberJniJarPlugin.asVariantName
+
 plugins {
-    `jni-library`
+    java
+    id("dev.nokee.jni-library")
+    id("dev.nokee.objective-cpp-language")
+    `uber-jni-jar`
     id("org.jetbrains.intellij")
 }
 
-fun DependencyHandlerScope.javaImplementation(dep: Any) {
-    compileOnly(dep)
-    runtimeOnly(dep)
-}
-
-dependencies {
-    javaImplementation(project(":auto-dark-mode-base"))
-    javaImplementation("com.github.weisj:darklaf-native-utils")
-}
-
-val macPath by tasks.registering(MacOSSdkPathTask::class)
-
-val sdkRoot: Provider<String> get() = macPath.map { it.sdkPath.absolutePath }
-
-fun ListProperty<String>.addJavaFrameworks() {
-    addAll("-framework", "JavaNativeFoundation")
-    add("-F")
-    add(sdkRoot.map { "$it/System/Library/Frameworks/JavaVM.framework/Frameworks" })
-    add("-F")
-    add("/System/Library/Frameworks/JavaVM.framework/Frameworks")
-}
-
 library {
-    targetMachines.addAll(machines.macOS.x86_64)
-    binaries.configureEach {
-        compileTask.get().apply {
-            dependsOn(macPath)
-            compilerArgs.addAll("-x", "objective-c++")
-            compilerArgs.addAll("-mmacosx-version-min=10.14")
-            compilerArgs.addJavaFrameworks()
-            source.from(
-                file("src/main/objectiveCpp/DarkMode.mm")
-            )
+    dependencies {
+        jvmImplementation(project(":auto-dark-mode-base"))
+        jvmImplementation("com.github.weisj:darklaf-native-utils")
+        nativeImplementation("dev.nokee.framework:JavaVM:10.15")
+        nativeImplementation("dev.nokee.framework:JavaVM:10.15") {
+            capabilities {
+                requireCapability("JavaVM:JavaNativeFoundation:10.15")
+            }
         }
     }
-    binaries.whenElementFinalized(CppSharedLibrary::class) {
-        linkTask.get().apply {
-            dependsOn(macPath)
-            linkerArgs.addAll("-lobjc", "-framework", "AppKit")
-            linkerArgs.addJavaFrameworks()
+    targetMachines.addAll(machines.macOS.x86_64)
+    variants.configureEach {
+        resourcePath.set("com/github/weisj/darkmode/platform/${project.name}/${asVariantName(targetMachine)}")
+        sharedLibrary {
+            compileTasks.configureEach {
+                compilerArgs.addAll("-mmacosx-version-min=10.10")
+
+                // Build type not modeled yet, assuming release
+                compilerArgs.addAll(toolChain.map {
+                    when (it) {
+                        is Gcc, is Clang -> listOf("-O2")
+                        is VisualCpp -> listOf("/O2")
+                        else -> emptyList()
+                    }
+                })
+            }
+            linkTask.configure {
+                linkerArgs.addAll("-lobjc", "-framework", "AppKit")
+            }
         }
     }
 }

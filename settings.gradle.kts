@@ -1,4 +1,16 @@
 pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = uri("https://dl.bintray.com/nokeedev/distributions-snapshots") }
+    }
+    val nokeeVersion = "0.3.0-df4e5ab"
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id.startsWith("dev.nokee.")) {
+                useModule("${requested.id.id}:${requested.id.id}.gradle.plugin:$nokeeVersion")
+            }
+        }
+    }
     plugins {
         fun String.v() = extra["$this.version"].toString()
         fun PluginDependenciesSpec.idv(id: String, key: String = id) = id(id) version key.v()
@@ -9,7 +21,7 @@ pluginManagement {
         idv("com.github.vlsi.license-gather", "com.github.vlsi.vlsi-release-plugins")
         idv("com.github.vlsi.stage-vote-release", "com.github.vlsi.vlsi-release-plugins")
         idv("org.jetbrains.intellij", "org.jetbrains.intellij")
-        idv("jvm", "kotlin")
+        idv("org.jetbrains.kotlin.jvm", "kotlin")
     }
 }
 
