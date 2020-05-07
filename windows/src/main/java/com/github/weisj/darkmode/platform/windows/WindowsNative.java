@@ -1,7 +1,7 @@
 package com.github.weisj.darkmode.platform.windows;
 
 import com.github.weisj.darklaf.platform.NativeUtil;
-import com.github.weisj.darkmode.platform.JREInfo;
+import com.github.weisj.darkmode.platform.LibraryInfo;
 
 import java.io.IOException;
 
@@ -21,9 +21,9 @@ public final class WindowsNative {
 
     public static boolean loadLibrary() {
         try {
-            if (JREInfo.isX86) {
+            if (LibraryInfo.isX86) {
                 NativeUtil.loadLibraryFromJar(PATH + "windows-x86/" + DLL_NAME);
-            } else if (JREInfo.isX64) {
+            } else if (LibraryInfo.isX64) {
                 NativeUtil.loadLibraryFromJar(PATH + "windows-x86-64/" + DLL_NAME);
             }
         } catch (IOException e) {

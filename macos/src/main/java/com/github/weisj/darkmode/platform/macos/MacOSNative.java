@@ -24,7 +24,7 @@
 package com.github.weisj.darkmode.platform.macos;
 
 import com.github.weisj.darklaf.platform.NativeUtil;
-import com.github.weisj.darkmode.platform.JREInfo;
+import com.github.weisj.darkmode.platform.LibraryInfo;
 
 public class MacOSNative {
 
@@ -42,7 +42,7 @@ public class MacOSNative {
 
     public static boolean loadLibrary() {
         try {
-            if (JREInfo.isX64) {
+            if (LibraryInfo.isX64) {
                 NativeUtil.loadLibraryFromJar(PATH + "macos-x86-64/" + DLL_NAME);
                 return true;
             }

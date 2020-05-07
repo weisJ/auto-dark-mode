@@ -1,11 +1,11 @@
 package com.github.weisj.darkmode.platform.macos;
 
+import com.github.weisj.darkmode.platform.LibraryInfo;
 import com.github.weisj.darkmode.platform.ThemeMonitorService;
-import com.intellij.openapi.util.SystemInfo;
 
 public class MacOSThemeMonitorService implements ThemeMonitorService {
 
-    private static final boolean loaded = SystemInfo.isMacOSMojave && MacOSNative.loadLibrary();
+    private static final boolean loaded = LibraryInfo.isMacOSMojave && MacOSNative.loadLibrary();
 
     @Override
     public boolean isDarkThemeEnabled() {
