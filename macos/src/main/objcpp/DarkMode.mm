@@ -98,16 +98,9 @@ Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isDarkThemeEnabled(JNI
 JNF_COCOA_ENTER(env);
     if(@available(macOS 10.14, *)) {
         NSApplication *app = [NSApplication sharedApplication];
-        NSAppearance *current = app.appearance;
-        [JNFRunLoop performOnMainThreadWaiting:YES withBlock:^{
-            app.appearance = nil; // Make sure the system appearance is used.
-        }];
         NSAppearance *appearance = app.effectiveAppearance;
         NSAppearanceName appearanceName = [appearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,
                                                                                           NSAppearanceNameDarkAqua]];
-        app.appearance = current; // Restore original appearance.
-        NSLog(@"Effective appearance: %@", appearance.name);
-        NSLog(@"Current appearance: %@", [[NSAppearance currentAppearance] name]);
         return (jboolean) [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
     } else {
         return (jboolean) NO;
