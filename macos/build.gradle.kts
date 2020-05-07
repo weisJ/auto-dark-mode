@@ -24,7 +24,7 @@ library {
         resourcePath.set("com/github/weisj/darkmode/platform/${project.name}/${asVariantName(targetMachine)}")
         sharedLibrary {
             compileTasks.configureEach {
-                compilerArgs.addAll("-mmacosx-version-min=10.10")
+                compilerArgs.addAll("-mmacosx-version-min=10.15")
 
                 // Build type not modeled yet, assuming release
                 compilerArgs.addAll(toolChain.map {
