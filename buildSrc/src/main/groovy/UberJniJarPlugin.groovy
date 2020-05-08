@@ -49,7 +49,7 @@ class UberJniJarPlugin implements Plugin<Project> {
         def downloadUrl = 'https://github.com/weisJ/auto-dark-mode/actions?query=workflow%3A%22Build+Native+Libraries%22'
         def defaultLibraryName = project.property('defaultLibraryName')
         for (TargetMachine targetMachine : library.targetMachines.get()) {
-            def libraryPath = "com/github/weisj/darklaf/platform/${project.name}"
+            def libraryPath = "com/github/weisj/darkmode/${project.name}"
             def variantName = asVariantName(targetMachine)
             def libraryFile = project.file("libraries/$variantName/$defaultLibraryName")
             def relativePath = project.rootProject.relativePath(libraryFile)
