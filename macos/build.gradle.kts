@@ -21,7 +21,7 @@ library {
 
     targetMachines.addAll(machines.macOS.x86_64)
     variants.configureEach {
-        resourcePath.set("com/github/weisj/darkmode/platform/${project.name}/${asVariantName(targetMachine)}")
+        resourcePath.set("com/github/weisj/darkmode/${project.name}/${asVariantName(targetMachine)}")
         sharedLibrary {
             compileTasks.configureEach {
                 compilerArgs.addAll("-mmacosx-version-min=10.14")

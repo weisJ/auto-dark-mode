@@ -14,7 +14,7 @@ library {
     }
     targetMachines.addAll(machines.windows.x86, machines.windows.x86_64)
     variants.configureEach {
-        resourcePath.set("com/github/weisj/darklaf/platform/${project.name}/${asVariantName(targetMachine)}")
+        resourcePath.set("com/github/weisj/darkmode/${project.name}/${asVariantName(targetMachine)}")
         sharedLibrary {
             compileTasks.configureEach {
                 compilerArgs.addAll(toolChain.map {
