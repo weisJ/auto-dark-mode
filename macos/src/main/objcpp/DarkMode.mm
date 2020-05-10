@@ -151,7 +151,7 @@ JNF_COCOA_ENTER(env);
 JNF_COCOA_EXIT(env);
 }
 
-JNIEXPORT jboolean JNICALL
+JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_patchAppBundle(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if (@available(macOS 10.15, *)) {
