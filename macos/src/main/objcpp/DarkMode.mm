@@ -27,6 +27,8 @@
 
 #define OBJC(jl) ((id)jlong_to_ptr(jl))
 
+#define NSRequiresAquaSystemAppearance CFSTR("NSRequiresAquaSystemAppearance")
+
 #define KEY_APPLE_INTERFACE_STYLE @"AppleInterfaceStyle"
 #define KEY_SWITCHES_AUTOMATICALLY @"AppleInterfaceStyleSwitchesAutomatically"
 
@@ -155,11 +157,8 @@ JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_patchAppBundle(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if (@available(macOS 10.15, *)) {
-        NSString *identifier = [[NSBundle mainBundle] bundleIdentifier];
-
-        CFStringRef bundleName = (__bridge CFStringRef)identifier;
-        CFPreferencesSetAppValue(CFSTR("NSRequiresAquaSystemAppearance"),
-                                 kCFBooleanFalse, bundleName);
+        CFStringRef bundleName = (__bridge CFStringRef)([[NSBundle mainBundle] bundleIdentifier]);
+        CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
         CFPreferencesAppSynchronize(bundleName);
     }
 JNF_COCOA_EXIT(env);
@@ -169,11 +168,8 @@ JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_unpatchAppBundle(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if (@available(macOS 10.15, *)) {
-        NSString *identifier = [[NSBundle mainBundle] bundleIdentifier];
-
-        CFStringRef bundleName = (__bridge CFStringRef)identifier;
-        CFPreferencesSetAppValue(CFSTR("NSRequiresAquaSystemAppearance"),
-                                 nil, bundleName);
+        CFStringRef bundleName = (__bridge CFStringRef)([[NSBundle mainBundle] bundleIdentifier]);
+        CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, nil, bundleName);
         CFPreferencesAppSynchronize(bundleName);
     }
 JNF_COCOA_EXIT(env);
