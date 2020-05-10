@@ -36,6 +36,8 @@
 #define EVENT_HIGH_CONTRAST @"AXInterfaceIncreaseContrastStatusDidChange"
 #define VALUE_DARK @"Dark"
 
+BOOL isPatched = NO;
+
 @interface PreferenceChangeListener:NSObject {
     @public JavaVM *jvm;
     @public jobject callback;
@@ -97,26 +99,34 @@
 
 @end
 
+BOOL isDarkModeCatalina() {
+    NSAppearance *appearance = NSApp.effectiveAppearance;
+    NSAppearanceName appearanceName = [appearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,
+                                                                                          NSAppearanceNameDarkAqua]];
+    return [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
+}
+
+BOOL isDarkModeMojave() {
+    NSString *interfaceStyle = [[NSUserDefaults standardUserDefaults] stringForKey:KEY_APPLE_INTERFACE_STYLE];
+    return [VALUE_DARK caseInsensitiveCompare:interfaceStyle] == NSOrderedSame;
+}
+
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if(@available(macOS 10.15, *)) {
-        // Catalina
-        NSAppearance *appearance = NSApp.effectiveAppearance;
-        NSAppearanceName appearanceName = [appearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,
-                                                                                          NSAppearanceNameDarkAqua]];
-        return (jboolean) [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
-    } else if (@available(macOS 10.14, *)) {
-        // Mojave
-        NSString *interfaceStyle = [[NSUserDefaults standardUserDefaults] stringForKey:KEY_APPLE_INTERFACE_STYLE];
-        return (jboolean) [VALUE_DARK caseInsensitiveCompare:interfaceStyle] == NSOrderedSame;
+        if (isPatched) {
+            return (jboolean) isDarkModeCatalina();
+        }
+    }
+    if (@available(macOS 10.14, *)) {
+        return (jboolean) isDarkModeMojave();
     } else {
         return (jboolean) NO;
     }
 JNF_COCOA_EXIT(env);
     return NO;
 }
-
 
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isHighContrastEnabled(JNIEnv *env, jclass obj) {
@@ -160,6 +170,11 @@ JNF_COCOA_ENTER(env);
         NSString *name = [[NSBundle mainBundle] bundleIdentifier];
         if ([name containsString:@"jetbrains"]) {
             CFStringRef bundleName = (__bridge CFStringRef)name;
+
+            Boolean  = false;
+            CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
+            isPatched = exists ? YES : NO;
+
             CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
             CFPreferencesAppSynchronize(bundleName);
         }
