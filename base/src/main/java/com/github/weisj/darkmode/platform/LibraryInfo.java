@@ -11,6 +11,7 @@ public final class LibraryInfo {
     public static final String X64 = "64";
     public static boolean isWin10OrNewer = SystemInfo.isWin10OrNewer;
     public static boolean isMacOSMojave = SystemInfo.isMacOSMojave;
+    public static boolean isMacOSCatalina = SystemInfo.isMacOSCatalina;
 
     static {
         isX64 = X64.equals(jreArchitecture);

@@ -11,4 +11,7 @@ public interface ThemeMonitorService {
     void deleteEventHandler(final long eventHandle);
 
     boolean isActive();
+
+    default void dispose() {
+    }
 }

@@ -31,4 +31,11 @@ public class MacOSThemeMonitorService implements ThemeMonitorService {
     public boolean isActive() {
         return loaded;
     }
+
+    @Override
+    public void dispose() {
+        if (LibraryInfo.isMacOSCatalina) {
+            MacOSNative.unpatchAppBundle();
+        }
+    }
 }

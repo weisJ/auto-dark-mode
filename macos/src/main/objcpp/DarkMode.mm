@@ -88,7 +88,9 @@
 }
 
 - (void)notificationEvent:(NSNotification *)notification {
-    [self runCallback];
+    [JNFRunLoop performOnMainThreadWaiting:NO withBlock:^{
+        [self runCallback];
+    }];
 }
 
 @end
@@ -96,18 +98,23 @@
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
-    if(@available(macOS 10.14, *)) {
-        NSApplication *app = [NSApplication sharedApplication];
-        NSAppearance *appearance = app.effectiveAppearance;
+    if(@available(macOS 10.15, *)) {
+        // Catalina
+        NSAppearance *appearance = NSApp.effectiveAppearance;
         NSAppearanceName appearanceName = [appearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,
                                                                                           NSAppearanceNameDarkAqua]];
         return (jboolean) [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
+    } else if (@available(macOS 10.14, *)) {
+        // Mojave
+        NSString *interfaceStyle = [[NSUserDefaults standardUserDefaults] stringForKey:KEY_APPLE_INTERFACE_STYLE];
+        return (jboolean) [VALUE_DARK caseInsensitiveCompare:interfaceStyle] == NSOrderedSame;
     } else {
         return (jboolean) NO;
     }
 JNF_COCOA_EXIT(env);
     return NO;
 }
+
 
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isHighContrastEnabled(JNIEnv *env, jclass obj) {
@@ -140,6 +147,34 @@ JNF_COCOA_ENTER(env);
         env->DeleteGlobalRef(listener->callback);
         [listener release];
         [listener dealloc];
+    }
+JNF_COCOA_EXIT(env);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_github_weisj_darkmode_platform_macos_MacOSNative_patchAppBundle(JNIEnv *env, jclass obj) {
+JNF_COCOA_ENTER(env);
+    if (@available(macOS 10.15, *)) {
+        NSString *identifier = [[NSBundle mainBundle] bundleIdentifier];
+
+        CFStringRef bundleName = (__bridge CFStringRef)identifier;
+        CFPreferencesSetAppValue(CFSTR("NSRequiresAquaSystemAppearance"),
+                                 kCFBooleanFalse, bundleName);
+        CFPreferencesAppSynchronize(bundleName);
+    }
+JNF_COCOA_EXIT(env);
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_weisj_darkmode_platform_macos_MacOSNative_unpatchAppBundle(JNIEnv *env, jclass obj) {
+JNF_COCOA_ENTER(env);
+    if (@available(macOS 10.15, *)) {
+        NSString *identifier = [[NSBundle mainBundle] bundleIdentifier];
+
+        CFStringRef bundleName = (__bridge CFStringRef)identifier;
+        CFPreferencesSetAppValue(CFSTR("NSRequiresAquaSystemAppearance"),
+                                 nil, bundleName);
+        CFPreferencesAppSynchronize(bundleName);
     }
 JNF_COCOA_EXIT(env);
 }

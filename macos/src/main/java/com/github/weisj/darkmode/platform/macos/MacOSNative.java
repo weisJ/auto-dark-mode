@@ -40,10 +40,17 @@ public class MacOSNative {
 
     public static native void deletePreferenceChangeListener(final long listenerPtr);
 
+    public static native void patchAppBundle();
+
+    public static native void unpatchAppBundle();
+
     public static boolean loadLibrary() {
         try {
             if (LibraryInfo.isX64) {
                 NativeUtil.loadLibraryFromJar(PATH + "macos-x86-64/" + DLL_NAME);
+                if (LibraryInfo.isMacOSCatalina) {
+                    patchAppBundle();
+                }
                 return true;
             }
         } catch (Throwable ignored) {
