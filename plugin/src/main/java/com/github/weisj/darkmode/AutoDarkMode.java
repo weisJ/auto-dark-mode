@@ -14,7 +14,7 @@ import com.intellij.util.Alarm;
 import javax.swing.*;
 
 /**
- * Automatically changes the IDEA theme based on windows settings.
+ * Automatically changes the IDEA theme based on system settings.
  */
 public final class AutoDarkMode implements Disposable, ThemeCallback {
     private static final Logger LOGGER = Logger.getInstance(AutoDarkMode.class);
