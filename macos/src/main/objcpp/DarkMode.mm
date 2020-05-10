@@ -157,9 +157,12 @@ JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_patchAppBundle(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if (@available(macOS 10.15, *)) {
-        CFStringRef bundleName = (__bridge CFStringRef)([[NSBundle mainBundle] bundleIdentifier]);
-        CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
-        CFPreferencesAppSynchronize(bundleName);
+        NSString *name = [[NSBundle mainBundle] bundleIdentifier];
+        if ([name containsString:@"jetbrains"]) {
+            CFStringRef bundleName = (__bridge CFStringRef)name;
+            CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
+            CFPreferencesAppSynchronize(bundleName);
+        }
     }
 JNF_COCOA_EXIT(env);
 }
@@ -168,9 +171,12 @@ JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_unpatchAppBundle(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if (@available(macOS 10.15, *)) {
-        CFStringRef bundleName = (__bridge CFStringRef)([[NSBundle mainBundle] bundleIdentifier]);
-        CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, nil, bundleName);
-        CFPreferencesAppSynchronize(bundleName);
+        NSString *name = [[NSBundle mainBundle] bundleIdentifier];
+        if ([name containsString:@"jetbrains"]) {
+            CFStringRef bundleName = (__bridge CFStringRef)name;
+            CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, nil, bundleName);
+            CFPreferencesAppSynchronize(bundleName);
+        }
     }
 JNF_COCOA_EXIT(env);
 }
