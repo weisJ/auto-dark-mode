@@ -175,8 +175,10 @@ JNF_COCOA_ENTER(env);
             CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
             isPatched = exists ? YES : NO;
 
-            CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
-            CFPreferencesAppSynchronize(bundleName);
+            if (!isPatched) {
+                CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
+                CFPreferencesAppSynchronize(bundleName);
+            }
         }
     } else {
         isPatched = false;
