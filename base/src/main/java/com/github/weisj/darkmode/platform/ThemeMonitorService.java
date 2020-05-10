@@ -12,6 +12,9 @@ public interface ThemeMonitorService {
 
     boolean isActive();
 
-    default void dispose() {
+    default void uninstall() {
+    }
+
+    default void install() {
     }
 }

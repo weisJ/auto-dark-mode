@@ -4,6 +4,9 @@
     <description>
         Automatically change IDEA theme according to OS settings (dark/light/high contrast).
         Currently works on Windows and macOS.
+
+        Note: When using the plugin on Catalina in "Auto" mode at least one restart is needed for dark mode detection to
+        work properly.
     </description>
 
     <vendor url="https://github.com/weisJ/">

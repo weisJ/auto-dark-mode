@@ -57,7 +57,6 @@ public class ThemeMonitor {
         LOGGER.info("Stopped theme monitoring.");
         running = false;
         monitorService.deleteEventHandler(listenerHandle);
-        monitorService.dispose();
     }
 
     public void setRunning(final boolean running) {
@@ -71,5 +70,13 @@ public class ThemeMonitor {
 
     public boolean isRunning() {
         return running;
+    }
+
+    public void install() {
+        monitorService.install();
+    }
+
+    public void uninstall() {
+        monitorService.uninstall();
     }
 }

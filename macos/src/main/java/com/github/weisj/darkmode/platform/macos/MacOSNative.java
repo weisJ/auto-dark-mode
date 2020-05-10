@@ -48,9 +48,6 @@ public class MacOSNative {
         try {
             if (LibraryInfo.isX64) {
                 NativeUtil.loadLibraryFromJar(PATH + "macos-x86-64/" + DLL_NAME);
-                if (LibraryInfo.isMacOSCatalina) {
-                    patchAppBundle();
-                }
                 return true;
             }
         } catch (Throwable ignored) {

@@ -11,11 +11,11 @@ public class AutoDarkModePluginListener implements DynamicPluginListener {
 
     @Override
     public void pluginLoaded(@NotNull IdeaPluginDescriptor pluginDescriptor) {
-        ServiceManager.getService(AutoDarkMode.class).start();
+        ServiceManager.getService(AutoDarkMode.class).install();
     }
 
     @Override
     public void beforePluginUnload(@NotNull IdeaPluginDescriptor pluginDescriptor, boolean isUpdate) {
-        Optional.ofNullable(ServiceManager.getServiceIfCreated(AutoDarkMode.class)).ifPresent(AutoDarkMode::stop);
+        Optional.ofNullable(ServiceManager.getServiceIfCreated(AutoDarkMode.class)).ifPresent(AutoDarkMode::uninstall);
     }
 }

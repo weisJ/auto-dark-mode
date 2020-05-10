@@ -80,4 +80,14 @@ public final class AutoDarkMode implements Disposable, ThemeCallback {
         monitor = null;
         options = null;
     }
+
+    public void uninstall() {
+        stop();
+        monitor.uninstall();
+    }
+
+    public void install() {
+        monitor.install();
+        start();
+    }
 }
