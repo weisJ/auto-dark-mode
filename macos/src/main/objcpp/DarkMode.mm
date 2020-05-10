@@ -171,13 +171,15 @@ JNF_COCOA_ENTER(env);
         if ([name containsString:@"jetbrains"]) {
             CFStringRef bundleName = (__bridge CFStringRef)name;
 
-            Boolean  = false;
+            Boolean exists = false;
             CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
             isPatched = exists ? YES : NO;
 
             CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
             CFPreferencesAppSynchronize(bundleName);
         }
+    } else {
+        isPatched = false;
     }
 JNF_COCOA_EXIT(env);
 }
