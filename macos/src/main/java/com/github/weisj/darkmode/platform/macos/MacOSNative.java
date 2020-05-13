@@ -32,19 +32,19 @@ public class MacOSNative {
     private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/";
     private static final String DLL_NAME = "lib" + PROJECT_NAME + ".dylib";
 
-    public static native boolean isDarkThemeEnabled();
+    static native boolean isDarkThemeEnabled();
 
-    public static native boolean isHighContrastEnabled();
+    static native boolean isHighContrastEnabled();
 
-    public static native long createPreferenceChangeListener(final Runnable callback);
+    static native long createPreferenceChangeListener(final Runnable callback);
 
-    public static native void deletePreferenceChangeListener(final long listenerPtr);
+    static native void deletePreferenceChangeListener(final long listenerPtr);
 
-    public static native void patchAppBundle();
+    static native void patchAppBundle();
 
-    public static native void unpatchAppBundle();
+    static native void unpatchAppBundle();
 
-    public static boolean loadLibrary() {
+    static boolean loadLibrary() {
         try {
             if (LibraryInfo.isX64) {
                 NativeUtil.loadLibraryFromJar(PATH + "macos-x86-64/" + DLL_NAME);

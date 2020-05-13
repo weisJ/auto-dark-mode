@@ -33,13 +33,6 @@ public class MacOSThemeMonitorService implements ThemeMonitorService {
     }
 
     @Override
-    public void uninstall() {
-        if (LibraryInfo.isMacOSCatalina) {
-            MacOSNative.unpatchAppBundle();
-        }
-    }
-
-    @Override
     public void install() {
         if (LibraryInfo.isMacOSCatalina) {
             MacOSNative.patchAppBundle();

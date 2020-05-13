@@ -1,8 +1,6 @@
 package com.github.weisj.darkmode;
 
-import com.github.weisj.darkmode.platform.ThemeCallback;
-import com.github.weisj.darkmode.platform.ThemeMonitor;
-import com.github.weisj.darkmode.platform.ThemeMonitorService;
+import com.github.weisj.darkmode.platform.*;
 import com.intellij.ide.actions.QuickChangeLookAndFeel;
 import com.intellij.ide.ui.LafManager;
 import com.intellij.openapi.Disposable;
@@ -12,6 +10,7 @@ import com.intellij.openapi.util.registry.Registry;
 import com.intellij.util.Alarm;
 
 import javax.swing.*;
+import java.util.Optional;
 
 /**
  * Automatically changes the IDEA theme based on system settings.
@@ -30,23 +29,27 @@ public final class AutoDarkMode implements Disposable, ThemeCallback {
     private ThemeMonitor createMonitor() {
         try {
             ThemeMonitorService service = ServiceManager.getService(ThemeMonitorService.class);
-            return new ThemeMonitor(service, this);
+            return new AbstractThemeMonitor(service, this);
         } catch (IllegalStateException e) {
             LOGGER.error(e);
-            return null;
+            return new NullMonitor();
         }
     }
 
     public void start() {
-        if (monitor == null) monitor = createMonitor();
-        if (monitor != null) monitor.setRunning(true);
+        Optional.ofNullable(monitor)
+                .orElseGet(this::createMonitor)
+                .setRunning(true);
     }
 
     public void stop() {
-        if (monitor != null) {
-            monitor.setRunning(false);
-            monitor = null;
-        }
+        stop(true);
+    }
+
+    private void stop(boolean dispose) {
+        Optional.ofNullable(monitor)
+                .ifPresent(m -> m.setRunning(false));
+        if (dispose) setNull();
     }
 
     public void onSettingsChange() {
@@ -76,18 +79,25 @@ public final class AutoDarkMode implements Disposable, ThemeCallback {
 
     @Override
     public void dispose() {
-        stop();
+        stop(false);
+        setNull();
+    }
+
+    private void setNull() {
         monitor = null;
         options = null;
     }
 
     public void uninstall() {
-        stop();
-        monitor.uninstall();
+        stop(false);
+        Optional.ofNullable(monitor).ifPresent(ThemeMonitor::uninstall);
+        setNull();
     }
 
     public void install() {
-        monitor.install();
+        Optional.ofNullable(monitor)
+                .orElseGet(this::createMonitor)
+                .install();
         start();
     }
 }
