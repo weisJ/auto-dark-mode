@@ -14,7 +14,7 @@ library {
         nativeImplementation("dev.nokee.framework:JavaVM:[10.14,)")
         nativeImplementation("dev.nokee.framework:JavaVM:[10.14,)") {
             capabilities {
-                requireCapability("JavaVM:JavaNativeFoundation:[10.14,0)")
+                requireCapability("JavaVM:JavaNativeFoundation:[10.14,)")
             }
         }
     }
