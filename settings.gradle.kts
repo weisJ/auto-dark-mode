@@ -3,7 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         maven { url = uri("https://dl.bintray.com/nokeedev/distributions-snapshots") }
     }
-    val nokeeVersion = "0.3.0-df4e5ab"
+    val nokeeVersion = extra["nokee.version"].toString()
     resolutionStrategy {
         eachPlugin {
             if (requested.id.id.startsWith("dev.nokee.")) {
