@@ -6,11 +6,13 @@ on:
       - '**.cpp'
       - '**.mm'
       - '**.yml'
+      - '**gradle.*'
   pull_request:
     paths:
       - '**.cpp'
       - '**.mm'
       - '**.yml'
+      - '**gradle.*'
   release:
     types:
       - published
