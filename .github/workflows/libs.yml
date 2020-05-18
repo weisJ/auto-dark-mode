@@ -46,6 +46,8 @@ jobs:
   macOS:
     name: macOS (Java 11)
     runs-on: macos-latest
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_10.3.app/Contents/Developer
     steps:
       - uses: actions/checkout@v2
         with:
