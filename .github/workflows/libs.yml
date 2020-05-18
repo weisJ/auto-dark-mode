@@ -54,11 +54,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Print SDK version 1
+        run: xcodebuild -showsdks
       - name: setup-xcode
         uses: maxim-lobanov/setup-xcode@1.0
         with:
           xcode-version: 10.3 # set the latest available Xcode 10.3.*
-      - name: Print SDK version
+      - name: Print SDK version 2
         run: xcodebuild -showsdks
       - name: Build
         run: ./gradlew :auto-dark-mode-macos:build
