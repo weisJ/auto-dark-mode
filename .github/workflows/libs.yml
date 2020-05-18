@@ -63,7 +63,7 @@ jobs:
       - name: Print SDK version 2
         run: xcodebuild -showsdks
       - name: SDK info
-        run: xcrun -sdk macosx10.14 --show-sdk-version
+        run: xcrun --show-sdk-version
       - name: Build
         run: ./gradlew :auto-dark-mode-macos:build
       - name: Upload artifact
