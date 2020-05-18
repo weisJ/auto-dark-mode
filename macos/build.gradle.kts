@@ -11,10 +11,10 @@ library {
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
         jvmImplementation("com.github.weisj:darklaf-native-utils")
-        nativeImplementation("dev.nokee.framework:JavaVM:10.15.4")
-        nativeImplementation("dev.nokee.framework:JavaVM:10.15.4") {
+        nativeImplementation("dev.nokee.framework:JavaVM:10.14.6")
+        nativeImplementation("dev.nokee.framework:JavaVM:10.14.6") {
             capabilities {
-                requireCapability("JavaVM:JavaNativeFoundation:10.15.4")
+                requireCapability("JavaVM:JavaNativeFoundation:10.14.6")
             }
         }
     }
