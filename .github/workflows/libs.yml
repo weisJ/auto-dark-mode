@@ -56,6 +56,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Print SDK version
+        run: xcrun --show-sdk-version
       - name: Build
         run: ./gradlew :auto-dark-mode-macos:build
       - name: Upload artifact
