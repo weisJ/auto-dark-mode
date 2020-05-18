@@ -62,8 +62,6 @@ jobs:
           xcode-version: 10.3 # set the latest available Xcode 10.3.*
       - name: Print SDK version 2
         run: xcodebuild -showsdks
-      - name: SDK info
-        run: xcrun --show-sdk-version
       - name: Build
         run: ./gradlew :auto-dark-mode-macos:build
       - name: Upload artifact
