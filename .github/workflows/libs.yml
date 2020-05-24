@@ -63,7 +63,7 @@ jobs:
       - name: Print SDK version 2
         run: xcodebuild -showsdks
       - name: Build
-        run: ./gradlew :auto-dark-mode-macos:build
+        run: ./gradlew :auto-dark-mode-macos:build --info
       - name: Upload artifact
         uses: actions/upload-artifact@v1
         with:

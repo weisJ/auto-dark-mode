@@ -17,6 +17,7 @@ library {
                 requireCapability("JavaVM:JavaNativeFoundation:[10.14,)")
             }
         }
+        nativeImplementation("dev.nokee.framework:AppKit:[10.14,)")
     }
 
     targetMachines.addAll(machines.macOS.x86_64)
@@ -36,7 +37,7 @@ library {
                 })
             }
             linkTask.configure {
-                linkerArgs.addAll("-lobjc", "-framework", "AppKit")
+                linkerArgs.addAll("-lobjc")
             }
         }
     }
