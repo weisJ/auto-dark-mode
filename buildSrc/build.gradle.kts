@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation("dev.nokee:platformJni:0.3.0-df4e5ab")
+    implementation("dev.nokee:platformJni:0.4.0-28912e7")
 }
 
 repositories {
