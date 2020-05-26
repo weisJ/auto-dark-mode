@@ -36,12 +36,12 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: auto-dark-mode-windows_x86.dll
-          path: windows/build/libs/main/shared/windowsx86/auto-dark-mode-windows.dll
+          path: windows/build/libs/main/x86/auto-dark-mode-windows.dll
       - name: Upload x86-64 artifact
         uses: actions/upload-artifact@v1
         with:
           name: auto-dark-mode-windows_x86-64.dll
-          path: windows/build/libs/main/shared/windowsx86-64/auto-dark-mode-windows.dll
+          path: windows/build/libs/main/x86-64/auto-dark-mode-windows.dll
 
   macOS:
     name: macOS (Java 11)
