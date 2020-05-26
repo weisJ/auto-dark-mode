@@ -1,16 +1,4 @@
 pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url = uri("https://dl.bintray.com/nokeedev/distributions-snapshots") }
-    }
-    val nokeeVersion = extra["nokee.version"].toString()
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id.startsWith("dev.nokee.")) {
-                useModule("${requested.id.id}:${requested.id.id}.gradle.plugin:$nokeeVersion")
-            }
-        }
-    }
     plugins {
         fun String.v() = extra["$this.version"].toString()
         fun PluginDependenciesSpec.idv(id: String, key: String = id) = id(id) version key.v()
