@@ -40,7 +40,7 @@ class UberJniJarPlugin implements Plugin<Project> {
         task.from(variants.map(jniLibraryBinaryFiles(project)))
     }
 
-    private static Closure<List<FileTree>> jniLibraryBinaryFiles(Project project) {
+    private static Closure<List<Provider<FileTree>>> jniLibraryBinaryFiles(Project project) {
         return { List<? extends JniLibrary> variants ->
             // Single variant are collapse into the JVM Jar
             if (variants.size() > 1) {
@@ -49,13 +49,13 @@ class UberJniJarPlugin implements Plugin<Project> {
                     variant.binaries.withType(JniJarBinary).elements.get().each { jniJarBinaries << it }
                 }
 
-                List<FileTree> result = []
-                for (Provider<RegularFile> archiveFile : jniJarBinaries*.jarTask*.get()*.archiveFile) {
-                    result << project.zipTree(archiveFile).matching { PatternFilterable p -> p.exclude('META-INF/**/*') }
+                List<Provider<FileTree>> result = []
+                for (Provider<Jar> jarTask : jniJarBinaries*.jarTask) {
+                    result << jarTask.map { project.zipTree(it.archiveFile).matching { PatternFilterable p -> p.exclude('META-INF/**/*') } }
                 }
                 return result
             }
-            return [] as List<FileTree>
+            return [] as List<Provider<FileTree>>
         }
     }
 
