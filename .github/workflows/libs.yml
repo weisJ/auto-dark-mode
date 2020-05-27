@@ -35,12 +35,12 @@ jobs:
       - name: Upload x86 artifact
         uses: actions/upload-artifact@v1
         with:
-          name: auto-dark-mode-windows_x86.dll
+          name: windows-x86
           path: windows/build/libs/main/x86/auto-dark-mode-windows.dll
       - name: Upload x86-64 artifact
         uses: actions/upload-artifact@v1
         with:
-          name: auto-dark-mode-windows_x86-64.dll
+          name: windows-x86-64
           path: windows/build/libs/main/x86-64/auto-dark-mode-windows.dll
 
   macOS:
@@ -67,7 +67,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v1
         with:
-          name: libauto-dark-mode-macos.dylib
+          name: macos-x86-64
           path: macos/build/libs/main/libauto-dark-mode-macos.dylib
       - name: Print library information
         run: otool -l macos/build/libs/main/libauto-dark-mode-macos.dylib
