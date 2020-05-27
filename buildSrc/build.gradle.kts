@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    implementation(platform("dev.nokee:nokee-gradle-plugins:0.4.0-727859f"))
+    implementation(platform("dev.nokee:nokee-gradle-plugins:0.4.0-92d0755"))
 }
 
 repositories {

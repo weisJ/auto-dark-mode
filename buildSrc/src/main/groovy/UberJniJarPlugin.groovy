@@ -1,6 +1,6 @@
 import dev.nokee.platform.jni.JniLibrary
 import dev.nokee.platform.jni.JniLibraryExtension
-import dev.nokee.runtime.nativebase.TargetMachine
+import dev.nokee.platform.nativebase.TargetMachine
 import groovy.transform.CompileStatic
 import org.gradle.api.Plugin
 import org.gradle.api.Project
