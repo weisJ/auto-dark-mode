@@ -1,4 +1,4 @@
-import UberJniJarPlugin.asVariantName
+import JniUtils.asVariantName
 
 plugins {
     java
