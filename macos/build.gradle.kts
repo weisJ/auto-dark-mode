@@ -5,6 +5,7 @@ plugins {
     id("dev.nokee.jni-library")
     id("dev.nokee.objective-cpp-language")
     `uber-jni-jar`
+    `use-prebuilt-binaries`
 }
 
 library {
