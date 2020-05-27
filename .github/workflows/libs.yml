@@ -68,9 +68,9 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: libauto-dark-mode-macos.dylib
-          path: macos/build/libs/main/shared/libauto-dark-mode-macos.dylib
+          path: macos/build/libs/main/libauto-dark-mode-macos.dylib
       - name: Print library information
-        run: otool -l macos/build/libs/main/shared/libauto-dark-mode-macos.dylib
+        run: otool -l macos/build/libs/main/libauto-dark-mode-macos.dylib
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v1
