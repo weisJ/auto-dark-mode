@@ -11,6 +11,7 @@ import org.gradle.jvm.tasks.Jar
 
 @CompileStatic
 class UberJniJarPlugin implements Plugin<Project> {
+
     @Override
     void apply(Project project) {
         project.tasks.named('jar', Jar) { task ->
@@ -22,10 +23,12 @@ class UberJniJarPlugin implements Plugin<Project> {
         def project = task.getProject()
         def logger = task.getLogger()
         def library = project.extensions.getByType(JniLibraryExtension)
-        if (library.targetMachines.get().size() > 1) {
+        if (library.targetMachines.get().size() >= 1) {
             logger.info("${project.name}: Merging binaries into the JVM Jar.")
             for (TargetMachine targetMachine : library.targetMachines.get()) {
-                Provider<JniLibrary> variant = library.variants.flatMap(targetMachineOf(targetMachine)).map(onlyOne())
+                Provider<JniLibrary> variant = library.variants
+                        .flatMap(targetMachineOf(targetMachine))
+                        .map(onlyOne() as Transformer<?, ? super List<?>>) as Provider<JniLibrary>
                 task.into(variant.map { it.resourcePath }) { CopySpec spec ->
                     spec.from(variant.map { it.nativeRuntimeFiles })
                 }
