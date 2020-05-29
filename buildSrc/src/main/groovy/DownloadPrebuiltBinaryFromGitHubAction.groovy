@@ -1,0 +1,295 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
+import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
+import org.gradle.api.Transformer
+import org.gradle.api.tasks.OutputFile
+
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import java.util.stream.Stream
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+
+@CompileStatic
+class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
+
+    private static final Object CACHE_FILE_LOCK = new Object()
+
+    private static final String VERSION_INFO_FILE_NAME = "github_artifact_versions.json"
+    private static final String TEMP_PATH = "tmp${File.separator}prebuild"
+    private static final String PRE_BUILD_PATH = "libs${File.separator}prebuild"
+
+    private final OneTimeLogger tokenWarning = new OneTimeLogger({
+        project.logger.error("""No github access token is specified. Latest artifacts will need to be included manually.
+                               |The access token needs to have the 'read-public' property. Specify using:
+                               |    -PgithubAccessToken=<your token>
+                               |or by setting
+                               |    githubAccessToken=<your token>
+                               |inside the gradle.properties file.
+                               |""".stripMargin())
+    })
+    private final OneTimeLogger useCachedWarning = new OneTimeLogger({
+        project.logger.warn("Could not download artifact or artifact information. Using cached version")
+    })
+
+    private Map cacheInfo
+
+    private String manualDownloadUrl = ""
+    private String user
+    private String repository
+    private String workflow
+
+    private String githubAccessToken
+    private String variant
+    private Optional<File> prebuiltBinary
+
+    @OutputFile
+    File getPrebuiltBinaryFile() {
+        if (user == null) throw new GradleException("Github user isn't specified")
+        if (repository == null) repository = project.name
+        if (workflow == null) throw new GradleException("Workflow isn't specified")
+
+        if (prebuiltBinary == null) {
+            if (githubAccessToken == null) tokenWarning.log()
+            prebuiltBinary = getExternalBinary(variant)
+        }
+        return prebuiltBinary.orElseThrow {
+            new GradleException(
+                    """${project.name}: Library for $variant could not be downloaded.
+                      |${(" " * (project.name.size() + 1))} Download it from $manualDownloadUrl
+                      |""".stripMargin()
+            )
+        }
+    }
+
+    void setGithubAccessToken(String githubAccessToken) {
+        this.githubAccessToken = githubAccessToken
+    }
+
+    void setVariant(String variant) {
+        this.variant = variant
+    }
+
+    void setUser(String user) {
+        this.user = user
+    }
+
+    void setRepository(String repository) {
+        this.repository = repository
+    }
+
+    void setWorkflow(String workflow) {
+        this.workflow = workflow
+    }
+
+    void setManualDownlaodUrl(String manualDownlaodUrl) {
+        this.manualDownloadUrl = manualDownlaodUrl
+    }
+
+    private Map getCacheInfo() {
+        if (cacheInfo == null) {
+            synchronized (CACHE_FILE_LOCK) {
+                File cacheInfoFile = getCacheInfoFile()
+                JsonSlurper jsonParser = new JsonSlurper()
+                cacheInfo = jsonParser.parseText(cacheInfoFile.text) as Map
+            }
+        }
+        return cacheInfo
+    }
+
+    private File getCacheInfoFile() {
+        String path = "${tempFolder()}${File.separator}$VERSION_INFO_FILE_NAME"
+        File cacheInfo = new File(path)
+        if (!cacheInfo.exists()) {
+            cacheInfo = createFile(path)
+            cacheInfo << "{}"
+        }
+        return cacheInfo
+    }
+
+    private void writeToCache(String variantName, String timeStamp, File file) {
+        synchronized (CACHE_FILE_LOCK) {
+            Map cacheInfo = getCacheInfo()
+            Map entry = [timeStamp: timeStamp, path: file.absolutePath]
+            cacheInfo.put(variantName, entry)
+            getCacheInfoFile().write(JsonOutput.prettyPrint(JsonOutput.toJson(cacheInfo)))
+        }
+    }
+
+    Optional<File> getExternalBinary(String variant) {
+        Tuple2<Optional<DownloadInfo>, Optional<File>> fetchResult = getBinaryDownloadUrl(variant)
+        Optional<DownloadInfo> downloadInfo = fetchResult.getFirst()
+        Optional<File> cachedFile = fetchResult.getSecond()
+        if (cachedFile.isPresent()) {
+            project.logger.warn("Reusing previously downloaded binary ${cachedFile.map { it.absolutePath }.orElse(null)}")
+            return cachedFile
+        }
+        Optional<File> downloadedFile = downloadInfo.map {
+            getBinaryFromUrl(variant, it.url).orElse(null)
+        }
+
+        downloadedFile.ifPresent() {
+            writeToCache(variant, downloadInfo.get()?.timeStamp, it)
+        }
+
+        return downloadedFile | { getCachedFile(variant) }
+    }
+
+    private Optional<File> getBinaryFromUrl(String variant, String url) {
+        File directory = createDirectory(preBuildPath(variant))
+        return downloadZipFile(url, variant).map { unzip(it, directory).findFirst() }.orElse(Optional.empty())
+    }
+
+    private String preBuildPath(String variant) {
+        return "${project.buildDir}${File.separator}$PRE_BUILD_PATH${File.separator}$variant"
+    }
+
+    private Optional<ZipFile> downloadZipFile(String url, String variant) {
+        return fetch(url) {
+            File file = createFile(zipPath(variant))
+            Path response = file.toPath()
+            Files.copy(it.getInputStream(), response, StandardCopyOption.REPLACE_EXISTING)
+            return new ZipFile(file)
+        }
+    }
+
+    private String zipPath(String name) {
+        return "$project.buildDir${File.separator}$TEMP_PATH${File.separator}${name}.zip"
+    }
+
+    private String tempFolder() {
+        return "$project.buildDir${File.separator}$TEMP_PATH"
+    }
+
+    private static Stream<File> unzip(ZipFile self, File directory) {
+        Collection<ZipEntry> files = self.entries().findAll { !(it as ZipEntry).directory }
+        return files.stream().map {
+            ZipEntry e = it as ZipEntry
+            e.name.with { fileName ->
+                File outputFile = createFile("${directory.path}$File.separator$fileName")
+                Files.copy(self.getInputStream(e), outputFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                return outputFile
+            }
+        }
+    }
+
+    private Tuple2<Optional<DownloadInfo>, Optional<File>> getBinaryDownloadUrl(String variantName) {
+        boolean isUptoDate = false
+        File cachedFile = null
+        String timeStamp = null
+        String artifactUrl = getLatestRun(getJson(getWorkflowsUrl())).with {
+            timeStamp = it.get("created_at")
+            Optional<String> cachedFilePath = getCachedFilePath(variantName, timeStamp)
+            isUptoDate = cachedFilePath.isPresent()
+            if (isUptoDate) {
+                cachedFile = new File(cachedFilePath.get())
+                isUptoDate = cachedFile.exists()
+            }
+            return get("artifacts_url") as String
+        }
+        project.logger.info("Using artifact from $timeStamp")
+        if (isUptoDate) {
+            return new Tuple2<>(Optional.empty(), Optional.of(cachedFile))
+        }
+        DownloadInfo downloadInfo = artifactUrl?.with { url ->
+            Map[] artifacts = getJson(url).get("artifacts") as Map[]
+            String artifactDownloadUrl = artifacts?.find { variantName == it.get("name") }?.get("url") as String
+            return artifactDownloadUrl?.with {
+                new DownloadInfo(getJson(it)?.get("archive_download_url") as String, timeStamp)
+            }
+        }
+
+        return new Tuple2<>(Optional.ofNullable(downloadInfo), Optional.empty())
+    }
+
+    private String getWorkflowsUrl() {
+        return "https://api.github.com/repos/$user/$repository/actions/workflows/$workflow/runs"
+    }
+
+    private Optional<String> getCachedFilePath(String variantName, String timeStamp) {
+        Map cacheInfo = getCacheInfo()
+        boolean isLatest = (cacheInfo[variantName] as Map)?.get("timeStamp") == timeStamp
+        if (isLatest) {
+            return Optional.ofNullable((cacheInfo[variantName] as Map)?.get("path") as String)
+        } else {
+            return Optional.empty()
+        }
+    }
+
+    private Optional<File> getCachedFile(String variant) {
+        Map cacheInfo = getCacheInfo()
+        return Optional.ofNullable(cacheInfo[variant] as Map).map {
+            return new File(String.valueOf(it["path"])).with {
+                if (it.exists()) useCachedWarning.log()
+                it.exists() ? it : null
+            }
+        }
+    }
+
+    private static Map getLatestRun(Map json) {
+        Map[] runs = json.get("workflow_runs") as Map[]
+        return Optional.ofNullable(runs?.find { run ->
+            boolean completed = "completed" == run.get("status")
+            boolean success = "success" == run.get("conclusion")
+            return completed && success
+        }).orElse(Collections.emptyMap())
+    }
+
+    private Map getJson(String url) {
+        return fetch(url) {
+            JsonSlurper jsonParser = new JsonSlurper()
+            Map parsedJson = jsonParser.parseText(it.getInputStream().getText()) as Map
+            return parsedJson
+        }.orElse(Collections.emptyMap())
+    }
+
+    private <T> Optional<T> fetch(String url, Transformer<T, HttpURLConnection> transformer) {
+        if (isOffline()) return Optional.empty()
+        HttpURLConnection get = new URL(url).openConnection() as HttpURLConnection
+        get.setRequestMethod("GET")
+        githubAccessToken?.with {
+            get.setRequestProperty("Authorization", "token $it")
+        }
+        try {
+            def responseCode = get.getResponseCode()
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                return Optional.ofNullable(transformer.transform(get))
+            } else {
+                project.logger.warn("Could not fetch $url. Response code '$responseCode'.")
+            }
+        } catch (IOException ignored) {
+        }
+        return Optional.empty()
+    }
+
+    private static File createFile(String fileName) {
+        File file = new File(fileName)
+        if (file.exists()) file.delete()
+        file.getParentFile().mkdirs()
+        file.createNewFile()
+        return file
+    }
+
+    private static File createDirectory(String fileName) {
+        File file = new File(fileName)
+        file.mkdirs()
+        return file
+    }
+
+    private class DownloadInfo {
+        protected String url
+        protected String timeStamp
+
+        private DownloadInfo(String url, String timeStamp) {
+            this.url = url
+            this.timeStamp = timeStamp
+        }
+    }
+
+    private boolean isOffline() {
+        return project.getGradle().startParameter.isOffline()
+    }
+}
