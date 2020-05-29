@@ -27,7 +27,10 @@ library {
         sharedLibrary {
             compileTasks.configureEach {
                 compilerArgs.addAll("-mmacosx-version-min=10.14")
-
+                compilerArgs.addAll(
+                    "-isysroot",
+                    "/Applications/Xcode_10.3.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk"
+                )
                 // Build type not modeled yet, assuming release
                 compilerArgs.addAll(toolChain.map {
                     when (it) {
