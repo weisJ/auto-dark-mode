@@ -8,6 +8,12 @@ plugins {
     `use-prebuilt-binaries`
 }
 
+configurations.all {
+    resolutionStrategy.eachDependency {
+        project.logger.warn("Dependency: ${requested.name} ${requested.version}")
+    }
+}
+
 library {
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
