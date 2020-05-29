@@ -23,16 +23,16 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     private static final String PRE_BUILD_PATH = "libs${File.separator}prebuild"
 
     private final OneTimeLogger tokenWarning = new OneTimeLogger({
-        project.logger.error("""No github access token is specified. Latest artifacts will need to be included manually.
-                               |The access token needs to have the 'read-public' property. Specify using:
-                               |    -PgithubAccessToken=<your token>
-                               |or by setting
-                               |    githubAccessToken=<your token>
-                               |inside the gradle.properties file.
-                               |""".stripMargin())
+        error("""No github access token is specified. Latest artifacts will need to be included manually.
+              |The access token needs to have the 'read-public' property. Specify using:
+              |    -PgithubAccessToken=<your token>
+              |or by setting
+              |    githubAccessToken=<your token>
+              |inside the gradle.properties file.
+              |""".stripMargin())
     })
     private final OneTimeLogger useCachedWarning = new OneTimeLogger({
-        project.logger.warn("Could not download artifact or artifact information. Using cached version")
+        log("Could not download artifact or artifact information. Using cached version")
     })
 
     private Map cacheInfo
@@ -101,7 +101,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     }
 
     private File getCacheInfoFile() {
-        String path = "${tempFolder()}${File.separator}$VERSION_INFO_FILE_NAME"
+        String path = preBuildPath("$VERSION_INFO_FILE_NAME")
         File cacheInfo = new File(path)
         if (!cacheInfo.exists()) {
             cacheInfo = createFile(path)
@@ -124,7 +124,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         Optional<DownloadInfo> downloadInfo = fetchResult.getFirst()
         Optional<File> cachedFile = fetchResult.getSecond()
         if (cachedFile.isPresent()) {
-            project.logger.warn("Reusing previously downloaded binary ${cachedFile.map { it.absolutePath }.orElse(null)}")
+            log("Reusing previously downloaded binary ${cachedFile.map { it.absolutePath }.orElse(null)}")
             return cachedFile
         }
         Optional<File> downloadedFile = downloadInfo.map {
@@ -160,10 +160,6 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         return "$project.buildDir${File.separator}$TEMP_PATH${File.separator}${name}.zip"
     }
 
-    private String tempFolder() {
-        return "$project.buildDir${File.separator}$TEMP_PATH"
-    }
-
     private static Stream<File> unzip(ZipFile self, File directory) {
         Collection<ZipEntry> files = self.entries().findAll { !(it as ZipEntry).directory }
         return files.stream().map {
@@ -190,7 +186,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             }
             return get("artifacts_url") as String
         }
-        project.logger.info("Using artifact from $timeStamp")
+        log("Latest artifact is from $timeStamp")
         if (isUptoDate) {
             return new Tuple2<>(Optional.empty(), Optional.of(cachedFile))
         }
@@ -258,7 +254,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 return Optional.ofNullable(transformer.transform(get))
             } else {
-                project.logger.warn("Could not fetch $url. Response code '$responseCode'.")
+                log("Could not fetch $url. Response code '$responseCode'.")
             }
         } catch (IOException ignored) {
         }
@@ -292,4 +288,14 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     private boolean isOffline() {
         return project.getGradle().startParameter.isOffline()
     }
+
+    private void log(String message) {
+        project.logger.warn("${project.name}: $message")
+    }
+
+    private void error(String message) {
+        project.logger.error("${project.name}: $message")
+    }
+
+
 }
