@@ -12,13 +12,13 @@ library {
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
         jvmImplementation("com.github.weisj:darklaf-native-utils")
-        nativeImplementation("dev.nokee.framework:JavaVM:10.14.+")
-        nativeImplementation("dev.nokee.framework:JavaVM:10.14.+") {
+        nativeImplementation("dev.nokee.framework:JavaVM:[10.14.0,1.15.0)")
+        nativeImplementation("dev.nokee.framework:JavaVM:[10.14.0,1.15.0)") {
             capabilities {
-                requireCapability("JavaVM:JavaNativeFoundation:10.14.+")
+                requireCapability("JavaVM:JavaNativeFoundation:[10.14.0,1.15.0)")
             }
         }
-        nativeImplementation("dev.nokee.framework:AppKit:10.14.+")
+        nativeImplementation("dev.nokee.framework:AppKit:[10.14.0,1.15.0)")
     }
 
     targetMachines.addAll(machines.macOS.x86_64)
