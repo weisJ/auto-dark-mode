@@ -8,23 +8,17 @@ plugins {
     `use-prebuilt-binaries`
 }
 
-configurations.all {
-    resolutionStrategy.eachDependency {
-        project.logger.warn("Dependency: ${requested.name} ${requested.version}")
-    }
-}
-
 library {
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
         jvmImplementation("com.github.weisj:darklaf-native-utils")
-        nativeImplementation("dev.nokee.framework:JavaVM:[10.14,)")
-        nativeImplementation("dev.nokee.framework:JavaVM:[10.14,)") {
+        nativeImplementation("dev.nokee.framework:JavaVM:10.14.+")
+        nativeImplementation("dev.nokee.framework:JavaVM:10.14.+") {
             capabilities {
-                requireCapability("JavaVM:JavaNativeFoundation:[10.14,)")
+                requireCapability("JavaVM:JavaNativeFoundation:10.14.+")
             }
         }
-        nativeImplementation("dev.nokee.framework:AppKit:[10.14,)")
+        nativeImplementation("dev.nokee.framework:AppKit:10.14.+")
     }
 
     targetMachines.addAll(machines.macOS.x86_64)
@@ -32,6 +26,7 @@ library {
         resourcePath.set("com/github/weisj/darkmode/${project.name}/${asVariantName(targetMachine)}")
         sharedLibrary {
             compileTasks.configureEach {
+                project.logger.error("CompilerArgs: $compilerArgs")
                 compilerArgs.addAll("-mmacosx-version-min=10.14")
 
                 // Build type not modeled yet, assuming release
