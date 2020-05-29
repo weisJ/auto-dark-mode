@@ -9,16 +9,18 @@ plugins {
 }
 
 library {
+    val minOs = "10.14"
+
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
         jvmImplementation("com.github.weisj:darklaf-native-utils")
-        nativeImplementation("dev.nokee.framework:JavaVM:[10.14,)")
-        nativeImplementation("dev.nokee.framework:JavaVM:[10.14,)") {
+        nativeImplementation("dev.nokee.framework:JavaVM:[$minOs,)")
+        nativeImplementation("dev.nokee.framework:JavaVM:[$minOs,)") {
             capabilities {
-                requireCapability("JavaVM:JavaNativeFoundation:[10.14,)")
+                requireCapability("JavaVM:JavaNativeFoundation:[$minOs,)")
             }
         }
-        nativeImplementation("dev.nokee.framework:AppKit:[10.14,)")
+        nativeImplementation("dev.nokee.framework:AppKit:[$minOs,)")
     }
 
     targetMachines.addAll(machines.macOS.x86_64)
@@ -26,7 +28,7 @@ library {
         resourcePath.set("com/github/weisj/darkmode/${project.name}/${asVariantName(targetMachine)}")
         sharedLibrary {
             compileTasks.configureEach {
-                compilerArgs.addAll("-mmacosx-version-min=10.14")
+                compilerArgs.addAll("-mmacosx-version-min=$minOs")
                 // Build type not modeled yet, assuming release
                 compilerArgs.addAll(toolChain.map {
                     when (it) {
@@ -37,8 +39,7 @@ library {
                 })
             }
             linkTask.configure {
-                linkerArgs.addAll("-mmacosx-version-min=10.14")
-                linkerArgs.addAll("-lobjc")
+                linkerArgs.addAll("-lobjc", "-mmacosx-version-min=$minOs")
             }
         }
     }
