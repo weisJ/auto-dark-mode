@@ -23,14 +23,7 @@
  */
 package com.github.weisj.darkmode.platform.macos;
 
-import com.github.weisj.darklaf.platform.NativeUtil;
-import com.github.weisj.darkmode.platform.LibraryInfo;
-
 public class MacOSNative {
-
-    private static final String PROJECT_NAME = "auto-dark-mode-macos";
-    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/";
-    private static final String DLL_NAME = "lib" + PROJECT_NAME + ".dylib";
 
     static native boolean isDarkThemeEnabled();
 
@@ -43,15 +36,4 @@ public class MacOSNative {
     static native void patchAppBundle();
 
     static native void unpatchAppBundle();
-
-    static boolean loadLibrary() {
-        try {
-            if (LibraryInfo.isX64) {
-                NativeUtil.loadLibraryFromJar(PATH + "macos-x86-64/" + DLL_NAME);
-                return true;
-            }
-        } catch (Throwable ignored) {
-        }
-        return false;
-    }
 }

@@ -1,11 +1,8 @@
 package com.github.weisj.darkmode.platform.windows;
 
-import com.github.weisj.darkmode.platform.LibraryInfo;
 import com.github.weisj.darkmode.platform.ThemeMonitorService;
 
 public class WindowsThemeMonitorService implements ThemeMonitorService {
-
-    private static final boolean loaded = LibraryInfo.isWin10OrNewer && WindowsNative.loadLibrary();
 
     @Override
     public boolean isDarkThemeEnabled() {
@@ -29,6 +26,6 @@ public class WindowsThemeMonitorService implements ThemeMonitorService {
 
     @Override
     public boolean isActive() {
-        return loaded;
+        return WindowsLibrary.get().isLoaded();
     }
 }
