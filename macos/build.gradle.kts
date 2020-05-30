@@ -10,17 +10,18 @@ plugins {
 
 library {
     val minOs = "10.14"
+    val frameworkVersion = "10.15.4"
 
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
         jvmImplementation("com.github.weisj:darklaf-native-utils")
-        nativeImplementation("dev.nokee.framework:JavaVM:[$minOs,)")
-        nativeImplementation("dev.nokee.framework:JavaVM:[$minOs,)") {
+        nativeImplementation("dev.nokee.framework:JavaVM:$frameworkVersion")
+        nativeImplementation("dev.nokee.framework:JavaVM:$frameworkVersion") {
             capabilities {
-                requireCapability("JavaVM:JavaNativeFoundation:[$minOs,)")
+                requireCapability("JavaVM:JavaNativeFoundation:$frameworkVersion")
             }
         }
-        nativeImplementation("dev.nokee.framework:AppKit:[$minOs,)")
+        nativeImplementation("dev.nokee.framework:AppKit:$frameworkVersion")
     }
 
     targetMachines.addAll(machines.macOS.x86_64)
