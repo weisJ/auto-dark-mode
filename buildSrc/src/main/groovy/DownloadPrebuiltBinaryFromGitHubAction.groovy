@@ -9,6 +9,8 @@ import org.gradle.api.tasks.OutputFile
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import java.util.concurrent.locks.ReadWriteLock
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.stream.Stream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
@@ -16,7 +18,7 @@ import java.util.zip.ZipFile
 @CompileStatic
 class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
 
-    private static final Object CACHE_FILE_LOCK = new Object()
+    private static final ReadWriteLock LOCK = new ReentrantReadWriteLock()
 
     private static final String VERSION_INFO_FILE_NAME = "github_artifact_versions.json"
     private static final String TEMP_PATH = "tmp${File.separator}prebuild"
@@ -91,10 +93,13 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
 
     private Map getCacheInfo() {
         if (cacheInfo == null) {
-            synchronized (CACHE_FILE_LOCK) {
+            LOCK.readLock().lock()
+            try {
                 File cacheInfoFile = getCacheInfoFile()
                 JsonSlurper jsonParser = new JsonSlurper()
                 cacheInfo = jsonParser.parseText(cacheInfoFile.text) as Map
+            } finally {
+                LOCK.readLock().unlock()
             }
         }
         return cacheInfo
@@ -111,11 +116,14 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     }
 
     private void writeToCache(String variantName, String timeStamp, File file) {
-        synchronized (CACHE_FILE_LOCK) {
+        LOCK.writeLock().lock()
+        try {
             Map cacheInfo = getCacheInfo()
             Map entry = [timeStamp: timeStamp, path: file.absolutePath]
             cacheInfo.put(variantName, entry)
             getCacheInfoFile().write(JsonOutput.prettyPrint(JsonOutput.toJson(cacheInfo)))
+        } finally {
+
         }
     }
 
@@ -275,16 +283,6 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         return file
     }
 
-    private class DownloadInfo {
-        protected String url
-        protected String timeStamp
-
-        private DownloadInfo(String url, String timeStamp) {
-            this.url = url
-            this.timeStamp = timeStamp
-        }
-    }
-
     private boolean isOffline() {
         return project.getGradle().startParameter.isOffline()
     }
@@ -298,4 +296,13 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     }
 
 
+    private class DownloadInfo {
+        protected String url
+        protected String timeStamp
+
+        private DownloadInfo(String url, String timeStamp) {
+            this.url = url
+            this.timeStamp = timeStamp
+        }
+    }
 }
