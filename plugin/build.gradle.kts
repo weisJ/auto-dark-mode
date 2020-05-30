@@ -20,12 +20,6 @@ tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     )
 }
 
-tasks.buildPlugin {
-    project.rootProject.subprojects.forEach {
-        dependsOn(it.tasks.withType<Jar>())
-    }
-}
-
 dependencies {
     implementation(project(":auto-dark-mode-base"))
     implementation(project(":auto-dark-mode-windows"))
