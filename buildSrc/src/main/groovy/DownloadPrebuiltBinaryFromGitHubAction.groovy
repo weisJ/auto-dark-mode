@@ -55,7 +55,9 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         if (workflow == null) throw new GradleException("Workflow isn't specified")
 
         if (prebuiltBinary == null) {
-            if (githubAccessToken == null) tokenWarning.log()
+            if (githubAccessToken == null || githubAccessToken.isEmpty()) {
+                tokenWarning.log()
+            }
             prebuiltBinary = getExternalBinary(variant)
         }
         return prebuiltBinary.orElseThrow {

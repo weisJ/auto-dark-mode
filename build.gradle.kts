@@ -32,6 +32,21 @@ allprojects {
     }
 
     val isPublished by props()
+    val githubAccessToken by props("")
+
+    plugins.withType<UsePrebuiltBinariesWhenUnbuildablePlugin>() {
+        prebuildBinaries {
+            prebuildLibrariesFolder = "pre-build-libraries"
+            github {
+                user = "weisj"
+                repository = "auto-dark-mode"
+                workflow = "libs.yml"
+                accessToken = githubAccessToken
+                manualDownloadUrl =
+                    "https://github.com/weisJ/auto-dark-mode/actions?query=workflow%3A%22Build+Native+Libraries%22+is%3Asuccess"
+            }
+        }
+    }
 
     listOf(BuildSearchableOptionsTask::class, PrepareSandboxTask::class)
         .forEach { tasks.withType(it).configureEach { enabled = isPublished } }
