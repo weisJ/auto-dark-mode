@@ -5,6 +5,8 @@
         Automatically change IDEA theme according to OS settings (dark/light/high contrast).
         Currently works on Windows and macOS.
 
+        You can change the default theme used in the plugin settings under "Other Settings"->"Auto Dark Mode".
+
         Note: When using the plugin on Catalina in "Auto" mode at least one restart is needed for dark mode detection to
         work properly.
     </description>
