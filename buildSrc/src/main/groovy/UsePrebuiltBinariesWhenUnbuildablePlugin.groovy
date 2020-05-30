@@ -45,6 +45,8 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin implements Plugin<Project> {
                         it.repository = githubArtifactExtension.repository
                         it.workflow = githubArtifactExtension.workflow
                         it.manualDownloadUrl = githubArtifactExtension.manualDownloadUrl
+                        it.branches = githubArtifactExtension.branches
+                        it.missingLibraryIsFailure = prebuildExtension.missingLibraryIsFailure
                     }
                     var.nativeRuntimeFiles.setFrom(prebuiltBinariesTask.map { it.prebuiltBinaryFile })
                     var.nativeRuntimeFiles.from(new CallableLogger({
@@ -66,8 +68,8 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin implements Plugin<Project> {
 
         private String prebuildLibrariesFolder = "pre-build-libraries"
         private boolean alwaysUsePrebuildArtifact = false
+        private boolean missingLibraryIsFailure = true
         private UsePrebuiltBinariesWhenUnbuildablePlugin plugin
-
 
         PrebuildBinariesExtension(UsePrebuiltBinariesWhenUnbuildablePlugin plugin) {
             this.plugin = plugin
@@ -89,10 +91,17 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin implements Plugin<Project> {
             return prebuildLibrariesFolder
         }
 
+        boolean getMissingLibraryIsFailure() {
+            return missingLibraryIsFailure
+        }
+
         void setPrebuildLibrariesFolder(String prebuildLibrariesFolder) {
             this.prebuildLibrariesFolder = prebuildLibrariesFolder
         }
 
+        void setMissingLibraryIsFailure(boolean missingLibraryIsFailure) {
+            this.missingLibraryIsFailure = missingLibraryIsFailure
+        }
     }
 
     static class GithubArtifactExtension {
@@ -101,6 +110,7 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin implements Plugin<Project> {
         private String workflow
         private String manualDownloadUrl
         private String accessToken
+        private List<String> branches = ["master"]
 
         String getUser() {
             return user
@@ -122,6 +132,10 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin implements Plugin<Project> {
             return accessToken
         }
 
+        List<String> getBranches() {
+            return branches
+        }
+
         void setUser(String user) {
             this.user = user
         }
@@ -140,6 +154,10 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin implements Plugin<Project> {
 
         void setAccessToken(String accessToken) {
             this.accessToken = accessToken
+        }
+
+        void setBranches(List<String> branches) {
+            this.branches = branches
         }
     }
 

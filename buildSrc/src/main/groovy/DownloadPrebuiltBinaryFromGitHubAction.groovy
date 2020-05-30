@@ -43,6 +43,8 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     private String user
     private String repository
     private String workflow
+    private List<String> branches = []
+    private boolean missingLibraryIsFailure
 
     private String githubAccessToken
     private String variant
@@ -60,13 +62,22 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             }
             prebuiltBinary = getExternalBinary(variant)
         }
-        return prebuiltBinary.orElseThrow {
-            new GradleException(
-                    """${project.name}: Library for $variant could not be downloaded.
+
+        return prebuiltBinary.orElseGet {
+            String errorMessage = """${project.name}: Library for $variant could not be downloaded.
                       |${(" " * (project.name.size() + 1))} Download it from $manualDownloadUrl
                       |""".stripMargin()
-            )
+            if (missingLibraryIsFailure) {
+                throw new GradleException(errorMessage)
+            } else {
+                error(errorMessage)
+            }
+            return createDirectory(tempFilePath("dummy/"))
         }
+    }
+
+    void setMissingLibraryIsFailure(boolean missingLibraryIsFailure) {
+        this.missingLibraryIsFailure = missingLibraryIsFailure
     }
 
     void setGithubAccessToken(String githubAccessToken) {
@@ -93,6 +104,10 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         this.manualDownloadUrl = manualDownloadUrl
     }
 
+    void setBranches(List<String> branches) {
+        this.branches = branches
+    }
+
     private Map getCacheInfo() {
         if (cacheInfo == null) {
             LOCK.readLock().lock()
@@ -108,7 +123,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     }
 
     private File getCacheInfoFile() {
-        String path = preBuildPath("$VERSION_INFO_FILE_NAME")
+        String path = preBuildPath(VERSION_INFO_FILE_NAME)
         File cacheInfo = new File(path)
         if (!cacheInfo.exists()) {
             cacheInfo = createFile(path)
@@ -141,11 +156,14 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             getBinaryFromUrl(variant, it.url).orElse(null)
         }
 
-        downloadedFile.ifPresent() {
-            writeToCache(variant, downloadInfo.get()?.timeStamp, it)
+        if (downloadedFile.isPresent()) {
+            writeToCache(variant, downloadInfo.get()?.timeStamp, downloadedFile.get())
+        } else {
+            info("No file found for variant $variant")
         }
 
-        return downloadedFile | { getCachedFile(variant) }
+        if (downloadedFile.isPresent()) return downloadedFile
+        return getCachedFile(variant)
     }
 
     private Optional<File> getBinaryFromUrl(String variant, String url) {
@@ -170,7 +188,11 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     }
 
     private String zipPath(String name) {
-        return "$project.buildDir${File.separator}$TEMP_PATH${File.separator}${name}.zip"
+        return tempFilePath("${name}.zip")
+    }
+
+    private String tempFilePath(String name) {
+        return "$project.buildDir${File.separator}$TEMP_PATH${File.separator}${name}"
     }
 
     private static Stream<File> unzip(ZipFile self, File directory) {
@@ -238,13 +260,17 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         }
     }
 
-    private static Map getLatestRun(Map json) {
+    private Map getLatestRun(Map json) {
         Map[] runs = json.get("workflow_runs") as Map[]
         return Optional.ofNullable(runs?.find { run ->
             boolean completed = "completed" == run.get("status")
             boolean success = "success" == run.get("conclusion")
-            return completed && success
-        }).orElse(Collections.emptyMap())
+            boolean isCorrectBranch = branches.isEmpty() || branches.contains(run.get("head_branch")?.toString())
+            return completed && success && isCorrectBranch
+        }).orElseGet {
+            log("No suitable workflow run found.")
+            return Collections.emptyMap()
+        }
     }
 
     private Map getJson(String url) {
@@ -256,6 +282,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     }
 
     private <T> Optional<T> fetch(String url, Transformer<T, HttpURLConnection> transformer) {
+        info("Fetching $url")
         if (isOffline()) return Optional.empty()
         HttpURLConnection get = new URL(url).openConnection() as HttpURLConnection
         get.setRequestMethod("GET")
@@ -293,7 +320,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     }
 
     private void info(String message) {
-        project.logger.warn("${project.name}: $message")
+        project.logger.info("${project.name}: $message")
     }
 
     private void log(String message) {
@@ -303,7 +330,6 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     private void error(String message) {
         project.logger.error("${project.name}: $message")
     }
-
 
     private class DownloadInfo {
         protected String url
