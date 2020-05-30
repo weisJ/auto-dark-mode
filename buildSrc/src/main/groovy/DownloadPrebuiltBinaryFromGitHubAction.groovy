@@ -89,8 +89,8 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         this.workflow = workflow
     }
 
-    void setManualDownlaodUrl(String manualDownlaodUrl) {
-        this.manualDownloadUrl = manualDownlaodUrl
+    void setManualDownloadUrl(String manualDownloadUrl) {
+        this.manualDownloadUrl = manualDownloadUrl
     }
 
     private Map getCacheInfo() {
@@ -150,7 +150,10 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
 
     private Optional<File> getBinaryFromUrl(String variant, String url) {
         File directory = createDirectory(preBuildPath(variant))
-        return downloadZipFile(url, variant).map { unzip(it, directory).findFirst() }.orElse(Optional.empty())
+        info("Downloading binary for variant '$variant' from $url")
+        Optional<File> file = downloadZipFile(url, variant).map { unzip(it, directory).findFirst() }.orElse(Optional.empty())
+        info("Finished download for variant '$variant'")
+        return file
     }
 
     private String preBuildPath(String variant) {
@@ -196,7 +199,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             }
             return get("artifacts_url") as String
         }
-        log("Latest artifact is from $timeStamp")
+        info("Latest artifact for variant '$variantName' is from $timeStamp")
         if (isUptoDate) {
             return new Tuple2<>(Optional.empty(), Optional.of(cachedFile))
         }
@@ -287,6 +290,10 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
 
     private boolean isOffline() {
         return project.getGradle().startParameter.isOffline()
+    }
+
+    private void info(String message) {
+        project.logger.warn("${project.name}: $message")
     }
 
     private void log(String message) {

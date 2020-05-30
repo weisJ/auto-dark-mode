@@ -44,7 +44,7 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin implements Plugin<Project> {
                         it.user = githubArtifactExtension.user
                         it.repository = githubArtifactExtension.repository
                         it.workflow = githubArtifactExtension.workflow
-                        it.manualDownlaodUrl = githubArtifactExtension.manualDownloadUrl
+                        it.manualDownloadUrl = githubArtifactExtension.manualDownloadUrl
                     }
                     var.nativeRuntimeFiles.setFrom(prebuiltBinariesTask.map { it.prebuiltBinaryFile })
                     var.nativeRuntimeFiles.from(new CallableLogger({
