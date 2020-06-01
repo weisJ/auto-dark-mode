@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 public class MacOSLibrary extends AbstractLibrary {
 
     private static final String PROJECT_NAME = "auto-dark-mode-macos";
-    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/";
+    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/macos-x86-64/";
     private static final String DLL_NAME = "lib" + PROJECT_NAME + ".dylib";
     private static final MacOSLibrary instance = new MacOSLibrary();
 
