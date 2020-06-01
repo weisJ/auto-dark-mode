@@ -30,6 +30,12 @@ tasks.buildPlugin {
     dependsOn(project.rootProject.tasks.jar)
 }
 
+tasks.buildPlugin {
+    project.rootProject.subprojects.forEach {
+        dependsOn(it.tasks.withType<Jar>())
+    }
+}
+
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     jvmTarget = "1.8"
