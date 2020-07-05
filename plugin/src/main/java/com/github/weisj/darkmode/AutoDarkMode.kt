@@ -6,6 +6,8 @@ import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.util.Alarm
 import javax.swing.UIManager.LookAndFeelInfo
@@ -16,9 +18,7 @@ import javax.swing.UIManager.LookAndFeelInfo
 class AutoDarkMode : Disposable, ThemeCallback {
     private val alarm = Alarm()
     private val options: AutoDarkModeOptions = ServiceManager.getService(AutoDarkModeOptions::class.java)
-    private var monitorValue: ThemeMonitor? = null
-    private val monitor: ThemeMonitor
-        get() = monitorValue ?: createMonitor()
+    private val monitor: Lazy<ThemeMonitor> = lazy { createMonitor() }
 
     private fun createMonitor(): ThemeMonitor {
         return try {
@@ -31,68 +31,67 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun start() {
-        (monitor ?: createMonitor()).isRunning = true
+        monitor.value.isRunning = true
     }
 
     fun stop() {
-        stop(true)
-    }
-
-    private fun stop(dispose: Boolean) {
-        monitorValue?.isRunning = false;
-        if (dispose) setNull()
+        if (monitor.isInitialized()) monitor.value.isRunning = false
     }
 
     fun onSettingsChange() {
-        monitor.requestUpdate()
+        monitor.value.requestUpdate()
     }
 
     override fun themeChanged(isDark: Boolean, isHighContrast: Boolean) {
-        val target = getTargetLaf(isDark, isHighContrast)
-        if (target != LafManager.getInstance().currentLookAndFeel) {
-            updateLaf(target)
+        val (lafTarget, colorSchemeTarget) = getTargetLaf(isDark, isHighContrast)
+        resetRequests()
+        if (lafTarget != LafManager.getInstance().currentLookAndFeel) {
+            updateLaf(lafTarget)
+        }
+        if (colorSchemeTarget != EditorColorsManager.getInstance().globalScheme) {
+            updateEditorScheme(colorSchemeTarget)
         }
     }
 
-    private fun getTargetLaf(dark: Boolean, highContrast: Boolean): LookAndFeelInfo {
+    private fun getTargetLaf(dark: Boolean, highContrast: Boolean): Pair<LookAndFeelInfo, EditorColorsScheme> {
         return when {
-            highContrast && options.checkHighContrast -> options.highContrastTheme
-            dark -> options.darkTheme
-            else -> options.lightTheme
+            highContrast && options.checkHighContrast -> Pair(options.highContrastTheme, options.highContrastCodeScheme)
+            dark -> Pair(options.darkTheme, options.darkCodeScheme)
+            else -> Pair(options.lightTheme, options.lightCodeScheme)
         }
     }
 
     private fun updateLaf(targetLaf: LookAndFeelInfo) {
+        scheduleRequest {
+            QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, false)
+        }
+    }
+
+    private fun updateEditorScheme(colorsScheme: EditorColorsScheme) {
+        scheduleRequest {
+            EditorColorsManager.getInstance().globalScheme = colorsScheme
+        }
+    }
+
+    private fun resetRequests() {
         alarm.cancelAllRequests()
-        alarm.addRequest(
-            {
-                QuickChangeLookAndFeel.switchLafAndUpdateUI(
-                    LafManager.getInstance(),
-                    targetLaf,
-                    false
-                )
-            },
-            Registry.get("ide.instant.theme.switch.delay").asInteger()
-        )
+    }
+
+    private fun scheduleRequest(runnable: () -> Unit) {
+        alarm.addRequest(runnable, Registry.get("ide.instant.theme.switch.delay").asInteger())
     }
 
     override fun dispose() {
-        stop(false)
-        setNull()
-    }
-
-    private fun setNull() {
-        monitorValue = null
+        stop()
     }
 
     fun uninstall() {
-        stop(false)
-        monitorValue?.uninstall()
-        setNull()
+        stop()
+        if (monitor.isInitialized()) monitor.value.uninstall()
     }
 
     fun install() {
-        monitor.install()
+        monitor.value.install()
         start()
     }
 

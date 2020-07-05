@@ -7,6 +7,9 @@ import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.RoamingType
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.colors.EditorColorsScheme
+import com.intellij.openapi.options.Scheme.EDITABLE_COPY_PREFIX
 import javax.swing.UIManager
 
 @State(name = "AutoDarkMode", storages = [Storage("auto-dark-mode.xml", roamingType = RoamingType.PER_OS)])
@@ -22,6 +25,15 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     var highContrastTheme: UIManager.LookAndFeelInfo = DEFAULT_HIGH_CONTRAST_THEME
 
     @Volatile
+    var lightCodeScheme: EditorColorsScheme = DEFAULT_LIGHT_SCHEME
+
+    @Volatile
+    var darkCodeScheme: EditorColorsScheme = DEFAULT_DARK_SCHEME
+
+    @Volatile
+    var highContrastCodeScheme: EditorColorsScheme = DEFAULT_HIGH_CONTRAST_SCHEME
+
+    @Volatile
     var checkHighContrast: Boolean = DEFAULT_CHECK_HIGH_CONTRAST
 
     override fun getState(): State? {
@@ -29,7 +41,8 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
             darkTheme.name, darkTheme.className,
             lightTheme.name, lightTheme.className,
             highContrastTheme.name, highContrastTheme.className,
-            checkHighContrast
+            lightCodeScheme.name, darkCodeScheme.name,
+            highContrastCodeScheme.name, checkHighContrast
         )
     }
 
@@ -44,6 +57,18 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
         highContrastTheme = lafManager.installedLookAndFeels
             .first { it.name == state.highContrastName && it.className == state.highContrastNameClassName }
             ?: DEFAULT_HIGH_CONTRAST_THEME
+
+        val schemes = EditorColorsManager.getInstance().allSchemes
+        lightCodeScheme = schemes
+            .first { it.name == state.lightSchemeName }
+            ?: DEFAULT_LIGHT_SCHEME
+        darkCodeScheme = schemes
+            .first { it.name == state.darkSchemeName }
+            ?: DEFAULT_DARK_SCHEME
+        highContrastCodeScheme = schemes
+            .first { it.name == state.highContrastSchemeName }
+            ?: DEFAULT_HIGH_CONTRAST_SCHEME
+
         checkHighContrast = state.checkHighContrast ?: DEFAULT_CHECK_HIGH_CONTRAST
     }
 
@@ -54,15 +79,32 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
         var lightClassName: String? = DEFAULT_LIGHT_THEME.className,
         var highContrastName: String? = DEFAULT_HIGH_CONTRAST_THEME.name,
         var highContrastNameClassName: String? = DEFAULT_HIGH_CONTRAST_THEME.className,
+        var lightSchemeName: String? = DEFAULT_LIGHT_SCHEME.name,
+        var darkSchemeName: String? = DEFAULT_DARK_SCHEME.name,
+        var highContrastSchemeName: String? = DEFAULT_HIGH_CONTRAST_SCHEME.name,
         var checkHighContrast: Boolean? = DEFAULT_CHECK_HIGH_CONTRAST
     )
 
     companion object {
-        val DEFAULT_DARK_THEME: UIManager.LookAndFeelInfo = DarculaLookAndFeelInfo()
-        val DEFAULT_LIGHT_THEME: UIManager.LookAndFeelInfo = IntelliJLookAndFeelInfo()
-        val DEFAULT_HIGH_CONTRAST_THEME: UIManager.LookAndFeelInfo = LafManager.getInstance()
-            .installedLookAndFeels.find { it.name.toLowerCase() == "high contrast" }
-            ?: IntelliJLookAndFeelInfo()
+        val DEFAULT_DARK_THEME: UIManager.LookAndFeelInfo =
+            DarculaLookAndFeelInfo()
+        val DEFAULT_LIGHT_THEME: UIManager.LookAndFeelInfo =
+            IntelliJLookAndFeelInfo()
+        val DEFAULT_HIGH_CONTRAST_THEME: UIManager.LookAndFeelInfo =
+            LafManager.getInstance()
+                .installedLookAndFeels.find { it.name.toLowerCase() == "high contrast" }
+                ?: IntelliJLookAndFeelInfo()
+        val DEFAULT_LIGHT_SCHEME: EditorColorsScheme =
+            EditorColorsManager.getInstance()
+                .let { it.getScheme("${EDITABLE_COPY_PREFIX}IntelliJ Light") ?: it.globalScheme }
+        val DEFAULT_DARK_SCHEME: EditorColorsScheme =
+            EditorColorsManager.getInstance()
+                .let { it.getScheme("${EDITABLE_COPY_PREFIX}Darcula") ?: it.globalScheme }
+
+        // Note: The small c in contrast is the cyrillic letter `с`.
+        val DEFAULT_HIGH_CONTRAST_SCHEME: EditorColorsScheme =
+            EditorColorsManager.getInstance()
+                .let { it.getScheme("${EDITABLE_COPY_PREFIX}High сontrast") ?: it.globalScheme }
         const val DEFAULT_CHECK_HIGH_CONTRAST = true
     }
 }

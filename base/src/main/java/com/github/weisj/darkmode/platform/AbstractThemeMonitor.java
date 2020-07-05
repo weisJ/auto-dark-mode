@@ -24,11 +24,15 @@ public class AbstractThemeMonitor implements ThemeMonitor {
     }
 
     private void onNotification() {
+        onNotification(false);
+    }
+
+    private void onNotification(final boolean forceChange) {
         boolean newDark = monitorService.isDarkThemeEnabled();
         boolean newHighContrast = monitorService.isHighContrastEnabled();
         boolean hasChanged = highContrast != newHighContrast
                              || (!newHighContrast && dark != newDark);
-        if (hasChanged) {
+        if (hasChanged || forceChange) {
             dark = newDark;
             highContrast = newHighContrast;
             onThemeChange.themeChanged(dark, highContrast);
@@ -36,7 +40,7 @@ public class AbstractThemeMonitor implements ThemeMonitor {
     }
 
     public void requestUpdate() {
-        onThemeChange.themeChanged(dark, highContrast);
+        onNotification(true);
     }
 
     protected void start() {
