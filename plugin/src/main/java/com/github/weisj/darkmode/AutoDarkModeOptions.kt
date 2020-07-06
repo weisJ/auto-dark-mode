@@ -101,10 +101,13 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
             EditorColorsManager.getInstance()
                 .let { it.getScheme("${EDITABLE_COPY_PREFIX}Darcula") ?: it.globalScheme }
 
-        // Note: The small c in contrast is the cyrillic letter `с`.
         val DEFAULT_HIGH_CONTRAST_SCHEME: EditorColorsScheme =
-            EditorColorsManager.getInstance()
-                .let { it.getScheme("${EDITABLE_COPY_PREFIX}High сontrast") ?: it.globalScheme }
+            EditorColorsManager.getInstance().let {
+                it.getScheme("${EDITABLE_COPY_PREFIX}High contrast")
+                // Note: The small c in contrast is the cyrillic letter `с`.
+                    ?: it.getScheme("${EDITABLE_COPY_PREFIX}High сontrast")
+                    ?: it.globalScheme
+            }
         const val DEFAULT_CHECK_HIGH_CONTRAST = true
     }
 }
