@@ -14,7 +14,7 @@ tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     changeNotes(
         """
         <ul>
-            <li>Reliable dark mode detection on Catalina.</li>
+            <li>Added option to choose editor independent from IDE theme.</li>
         </ul>
         """
     )
