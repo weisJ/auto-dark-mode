@@ -6,7 +6,6 @@ import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
-import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
 import com.intellij.ui.layout.InnerCell
@@ -24,9 +23,7 @@ class DarkModeConfigurable(private val lafManager: LafManager) : BoundConfigurab
         val lafRenderer = SimpleListCellRenderer.create("") { obj: UIManager.LookAndFeelInfo -> obj.name }
 
         val schemes = EditorColorsManager.getInstance().allSchemes.asList()
-        val schemeRenderer = SimpleListCellRenderer.create("") { obj: EditorColorsScheme ->
-            StringUtil.trimStart(obj.name, AutoDarkModeOptions.EDITABLE_COPY_PREFIX)
-        }
+        val schemeRenderer = SimpleListCellRenderer.create("") { obj: EditorColorsScheme -> obj.displayName }
 
         fun Row.themeMode(
             label: String,

@@ -10,6 +10,7 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.colors.EditorColorsScheme.DEFAULT_SCHEME_NAME
+import com.intellij.openapi.options.Scheme.EDITABLE_COPY_PREFIX
 import javax.swing.UIManager
 
 @State(name = "AutoDarkMode", storages = [Storage("auto-dark-mode.xml", roamingType = RoamingType.PER_OS)])
@@ -86,7 +87,6 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     )
 
     companion object {
-        const val EDITABLE_COPY_PREFIX = "_@user_"
 
         private fun searchScheme(vararg names: String): EditorColorsScheme = EditorColorsManager.getInstance().run {
             names.mapNotNull { name ->
