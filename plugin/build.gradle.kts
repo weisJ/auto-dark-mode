@@ -8,7 +8,6 @@ plugins {
 
 intellij {
     version = "2019.3"
-    updateSinceUntilBuild = false
 }
 
 tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
@@ -20,7 +19,7 @@ tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
         """
     )
     sinceBuild("193")
-    untilBuild("201.*")
+    untilBuild("193.*")
 }
 
 dependencies {

@@ -15,7 +15,6 @@
         Jannis Weis
     </vendor>
 
-    <idea-version since-build="2019.3" until-build="2020.1"/>
     <depends>com.intellij.modules.platform</depends>
 
     <applicationListeners>
