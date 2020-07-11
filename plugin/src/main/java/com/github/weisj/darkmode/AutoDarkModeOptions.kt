@@ -9,7 +9,7 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
-import com.intellij.openapi.options.Scheme.EDITABLE_COPY_PREFIX
+import com.intellij.openapi.editor.colors.EditorColorsScheme.DEFAULT_SCHEME_NAME
 import javax.swing.UIManager
 
 @State(name = "AutoDarkMode", storages = [Storage("auto-dark-mode.xml", roamingType = RoamingType.PER_OS)])
@@ -86,28 +86,26 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     )
 
     companion object {
-        val DEFAULT_DARK_THEME: UIManager.LookAndFeelInfo =
-            DarculaLookAndFeelInfo()
-        val DEFAULT_LIGHT_THEME: UIManager.LookAndFeelInfo =
-            IntelliJLookAndFeelInfo()
-        val DEFAULT_HIGH_CONTRAST_THEME: UIManager.LookAndFeelInfo =
-            LafManager.getInstance()
-                .installedLookAndFeels.find { it.name.toLowerCase() == "high contrast" }
-                ?: IntelliJLookAndFeelInfo()
-        val DEFAULT_LIGHT_SCHEME: EditorColorsScheme =
-            EditorColorsManager.getInstance()
-                .let { it.getScheme("${EDITABLE_COPY_PREFIX}IntelliJ Light") ?: it.globalScheme }
-        val DEFAULT_DARK_SCHEME: EditorColorsScheme =
-            EditorColorsManager.getInstance()
-                .let { it.getScheme("${EDITABLE_COPY_PREFIX}Darcula") ?: it.globalScheme }
+        const val EDITABLE_COPY_PREFIX = "_@user_"
 
-        val DEFAULT_HIGH_CONTRAST_SCHEME: EditorColorsScheme =
-            EditorColorsManager.getInstance().let {
-                it.getScheme("${EDITABLE_COPY_PREFIX}High contrast")
-                // Note: The small c in contrast is the cyrillic letter `с`.
-                    ?: it.getScheme("${EDITABLE_COPY_PREFIX}High сontrast")
-                    ?: it.globalScheme
-            }
+        private fun searchScheme(vararg names: String): EditorColorsScheme = EditorColorsManager.getInstance().run {
+            names.mapNotNull { name ->
+                allSchemes.find { it.name == name } ?: allSchemes.find { it.name == "${EDITABLE_COPY_PREFIX}${name}" }
+            }.firstOrNull() ?: globalScheme
+        }
+
+        val DEFAULT_DARK_THEME: UIManager.LookAndFeelInfo = DarculaLookAndFeelInfo()
+        val DEFAULT_LIGHT_THEME: UIManager.LookAndFeelInfo = IntelliJLookAndFeelInfo()
+        val DEFAULT_HIGH_CONTRAST_THEME: UIManager.LookAndFeelInfo = LafManager.getInstance()
+            .installedLookAndFeels.find { it.name.toLowerCase() == "high contrast" }
+            ?: IntelliJLookAndFeelInfo()
+
+        val DEFAULT_LIGHT_SCHEME: EditorColorsScheme = searchScheme("IntelliJ Light", DEFAULT_SCHEME_NAME)
+        val DEFAULT_DARK_SCHEME: EditorColorsScheme = searchScheme("Darcula")
+
+        // Note: The small c in the second contrast is the cyrillic letter `с`.
+        val DEFAULT_HIGH_CONTRAST_SCHEME: EditorColorsScheme = searchScheme("High contrast", "High сontrast")
+
         const val DEFAULT_CHECK_HIGH_CONTRAST = true
     }
 }

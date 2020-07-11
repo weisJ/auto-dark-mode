@@ -78,7 +78,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     private fun scheduleRequest(runnable: () -> Unit) {
-        alarm.addRequest(runnable, Registry.get("ide.instant.theme.switch.delay").asInteger())
+        alarm.addRequest(runnable, Registry.intValue("ide.instant.theme.switch.delay", 0))
     }
 
     override fun dispose() {

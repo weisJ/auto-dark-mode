@@ -7,17 +7,20 @@ plugins {
 }
 
 intellij {
-    version = "2020.1"
+    version = "2019.3"
+    updateSinceUntilBuild = false
 }
 
 tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
     changeNotes(
         """
         <ul>
-            <li>Added option to choose editor independent from IDE theme.</li>
+            <li>Added option to choose editor theme independent from IDE theme.</li>
         </ul>
         """
     )
+    sinceBuild("193")
+    untilBuild("201.*")
 }
 
 dependencies {
