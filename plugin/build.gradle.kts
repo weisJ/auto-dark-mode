@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":auto-dark-mode-base"))
     implementation(project(":auto-dark-mode-windows"))
     implementation(project(":auto-dark-mode-macos"))
+    implementation(project(":auto-dark-mode-linux"))
 }
 
 tasks.buildPlugin {

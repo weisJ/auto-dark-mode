@@ -18,7 +18,8 @@ include(
     "plugin",
     "base",
     "windows",
-    "macos"
+    "macos",
+    "linux"
 )
 
 rootProject.name = "auto-dark-mode"

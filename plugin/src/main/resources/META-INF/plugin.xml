@@ -34,6 +34,9 @@
         <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorService"
                             serviceImplementation="com.github.weisj.darkmode.platform.macos.MacOSThemeMonitorService"
                             os="mac"/>
+        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorService"
+                            serviceImplementation="com.github.weisj.darkmode.platform.linux.LinuxThemeMonitorService"
+                            os="linux"/>
         <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkMode"/>
         <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"/>
         <applicationConfigurable instance="com.github.weisj.darkmode.DarkModeConfigurable"
