@@ -24,7 +24,6 @@
 #include "com_github_weisj_darkmode_platform_linux_gnome_GnomeNative.h"
 
 #include <string>
-#include <thread>
 #include <glibmm-2.4/glibmm.h>
 #include <giomm-2.4/giomm.h>
 
@@ -40,9 +39,8 @@ struct EventHandler {
   JavaVM *jvm;
   JNIEnv *env;
   jobject callback;
-  Glib::RefPtr<Glib::MainLoop> mainLoop;
   Glib::RefPtr<Gio::Settings> settings;
-  std::thread notificationLoop;
+  sigc::connection settingsChangedSignalConnection;
 
   void settingChanged(const Glib::ustring &name) {
     runCallBack();
@@ -70,23 +68,17 @@ struct EventHandler {
       jvm->DetachCurrentThread();
   }
 
-  void run() {
-    mainLoop->run();
-  }
-
   void stop() {
-    mainLoop->quit();
-    notificationLoop.join();
+    settingsChangedSignalConnection.disconnect();
   }
 
   EventHandler(JavaVM *jvm_, jobject callback_) {
     jvm = jvm_;
     callback = callback_;
     Gio::init();
-    mainLoop = Glib::MainLoop::create(false);
     settings = Gio::Settings::create("org.gnome.desktop.interface");
-    settings->signal_changed(themeSettingName).connect(sigc::mem_fun(this, &EventHandler::settingChanged));
-    notificationLoop = std::thread(&EventHandler::run, this);
+    settingsChangedSignalConnection =
+        settings->signal_changed(themeSettingName).connect(sigc::mem_fun(this, &EventHandler::settingChanged));
   }
 };
 
