@@ -25,7 +25,7 @@ library {
             compileTasks.configureEach {
                 compilerArgs.addAll(toolChain.map {
                     when (it) {
-                        //These parameters (excluding --std=c++11) were obtained with `pkg-config --cflags glibmm-2.4 giomm-2.4 sigc++-2.0`.
+                        // These parameters (excluding --std=c++11) were obtained with `pkg-config --cflags glibmm-2.4 giomm-2.4 sigc++-2.0`.
                         is Gcc, is Clang -> listOf(
                             "--std=c++11",
                             "-pthread",
@@ -55,7 +55,7 @@ library {
             linkTask.configure {
                 linkerArgs.addAll(toolChain.map {
                     when (it) {
-                        //These parameters were obtained with `pkg-config --libs glibmm-2.4 giomm-2.4 sigc++-2.0`.
+                        // These parameters were obtained with `pkg-config --libs glibmm-2.4 giomm-2.4 sigc++-2.0`.
                         is Gcc, is Clang -> listOf(
                             "-lgiomm-2.4",
                             "-lgio-2.0",
