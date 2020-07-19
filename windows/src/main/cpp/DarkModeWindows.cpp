@@ -91,12 +91,12 @@ bool RegisterRegistryEvent(const LPCSTR subKey, HANDLE event) {
 
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_windows_WindowsNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
-    return (jboolean) IsDarkMode();
+    return static_cast<jboolean>(IsDarkMode());
 }
 
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_windows_WindowsNative_isHighContrastEnabled(JNIEnv *env, jclass obj) {
-    return (jboolean) IsHighContrastMode();
+    return static_cast<jboolean>(IsHighContrastMode());
 }
 
 struct EventHandler {
@@ -164,7 +164,7 @@ Java_com_github_weisj_darkmode_platform_windows_WindowsNative_createEventHandler
         EventHandler* eventHandler = new EventHandler(jvm, callbackRef, event);
         return reinterpret_cast<jlong>(eventHandler);
     }
-    return (jlong) 0;
+    return static_cast<jlong>(0);
 }
 
 JNIEXPORT void JNICALL
