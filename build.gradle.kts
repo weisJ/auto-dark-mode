@@ -1,20 +1,17 @@
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
 import com.github.vlsi.gradle.properties.dsl.props
-import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
-import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.PublishTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.gradle-extensions")
-    id("org.jetbrains.intellij")
+    kotlin("jvm") apply false
 }
 
 val skipJavadoc by props()
 val enableMavenLocal by props()
 val enableGradleMetadata by props()
-val intellijPublishToken: String by props("")
 
 val String.v: String get() = rootProject.extra["$this.version"] as String
 
@@ -31,7 +28,6 @@ allprojects {
         mavenCentral()
     }
 
-    val isPublished by props()
     val githubAccessToken by props("")
 
     plugins.withType<UsePrebuiltBinariesWhenUnbuildablePlugin>() {
@@ -48,16 +44,6 @@ allprojects {
         }
     }
 
-    listOf(BuildSearchableOptionsTask::class, PrepareSandboxTask::class)
-        .forEach { tasks.withType(it).configureEach { enabled = isPublished } }
-
-    tasks.withType<PublishTask> {
-        token(intellijPublishToken)
-        if (buildVersion.contains("pre")) {
-            channels("pre-release")
-        }
-    }
-
     tasks.withType<AbstractArchiveTask>().configureEach {
         // Ensure builds are reproducible
         isPreserveFileTimestamps = false
@@ -67,24 +53,21 @@ allprojects {
     }
 
     plugins.withType<JavaLibraryPlugin> {
-
         dependencies {
-            // cpp-library is not compatible with java-library
-            // they both use api and implementation configurations
-            val bom = platform(project(":auto-dark-mode-dependencies-bom"))
-            if (!plugins.hasPlugin("cpp-library")) {
-                "api"(bom)
-            } else {
-                // cpp-library does not know these configurations, so they are for Java
-                "compileOnly"(bom)
-                "runtimeOnly"(bom)
-            }
+            "api"(platform(project(":auto-dark-mode-dependencies-bom")))
         }
     }
 
     if (!enableGradleMetadata) {
         tasks.withType<GenerateModuleMetadata> {
             enabled = false
+        }
+    }
+
+    tasks.withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = listOf("-Xjvm-default=compatibility")
         }
     }
 

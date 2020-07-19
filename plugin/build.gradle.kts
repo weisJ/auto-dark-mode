@@ -1,10 +1,17 @@
+import com.github.vlsi.gradle.properties.dsl.props
+import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.intellij.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.tasks.PublishTask
 
 plugins {
     id("org.jetbrains.intellij")
+    id("com.github.vlsi.gradle-extensions")
     kotlin("jvm")
 }
+
+val isPublished by props()
+val intellijPublishToken: String by props("")
 
 intellij {
     version = "2020.1"
@@ -28,8 +35,11 @@ dependencies {
     implementation(project(":auto-dark-mode-macos"))
 }
 
-tasks.buildPlugin {
-    dependsOn(project.rootProject.tasks.jar)
+tasks.withType<PublishTask> {
+    token(intellijPublishToken)
+    if (version.toString().contains("pre")) {
+        channels("pre-release")
+    }
 }
 
 tasks.buildPlugin {
@@ -38,11 +48,5 @@ tasks.buildPlugin {
     }
 }
 
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    jvmTarget = "1.8"
-}
-val compileTestKotlin: KotlinCompile by tasks
-compileTestKotlin.kotlinOptions {
-    jvmTarget = "1.8"
-}
+listOf(BuildSearchableOptionsTask::class, PrepareSandboxTask::class)
+    .forEach { tasks.withType(it).configureEach { enabled = isPublished } }
