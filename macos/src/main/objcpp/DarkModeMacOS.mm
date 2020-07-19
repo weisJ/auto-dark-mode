@@ -140,7 +140,7 @@ JNIEXPORT jlong JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_createPreferenceChangeListener(JNIEnv *env, jclass obj, jobject callback) {
 JNF_COCOA_DURING(env); // We dont want an auto release pool.
     JavaVM *jvm;
-    if (env->GetJavaVM(&jvm) == 0) {
+    if (env->GetJavaVM(&jvm) == JNI_OK) {
         jobject callbackRef = env->NewGlobalRef(callback);
         PreferenceChangeListener *listener = [[PreferenceChangeListener alloc] initWithJVM:jvm andCallBack: callbackRef];
         [listener retain];
