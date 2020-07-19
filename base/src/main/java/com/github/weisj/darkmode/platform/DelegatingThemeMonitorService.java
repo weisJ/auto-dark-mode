@@ -22,33 +22,47 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.linux;
+package com.github.weisj.darkmode.platform;
 
-import com.github.weisj.darkmode.platform.ThemeMonitorService;
+public class DelegatingThemeMonitorService implements ThemeMonitorService {
+    private final ThemeMonitorService delegate;
 
-public class NullThemeMonitorService implements ThemeMonitorService {
+    public DelegatingThemeMonitorService(ThemeMonitorService delegate) {
+        this.delegate = delegate;
+    }
+
     @Override
     public boolean isDarkThemeEnabled() {
-        return false;
+        return delegate.isDarkThemeEnabled();
     }
 
     @Override
     public boolean isHighContrastEnabled() {
-        return false;
+        return delegate.isHighContrastEnabled();
     }
 
     @Override
     public long createEventHandler(Runnable callback) {
-        return 0;
+        return delegate.createEventHandler(callback);
     }
 
     @Override
     public void deleteEventHandler(long eventHandle) {
-
+        delegate.deleteEventHandler(eventHandle);
     }
 
     @Override
     public boolean isActive() {
-        return false;
+        return delegate.isActive();
+    }
+
+    @Override
+    public void uninstall() {
+        delegate.uninstall();
+    }
+
+    @Override
+    public void install() {
+        delegate.install();
     }
 }

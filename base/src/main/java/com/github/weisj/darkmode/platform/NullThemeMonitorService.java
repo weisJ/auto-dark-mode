@@ -22,48 +22,38 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.linux;
+package com.github.weisj.darkmode.platform;
 
-import com.github.weisj.darkmode.platform.LibraryUtil;
-import com.github.weisj.darkmode.platform.ThemeMonitorService;
-import com.github.weisj.darkmode.platform.linux.gnome.GnomeThemeMonitorService;
-
-public class LinuxEnvironmentDelegateHelper {
-    private static final ThemeMonitorService delegate;
-
-    static {
-        if (LibraryUtil.isGnome) {
-            delegate = new GnomeThemeMonitorService();
-        } else {
-            delegate = new NullThemeMonitorService();
-        }
+/**
+ * This class is a no-op {@link ThemeMonitorService}. This class
+ * is used when a ThemeMonitorService needs to be created for a given environment but no
+ * ThemeMonitorService has been created to suit that environment yet.
+ * <p>
+ * By returning {@code false} from {@link #isActive()}, this class signals to {@link AbstractThemeMonitor} that
+ * delegation failed and no suitable
+ * ThemeMonitorService could be found for the current environment.
+ */
+public class NullThemeMonitorService implements ThemeMonitorService {
+    @Override
+    public boolean isDarkThemeEnabled() {
+        return false;
     }
 
-    static boolean isDarkThemeEnabled() {
-        return delegate.isDarkThemeEnabled();
+    @Override
+    public boolean isHighContrastEnabled() {
+        return false;
     }
 
-    static boolean isHighContrastEnabled() {
-        return delegate.isHighContrastEnabled();
+    @Override
+    public long createEventHandler(Runnable callback) {
+        return 0;
     }
 
-    static long createEventHandler(final Runnable callback) {
-        return delegate.createEventHandler(callback);
-    }
+    @Override
+    public void deleteEventHandler(long eventHandle) {}
 
-    static void deleteEventHandler(final long eventHandle) {
-        delegate.deleteEventHandler(eventHandle);
-    }
-
-    static boolean isActive() {
-        return delegate.isActive();
-    }
-
-    static void uninstall() {
-        delegate.uninstall();
-    }
-
-    static void install() {
-        delegate.install();
+    @Override
+    public boolean isActive() {
+        return false;
     }
 }
