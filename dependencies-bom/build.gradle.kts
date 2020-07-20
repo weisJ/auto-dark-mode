@@ -31,5 +31,7 @@ dependencies {
         // dependency on it during compilation.
         apiv("com.github.weisj:darklaf-native-utils", "darklaf")
         apiv("com.jetbrains.intellij.platform:util", "idea")
+        apiv("com.google.auto.service:auto-service-annotations", "auto-service")
+        apiv("com.google.auto.service:auto-service", "auto-service")
     }
 }

@@ -17,8 +17,7 @@ import javax.swing.UIManager.LookAndFeelInfo
  */
 class AutoDarkMode : Disposable, ThemeCallback {
     private val alarm = Alarm()
-    private val options: AutoDarkModeOptions = ServiceManager.getService(AutoDarkModeOptions::class.java)
-    private val monitor: Lazy<ThemeMonitor> = lazy { createMonitor() }
+    private val monitor = lazy { createMonitor() }
 
     private fun createMonitor(): ThemeMonitor {
         return try {
@@ -54,10 +53,14 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     private fun getTargetLaf(dark: Boolean, highContrast: Boolean): Pair<LookAndFeelInfo, EditorColorsScheme> {
-        return when {
-            highContrast && options.checkHighContrast -> Pair(options.highContrastTheme, options.highContrastCodeScheme)
-            dark -> Pair(options.darkTheme, options.darkCodeScheme)
-            else -> Pair(options.lightTheme, options.lightCodeScheme)
+        return GeneralThemeSettings.run {
+            when {
+                highContrast && checkHighContrast -> {
+                    Pair(highContrastTheme, highContrastCodeScheme)
+                }
+                dark -> Pair(darkTheme, darkCodeScheme)
+                else -> Pair(lightTheme, lightCodeScheme)
+            }
         }
     }
 
@@ -95,5 +98,6 @@ class AutoDarkMode : Disposable, ThemeCallback {
 
     companion object {
         private val LOGGER = Logger.getInstance(AutoDarkMode::class.java)
+        private val OPTIONS = ServiceManager.getService(AutoDarkModeOptions::class.java)
     }
 }

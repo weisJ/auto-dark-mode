@@ -8,6 +8,7 @@ plugins {
     id("org.jetbrains.intellij")
     id("com.github.vlsi.gradle-extensions")
     kotlin("jvm")
+    kotlin("kapt")
 }
 
 val String.v: String get() = rootProject.extra["$this.version"] as String
@@ -35,6 +36,9 @@ dependencies {
     implementation(project(":auto-dark-mode-windows"))
     implementation(project(":auto-dark-mode-macos"))
     implementation(project(":auto-dark-mode-linux"))
+
+    compileOnly("com.google.auto.service:auto-service")
+    kapt("com.google.auto.service:auto-service:1.0-rc5")
 }
 
 tasks.withType<PublishTask> {
