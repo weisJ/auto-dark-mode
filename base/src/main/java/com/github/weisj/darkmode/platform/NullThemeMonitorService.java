@@ -29,7 +29,7 @@ package com.github.weisj.darkmode.platform;
  * is used when a ThemeMonitorService needs to be created for a given environment but no
  * ThemeMonitorService has been created to suit that environment yet.
  * <p>
- * By returning {@code false} from {@link #isActive()}, this class signals to {@link AbstractThemeMonitor} that
+ * By returning {@code false} from {@link #isSupported()}, this class signals to {@link AbstractThemeMonitor} that
  * delegation failed and no suitable
  * ThemeMonitorService could be found for the current environment.
  */
@@ -53,7 +53,7 @@ public class NullThemeMonitorService implements ThemeMonitorService {
     public void deleteEventHandler(long eventHandle) {}
 
     @Override
-    public boolean isActive() {
+    public boolean isSupported() {
         return false;
     }
 }

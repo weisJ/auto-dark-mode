@@ -49,7 +49,7 @@ public class WindowsThemeMonitorService implements ThemeMonitorService {
     }
 
     @Override
-    public boolean isActive() {
+    public boolean isSupported() {
         return WindowsLibrary.get().isLoaded();
     }
 }

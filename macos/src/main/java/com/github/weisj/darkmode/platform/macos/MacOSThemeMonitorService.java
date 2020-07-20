@@ -50,7 +50,7 @@ public class MacOSThemeMonitorService implements ThemeMonitorService {
     }
 
     @Override
-    public boolean isActive() {
+    public boolean isSupported() {
         return MacOSLibrary.get().isLoaded();
     }
 

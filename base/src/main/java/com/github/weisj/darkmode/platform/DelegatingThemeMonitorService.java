@@ -52,8 +52,8 @@ public class DelegatingThemeMonitorService implements ThemeMonitorService {
     }
 
     @Override
-    public boolean isActive() {
-        return delegate.isActive();
+    public boolean isSupported() {
+        return delegate.isSupported();
     }
 
     @Override

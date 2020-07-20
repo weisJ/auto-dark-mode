@@ -42,7 +42,7 @@ public class AbstractThemeMonitor implements ThemeMonitor {
     public AbstractThemeMonitor(final ThemeMonitorService monitorService, final ThemeCallback callback) {
         this.monitorService = monitorService;
         this.onThemeChange = callback;
-        if (monitorService == null || !monitorService.isActive()) {
+        if (monitorService == null || !monitorService.isSupported()) {
             throw new IllegalStateException("Could not load library.");
         }
     }

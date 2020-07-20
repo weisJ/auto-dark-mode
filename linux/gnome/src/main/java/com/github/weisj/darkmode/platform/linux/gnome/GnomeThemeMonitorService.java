@@ -54,7 +54,7 @@ public class GnomeThemeMonitorService implements ThemeMonitorService {
     }
 
     @Override
-    public boolean isActive() {
+    public boolean isSupported() {
         return GnomeLibrary.get().isLoaded();
     }
 
