@@ -37,6 +37,11 @@ artifacts built by a [custom GitHub Actions workflow](.github/workflows/libs.yml
 in the given environment. [A custom Gradle plugin](buildSrc/src/main/groovy/UsePrebuiltBinariesWhenUnbuildablePlugin.groovy) 
 downloads these artifacts during the build if necessary.
 
+##### This step requires a GitHub access token
+For Gradle to be able to retrieve the pre-built artifacts, you need to provide a [personal access token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) using the `githubAccessToken` property in [`gradle.properties`](gradle.properties) file. The access token only needs to have the permission to read repositories. Be sure to **not** commit your token.
+
+##### Requirements for building
+
 With exception to Linux, this plugin only requires that a standard 
 C++ toolchain be installed when building on Windows (i.e. VisualCpp) 
 and an Objective-C++ toolchain when building on Mac OS (i.e. Gcc or Clang).
