@@ -31,4 +31,6 @@ public class GnomeNative {
     static native long createEventHandler(final Runnable callback);
 
     static native void deleteEventHandler(final long handle);
+
+    static native void init();
 }

@@ -28,19 +28,19 @@
 #include <glibmm-2.4/glibmm.h>
 #include <giomm-2.4/giomm.h>
 
+constexpr auto SETTINGS_SCHEMA_NAME = "org.gnome.desktop.interface";
+constexpr auto THEME_NAME_KEY = "gtk-theme";
+Glib::RefPtr<Gio::Settings> settings;
+
 JNIEXPORT jstring JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_getCurrentTheme(JNIEnv *env, jclass) {
-    Gio::init();
-    Glib::RefPtr<Gio::Settings> settings = Gio::Settings::create("org.gnome.desktop.interface");
-    return env->NewStringUTF(settings->get_string("gtk-theme").c_str());
+    return env->NewStringUTF(settings->get_string(THEME_NAME_KEY).c_str());
 }
 
 struct EventHandler {
-    std::string themeSettingName = "gtk-theme";
     JavaVM *jvm;
     JNIEnv *env;
     jobject callback;
-    Glib::RefPtr<Gio::Settings> settings;
     sigc::connection settingsChangedSignalConnection;
 
     void settingChanged(const Glib::ustring &name) {
@@ -75,9 +75,7 @@ struct EventHandler {
     EventHandler(JavaVM *jvm_, jobject callback_) {
         jvm = jvm_;
         callback = callback_;
-        Gio::init();
-        settings = Gio::Settings::create("org.gnome.desktop.interface");
-        settingsChangedSignalConnection = settings->signal_changed(themeSettingName).connect(
+        settingsChangedSignalConnection = settings->signal_changed(THEME_NAME_KEY).connect(
                 sigc::mem_fun(this, &EventHandler::settingChanged));
     }
 };
@@ -85,7 +83,7 @@ struct EventHandler {
 JNIEXPORT jlong JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_createEventHandler(JNIEnv *env, jclass obj, jobject callback) {
     JavaVM *jvm;
-    if (env->GetJavaVM(&jvm) == 0) {
+    if (env->GetJavaVM(&jvm) == JNI_OK) {
         jobject callbackRef = env->NewGlobalRef(callback);
         EventHandler* eventHandler = new EventHandler(jvm, callbackRef);
         return reinterpret_cast<jlong>(eventHandler);
@@ -102,4 +100,10 @@ Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_deleteEventHandl
         handler->stop();
         delete handler;
     }
+}
+
+JNIEXPORT void JNICALL
+Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_init(JNIEnv *env, jclass obj) {
+    Gio::init();
+    settings = Gio::Settings::create(SETTINGS_SCHEMA_NAME);
 }
