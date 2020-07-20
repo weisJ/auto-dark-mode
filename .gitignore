@@ -37,6 +37,7 @@ target/
 /build/
 /buildSrc/.gradle/
 /*/build/
+/linux/*/build/
 
 # Python
 venv/
