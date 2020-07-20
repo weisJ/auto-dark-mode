@@ -22,30 +22,39 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.macos;
+package com.github.weisj.darkmode.platform;
 
-import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
-import com.github.weisj.darkmode.platform.LibraryUtil;
-import com.github.weisj.darkmode.platform.PluginLogger;
+import com.intellij.openapi.diagnostic.Logger;
 
-public class MacOSLibrary extends AbstractPluginLibrary {
+public class PluginLogger {
 
-    private static final String PROJECT_NAME = "auto-dark-mode-macos";
-    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/macos-x86-64/";
-    private static final String DLL_NAME = "lib" + PROJECT_NAME + ".dylib";
-    private static final MacOSLibrary instance = new MacOSLibrary();
-
-    static MacOSLibrary get() {
-        instance.updateLibrary();
-        return instance;
+    public static PluginLogger getLogger(final Class<?> type) {
+        return new PluginLogger(Logger.getInstance(type));
     }
 
-    protected MacOSLibrary() {
-        super(PATH, DLL_NAME, PluginLogger.getLogger(MacOSLibrary.class));
+    private final Logger logger;
+
+    public PluginLogger(final Logger logger) {
+        this.logger = logger;
     }
 
-    @Override
-    protected boolean canLoad() {
-        return LibraryUtil.isX64 && LibraryUtil.isMacOSMojave;
+    public void info(final String msg) {
+        logger.info(msg);
+    }
+
+    public void warn(final String msg) {
+        logger.warn(msg);
+    }
+
+    public void error(final String msg) {
+        logger.error(msg);
+    }
+
+    public void error(final Throwable e) {
+        logger.error(e);
+    }
+
+    public void error(final String msg, final Throwable e) {
+        logger.error(msg, e);
     }
 }

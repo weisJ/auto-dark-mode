@@ -97,7 +97,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     companion object {
-        private val LOGGER = Logger.getInstance(AutoDarkMode::class.java)
+        private val LOGGER = PluginLogger.getLogger(AutoDarkMode::class.java)
         private val OPTIONS = ServiceManager.getService(AutoDarkModeOptions::class.java)
     }
 }

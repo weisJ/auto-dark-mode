@@ -22,30 +22,31 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.macos;
+package com.github.weisj.darkmode.platform;
 
-import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
-import com.github.weisj.darkmode.platform.LibraryUtil;
-import com.github.weisj.darkmode.platform.PluginLogger;
+import com.github.weisj.darklaf.platform.AbstractLibrary;
 
-public class MacOSLibrary extends AbstractPluginLibrary {
+public abstract class AbstractPluginLibrary extends AbstractLibrary {
 
-    private static final String PROJECT_NAME = "auto-dark-mode-macos";
-    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/macos-x86-64/";
-    private static final String DLL_NAME = "lib" + PROJECT_NAME + ".dylib";
-    private static final MacOSLibrary instance = new MacOSLibrary();
+    protected final PluginLogger logger;
 
-    static MacOSLibrary get() {
-        instance.updateLibrary();
-        return instance;
-    }
-
-    protected MacOSLibrary() {
-        super(PATH, DLL_NAME, PluginLogger.getLogger(MacOSLibrary.class));
+    public AbstractPluginLibrary(final String path, final String libraryName, final PluginLogger logger) {
+        super(path, libraryName, null);
+        this.logger = logger;
     }
 
     @Override
-    protected boolean canLoad() {
-        return LibraryUtil.isX64 && LibraryUtil.isMacOSMojave;
+    protected void info(String message) {
+        logger.info(message);
+    }
+
+    @Override
+    protected void warning(String message) {
+        logger.warn(message);
+    }
+
+    @Override
+    protected void error(String message, Throwable e) {
+        logger.error(message, e);
     }
 }

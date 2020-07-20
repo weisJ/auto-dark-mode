@@ -24,11 +24,9 @@
  */
 package com.github.weisj.darkmode.platform;
 
-import com.intellij.openapi.diagnostic.Logger;
-
 public class AbstractThemeMonitor implements ThemeMonitor {
 
-    private static final Logger LOGGER = Logger.getInstance(AbstractThemeMonitor.class);
+    private static final PluginLogger LOGGER = PluginLogger.getLogger(AbstractThemeMonitor.class);
 
     private ThemeCallback onThemeChange;
     private ThemeMonitorService monitorService;
