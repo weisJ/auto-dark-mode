@@ -76,56 +76,54 @@ public class GtkVariants {
      * - '-darkest'
      *
      * @param  themeName the name of a theme. This could be one of the many variants of your theme (i.e. the dark
-     *                   version
-     *                   or whatever other variants the theme offers)
-     * @return           a map containing three keys: "original" (the provided themeName), "day" (the guessed day
-     *                   variant), and
-     *                   "night" (the guessed night variant)
+     *                   version or whatever other variants the theme offers)
+     * @return           a map containing three keys: {@link Variant#original} (the provided themeName), {@link Variant#day} (the guessed day
+     *                   variant), and {@link Variant#night} (the guessed night variant)
      */
-    public static Map<String, String> guessFrom(String themeName) {
-        Map<String, String> variants = new HashMap<>();
-        variants.put("original", themeName);
+    public static Map<Variant, String> guessFrom(String themeName) {
+        Map<Variant, String> variants = new HashMap<>();
+        variants.put(Variant.original, themeName);
 
         if (themeName.contains("Adapta")) {
-            variants.put("day", themeName.replace("-Nokto", ""));
-            variants.put("night", variants.get("day").replace("Adapta", "Adapta-Nokto"));
+            variants.put(Variant.day, themeName.replace("-Nokto", ""));
+            variants.put(Variant.night, variants.get(Variant.day).replace("Adapta", "Adapta-Nokto"));
         } else if (themeName.contains("Arc")) {
-            variants.put("day", themeName.replaceAll("-Dark(?!er)", ""));
-            variants.put("night", variants.get("day").replaceAll("Arc(-Darker)?", "Arc-Dark"));
+            variants.put(Variant.day, themeName.replaceAll("-Dark(?!er)", ""));
+            variants.put(Variant.night, variants.get(Variant.day).replaceAll("Arc(-Darker)?", "Arc-Dark"));
         } else if (themeName.matches("Cabinet")) {
-            variants.put("day", themeName.replaceAll("-Dark(?!er)", "-Light"));
-            variants.put("night", variants.get("day").replaceAll("(-Light|-Darker)", "-Dark"));
+            variants.put(Variant.day, themeName.replaceAll("-Dark(?!er)", "-Light"));
+            variants.put(Variant.night, variants.get(Variant.day).replaceAll("(-Light|-Darker)", "-Dark"));
         } else if (themeName.matches("^(Canta|ChromeOS|Materia|Orchis).*-compact")) {
-            variants.put("day", themeName.replace("-dark", ""));
-            variants.put("night", variants.get("day").replaceAll("(-light)?-compact", "-dark-compact"));
+            variants.put(Variant.day, themeName.replace("-dark", ""));
+            variants.put(Variant.night, variants.get(Variant.day).replaceAll("(-light)?-compact", "-dark-compact"));
         } else if (themeName.contains("Flat-Remix-GTK")) {
             boolean isSolid = themeName.contains("-Solid");
             boolean withoutBorder = themeName.contains("-NoBorder");
             String basename = String.join("-", getSliceOfArray(themeName.split("-"), 0, 4));
-            variants.put("day",
+            variants.put(Variant.day,
                     basename + (themeName.contains("-Darker") ? "-Darker" : "") + (isSolid ? "-Solid" : ""));
-            variants.put("night",
+            variants.put(Variant.night,
                     basename + (themeName.contains("-Darkest") ? "-Darkest" : "-Dark") + (isSolid ? "-Solid" : "")
                             + (withoutBorder ? "-NoBorder" : ""));
         } else if (themeName.contains("HighContrast")) {
-            variants.put("day", "HighContrast");
-            variants.put("night", "HighContrastInverse");
+            variants.put(Variant.day, "HighContrast");
+            variants.put(Variant.night, "HighContrastInverse");
         } else if (themeName.matches("^(Layan|Macwaita|Matcha|Nextwaita)")) {
             String basename = themeName.split("-")[0];
-            variants.put("day", themeName.replace("-dark", ""));
-            variants.put("night", variants.get("day").replace(basename + "(-light)?", basename + "-dark"));
+            variants.put(Variant.day, themeName.replace("-dark", ""));
+            variants.put(Variant.night, variants.get(Variant.day).replace(basename + "(-light)?", basename + "-dark"));
         } else if (themeName.contains("Mojave")) {
-            variants.put("day", themeName.replace("-dark", "-light"));
-            variants.put("night", variants.get("day").replace("-light", "-dark"));
+            variants.put(Variant.day, themeName.replace("-dark", "-light"));
+            variants.put(Variant.night, variants.get(Variant.day).replace("-light", "-dark"));
         } else if (themeName.contains("Plata")) {
-            variants.put("day", themeName.replace("-Noir", ""));
-            variants.put("night", variants.get("day").replace("Plata(-Lumine)?", "Plata-Noir"));
+            variants.put(Variant.day, themeName.replace("-Noir", ""));
+            variants.put(Variant.night, variants.get(Variant.day).replace("Plata(-Lumine)?", "Plata-Noir"));
         } else if (themeName.matches("^Prof-Gnome-(.+)-3(.*)")) {
-            variants.put("day", themeName.replaceAll("-Dark(?!er)", "-Light"));
-            variants.put("night", variants.get("day").replaceAll("(-Light(-DS)?|-Darker)", "-Dark"));
+            variants.put(Variant.day, themeName.replaceAll("-Dark(?!er)", "-Light"));
+            variants.put(Variant.night, variants.get(Variant.day).replaceAll("(-Light(-DS)?|-Darker)", "-Dark"));
         } else if (themeName.contains("Simply_Circles")) {
-            variants.put("day", themeName.replace("_Dark", "_Light"));
-            variants.put("night", themeName.replace("_Light", "_Dark"));
+            variants.put(Variant.day, themeName.replace("_Dark", "_Light"));
+            variants.put(Variant.night, themeName.replace("_Light", "_Dark"));
         } else if (themeName.contains("Teja")) {
             /*
              * If themeName was Teja_Light, potentialDarkVariant will be ['Teja'].
@@ -134,17 +132,26 @@ public class GtkVariants {
              */
             String[] potentialDarkVariant = themeName.replace("_Light", "").split("_");
             String dark_variant = '_' + (potentialDarkVariant.length > 1 ? potentialDarkVariant[1] : "Dark");
-            variants.put("day", themeName.replaceAll("(_Dark(est)?|_Black)", ""));
-            variants.put("night", variants.get("day").replace("_Light", "") + dark_variant);
+            variants.put(Variant.day, themeName.replaceAll("(_Dark(est)?|_Black)", ""));
+            variants.put(Variant.night, variants.get(Variant.day).replace("_Light", "") + dark_variant);
         } else if (themeName.contains("vimix")) {
-            variants.put("day", themeName.replace("-dark", ""));
-            variants.put("night", variants.get("day").replaceAll("vimix(-light)?", "vimix-dark"));
+            variants.put(Variant.day, themeName.replace("-dark", ""));
+            variants.put(Variant.night, variants.get(Variant.day).replaceAll("vimix(-light)?", "vimix-dark"));
         } else {
-            variants.put("day", themeName.replaceAll("-dark(?!er)(est)?", ""));
-            variants.put("night", variants.get("day").replaceAll("(-light|-darker)", "") + (themeName.contains(
+            variants.put(Variant.day, themeName.replaceAll("-dark(?!er)(est)?", ""));
+            variants.put(Variant.night, variants.get(Variant.day).replaceAll("(-light|-darker)", "") + (themeName.contains(
                     "-darkest") ? "-darkest" : "-dark"));
         }
         return variants;
+    }
+
+    /**
+     * These enum values exist so that the keys of {@link #guessFrom(String)} can be strongly typed.
+     */
+    enum Variant {
+        original,
+        day,
+        night
     }
 
     /**

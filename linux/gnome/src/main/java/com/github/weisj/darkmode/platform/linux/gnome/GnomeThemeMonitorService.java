@@ -32,7 +32,7 @@ public class GnomeThemeMonitorService implements ThemeMonitorService {
     public boolean isDarkThemeEnabled() {
         // TODO: Stop guessing and check the settings when available (like what is mentioned in the GtkVariants class)
         String currentTheme = GnomeNative.getCurrentTheme();
-        return currentTheme.equals(GtkVariants.guessFrom(currentTheme).get("night"));
+        return currentTheme.equals(GtkVariants.guessFrom(currentTheme).get(GtkVariants.Variant.Night));
     }
 
     @Override
