@@ -61,11 +61,6 @@ public class GnomeThemeMonitorService implements ThemeMonitorService {
     }
 
     @Override
-    public void uninstall() {
-
-    }
-
-    @Override
     public void install() {
         GnomeNative.init();
     }
