@@ -34,6 +34,7 @@ dependencies {
     implementation(project(":auto-dark-mode-windows"))
     implementation(project(":auto-dark-mode-macos"))
     implementation(project(":auto-dark-mode-linux"))
+    implementation(project(":auto-dark-mode-linux-gnome"))
 }
 
 tasks.withType<PublishTask> {

@@ -20,7 +20,8 @@ include(
     "base",
     "windows",
     "macos",
-    "linux"
+    "linux",
+    "linux/gnome"
 )
 
 rootProject.name = "auto-dark-mode"
@@ -29,6 +30,6 @@ for (p in rootProject.children) {
     if (p.children.isEmpty()) {
         // Rename leaf projects only
         // E.g. we don't expect to publish examples as a Maven module
-        p.name = rootProject.name + "-" + p.name
+        p.name = rootProject.name + "-" + p.name.replace("/", "-")
     }
 }

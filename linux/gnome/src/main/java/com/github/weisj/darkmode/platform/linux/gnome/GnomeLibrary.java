@@ -29,24 +29,18 @@ import java.util.logging.Logger;
 import com.github.weisj.darklaf.platform.AbstractLibrary;
 import com.github.weisj.darkmode.platform.LibraryUtil;
 
-/*
- * TODO: This class makes the same assumption as the build script, that Gnome is
- * the only desktop environment. The auto-dark-mode-linux module may need to be
- * split into subprojects to accommodate for different .so libraries used
- * for different environments.
- */
-public class LinuxLibrary extends AbstractLibrary {
+public class GnomeLibrary extends AbstractLibrary {
 
-    private static final String PROJECT_NAME = "auto-dark-mode-linux";
+    private static final String PROJECT_NAME = "auto-dark-mode-linux-gnome";
     private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/linux-x86-64/";
     private static final String DLL_NAME = "lib" + PROJECT_NAME + ".so";
-    private static final LinuxLibrary instance = new LinuxLibrary();
+    private static final GnomeLibrary instance = new GnomeLibrary();
 
-    protected LinuxLibrary() {
-        super(PATH, DLL_NAME, Logger.getLogger(LinuxLibrary.class.getName()));
+    protected GnomeLibrary() {
+        super(PATH, DLL_NAME, Logger.getLogger(GnomeLibrary.class.getName()));
     }
 
-    static LinuxLibrary get() {
+    static GnomeLibrary get() {
         instance.updateLibrary();
         return instance;
     }
