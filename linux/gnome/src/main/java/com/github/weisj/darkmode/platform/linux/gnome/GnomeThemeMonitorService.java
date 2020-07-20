@@ -24,8 +24,6 @@
  */
 package com.github.weisj.darkmode.platform.linux.gnome;
 
-import static com.github.weisj.darkmode.platform.linux.gnome.GtkVariants.guessFrom;
-
 import com.github.weisj.darkmode.platform.ThemeMonitorService;
 
 public class GnomeThemeMonitorService implements ThemeMonitorService {
@@ -34,7 +32,7 @@ public class GnomeThemeMonitorService implements ThemeMonitorService {
     public boolean isDarkThemeEnabled() {
         // TODO: Stop guessing and check the settings when available (like what is mentioned in the GtkVariants class)
         String currentTheme = GnomeNative.getCurrentTheme();
-        return currentTheme.equals(guessFrom(currentTheme).get("night"));
+        return currentTheme.equals(GtkVariants.guessFrom(currentTheme).get("night"));
     }
 
     @Override
