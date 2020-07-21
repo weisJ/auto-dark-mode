@@ -1,51 +1,18 @@
 package com.github.weisj.darkmode.platform.settings
 
 import com.intellij.util.castSafelyTo
-import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty0
 
-/**
- * Cast the property to the specified type if applicable for read and write operations.
- */
-inline fun <reified T> KMutableProperty0<Any>.withType(): KMutableProperty0<T>? {
-    return if (get().javaClass.kotlin == T::class) {
-        this.castSafelyTo<KMutableProperty0<T>>()
-    } else {
-        null
-    }
-}
-
-/**
- * Cast the property to the specified type if applicable for read operations.
- */
-inline fun <reified T> KMutableProperty0<Any>.withOutType(): KMutableProperty0<T>? {
-    return if (T::class.java.isAssignableFrom(get().javaClass)) {
-        this.castSafelyTo<KMutableProperty0<T>>()
-    } else {
-        null
-    }
-}
-
-/**
- * Cast the property to the specified type if applicable for write operations.
- */
-inline fun <reified T> KMutableProperty0<Any>.withInType(): KMutableProperty0<T>? {
-    return if (get().javaClass.isAssignableFrom(T::class.java)) {
-        this.castSafelyTo<KMutableProperty0<T>>()
-    } else {
-        null
-    }
-}
-
 interface SettingsContainer : SettingsGroup {
-    val settings: MutableMap<KClass<*>, MutableMap<String, ValueProperty<Any>>>
-    val namedGroups: MutableList<SettingsGroup>
+    val namedGroups: MutableList<NamedSettingsGroup>
     val unnamedGroup: SettingsGroup
 
     @JvmDefault
     fun allProperties(): List<ValueProperty<Any>> {
-        return settings.values.flatMap { it.values }
+        return namedGroups.flatten() + unnamedGroup
     }
+
+    fun isEnabled(): Boolean
 }
 
 /**
@@ -55,40 +22,35 @@ interface SettingsContainer : SettingsGroup {
  * All properties not contained inside a {@SettingsGroup} will automatically belong
  * to the unnamed group of the container.
  */
-open class DefaultSettingsContainer(
-    override val unnamedGroup: SettingsGroup = DefaultSettingsGroup()
+abstract class DefaultSettingsContainer private constructor(
+    override val unnamedGroup: SettingsGroup
 ) : SettingsContainer, SettingsGroup by unnamedGroup {
-    override val settings: MutableMap<KClass<*>, MutableMap<String, ValueProperty<Any>>> = mutableMapOf()
-    override val namedGroups: MutableList<SettingsGroup> = mutableListOf()
 
-    init {
-        unnamedGroup.parent = this
-    }
+    constructor() : this(DefaultSettingsGroup())
+
+    override val namedGroups: MutableList<NamedSettingsGroup> = mutableListOf()
 }
 
-inline fun <reified T> SettingsGroup.add(property: ValueProperty<T>) {
-    val type = T::class
-    val list = parent.settings[type] ?: mutableMapOf()
-    list[property.description] = property.castSafelyTo()!!
-    parent.settings[type] = list
-    properties.add(property.castSafelyTo()!!)
+fun <T> SettingsGroup.add(property: ValueProperty<T>) {
+    this.add(property.castSafelyTo()!!)
 }
 
 /**
  * Provides grouping for {@link ValueProperty}s
  */
-interface SettingsGroup {
+typealias SettingsGroup = MutableList<ValueProperty<Any>>
+
+interface NamedSettingsGroup : SettingsGroup {
     val name: String
-    val properties: MutableList<ValueProperty<Any>>
-    var parent: SettingsContainer
 }
 
-class DefaultSettingsGroup(
-    override val name: String = "",
-    override val properties: MutableList<ValueProperty<Any>> = mutableListOf()
-) : SettingsGroup {
-    override lateinit var parent: SettingsContainer
-}
+open class DefaultSettingsGroup internal constructor(
+    private val properties: MutableList<ValueProperty<Any>> = mutableListOf()
+) : SettingsGroup by properties
+
+class DefaultNamedSettingsGroup internal constructor(
+    override val name: String
+) : DefaultSettingsGroup(), NamedSettingsGroup
 
 /**
  * Wrapper for properties that provides a description and parser/writer used
@@ -96,87 +58,139 @@ class DefaultSettingsGroup(
  */
 interface ValueProperty<T> {
     val description: String
-    var property: KMutableProperty0<T>
-    val parser: (String) -> T
-    val writer: (T) -> String
+    val name: String
+    var value: T
 }
 
-class SimpleValueProperty<T>(
-    override val description: String,
-    override var property: KMutableProperty0<T>,
-    override val parser: (s: String) -> T,
-    override val writer: (T) -> String = { it.toString() }
-) : ValueProperty<T>
+/**
+ * Property with a backing value that has a different type than the exposed value.
+ */
+interface TransformingValueProperty<R, T> : ValueProperty<T> {
+    var backingValue: R
+}
+
+/**
+ * Property that can be stored in String format.
+ */
+interface PersistentValueProperty<T> : TransformingValueProperty<T, String>
+
+fun ValueProperty<Any>.asPersistent() : PersistentValueProperty<Any>? =
+    castSafelyTo<PersistentValueProperty<Any>>()
+
+class SimpleValueProperty<T> internal constructor(
+    descr: String?,
+    private val property: KMutableProperty0<T>
+) : ValueProperty<T> {
+    override val description: String = descr ?: property.name
+    override val name: String = property.name
+    override var value: T
+        get() = property.get()
+        set(v) = property.set(v)
+}
+
+open class SimpleTransformingValueProperty<R, T> internal constructor(
+    private val delegate: ValueProperty<R>,
+    private var transformer: Transformer<R, T>
+) : TransformingValueProperty<R, T> {
+    override val description = delegate.description
+    override val name = delegate.name
+    override var value: T
+        get() = transformer.read(delegate.value)
+        set(v) {
+            delegate.value = transformer.write(v)
+        }
+    override var backingValue: R
+        get() = delegate.value
+        set(v) {
+            delegate.value = v
+        }
+}
+
+class SimplePersistentValueProperty<R>(
+    delegate: ValueProperty<R>,
+    transformer: Transformer<R, String>
+) : SimpleTransformingValueProperty<R, String>(delegate, transformer),
+    PersistentValueProperty<R>
 
 /**
  * Property that has a limited set of values the property can take on.
  */
-class ChoiceProperty<T>(
-    override val description: String,
-    override var property: KMutableProperty0<T>,
-    override val parser: (s: String) -> T,
-    override val writer: (T) -> String = { it.toString() }
-) : ValueProperty<T> {
-    var options: List<T> = ArrayList()
-    var renderer: (T) -> String = { it.toString() }
+abstract class ChoiceProperty<R, T> internal constructor(
+    private val delegateProperty: TransformingValueProperty<R, T>
+) : TransformingValueProperty<R, T> by delegateProperty {
+    var choiceValue: R
+        get() = backingValue
+        set(v) {
+            backingValue = v
+        }
+    var choices: List<R> = ArrayList()
+    var renderer: (R) -> String = { it.toString() }
 }
 
+class TransformingChoiceProperty<R, T> internal constructor(
+    property: TransformingValueProperty<R, T>
+) : ChoiceProperty<R, T>(property) {
+    constructor(property: ValueProperty<R>, transformer: Transformer<R, T>)
+            : this(SimpleTransformingValueProperty(property, transformer))
+}
+
+class PersistentChoiceProperty<R>(
+    property: PersistentValueProperty<R>
+) : ChoiceProperty<R, String>(property),
+    PersistentValueProperty<R> {
+    constructor(property: ValueProperty<R>, transformer: Transformer<R, String>)
+            : this(SimplePersistentValueProperty(property, transformer))
+}
+
+
 fun SettingsContainer.group(name: String, init: SettingsGroup.() -> Unit) {
-    val group = DefaultSettingsGroup(name)
-    group.parent = this
-    parent.namedGroups.add(group)
+    val group = DefaultNamedSettingsGroup(name)
+    namedGroups.add(group)
     group.init()
 }
 
-inline fun <reified T> SettingsGroup.property(
-    description: String,
-    value: KMutableProperty0<T>,
-    noinline parser: (s: String) -> T
-) = add(SimpleValueProperty(description, value, parser))
+fun SettingsContainer.unnamed(init: SettingsGroup.() -> Unit) = this.init()
 
-inline fun <reified T> SettingsGroup.property(
-    description: String,
-    value: KMutableProperty0<T>,
-    noinline parser: (String) -> T,
-    noinline writer: (T) -> String
-) = add(SimpleValueProperty(description, value, parser, writer))
+fun <T> SettingsGroup.property(
+    description: String? = null,
+    value: KMutableProperty0<T>
+) = add(SimpleValueProperty(description, value))
 
-inline fun <reified T> SettingsGroup.choiceProperty(
-    description: String,
-    value: KMutableProperty0<T>,
-    noinline parser: (s: String) -> T,
-    init: ChoiceProperty<T>.() -> Unit
-) = add(ChoiceProperty(description, value, parser).also { it.init() })
+fun <R, T> SettingsGroup.property(
+    description: String? = null,
+    value: KMutableProperty0<R>,
+    transformer: Transformer<R, T>
+) = add(SimpleTransformingValueProperty(SimpleValueProperty(description, value), transformer))
 
-inline fun <reified T> SettingsGroup.choiceProperty(
-    description: String,
-    value: KMutableProperty0<T>,
-    noinline parser: (String) -> T,
-    noinline writer: (T) -> String,
-    init: ChoiceProperty<T>.() -> Unit
-) = add(ChoiceProperty(description, value, parser, writer).also { it.init() })
+fun SettingsGroup.stringProperty(description: String? = null, value: KMutableProperty0<String>) =
+    property(description, value)
 
-inline fun <reified T> SettingsGroup.choiceProperty(
-    value: KMutableProperty0<T>,
-    noinline parser: (String) -> T,
-    noinline writer: (T) -> String,
-    init: ChoiceProperty<T>.() -> Unit
-) = choiceProperty(value.name, value, parser, writer, init)
+fun SettingsGroup.booleanProperty(description: String? = null, value: KMutableProperty0<Boolean>) =
+    property(description, value)
 
-inline fun <reified T> SettingsGroup.property(value: KMutableProperty0<T>, noinline parser: (s: String) -> T) =
-    property(value.name, value, parser)
+fun <R, T> SettingsGroup.choiceProperty(
+    description: String? = null,
+    value: KMutableProperty0<R>,
+    transformer: Transformer<R, T>,
+    init: ChoiceProperty<R, T>.() -> Unit = {}
+) = add(TransformingChoiceProperty(SimpleValueProperty(description, value), transformer).also(init))
 
-inline fun <reified T> SettingsGroup.property(
-    value: KMutableProperty0<T>,
-    noinline parser: (String) -> T,
-    noinline writer: (T) -> String
-) = property(value.name, value, parser, writer)
+fun <R> SettingsGroup.persistentProperty(
+    description: String? = null,
+    value: KMutableProperty0<R>,
+    transformer: Transformer<R, String>
+) = add(SimplePersistentValueProperty(SimpleValueProperty(description, value), transformer))
 
-fun SettingsGroup.stringProperty(description: String, value: KMutableProperty0<String>) =
-    property(description, value) { it }
+fun SettingsGroup.persistentStringProperty(description: String? = null, value: KMutableProperty0<String>) =
+    persistentProperty(description, value, constantTransformer())
 
-fun SettingsGroup.booleanProperty(description: String, value: KMutableProperty0<Boolean>) =
-    property(description, value, String::toBoolean)
+fun SettingsGroup.persistentBooleanProperty(description: String? = null, value: KMutableProperty0<Boolean>) =
+    persistentProperty(description, value, Transformer(String::toBoolean, Boolean::toString))
 
-fun SettingsGroup.booleanProperty(value: KMutableProperty0<Boolean>) =
-    booleanProperty(value.name, value)
+fun <R> SettingsGroup.persistentChoiceProperty(
+    description: String? = null,
+    value: KMutableProperty0<R>,
+    transformer: Transformer<R, String>,
+    init: ChoiceProperty<R, String>.() -> Unit = {}
+) = add(PersistentChoiceProperty(SimpleValueProperty(description, value), transformer).also(init))
+

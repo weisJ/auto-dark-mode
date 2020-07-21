@@ -16,8 +16,8 @@ pluginManagement {
 
 include(
     "dependencies-bom",
-    "plugin",
     "base",
+    "plugin",
     "windows",
     "macos",
     "linux",
