@@ -11,7 +11,7 @@ import com.intellij.ui.layout.Row
 import com.intellij.ui.layout.panel
 import com.intellij.util.castSafelyTo
 
-class DarkModeConfigurable : BoundConfigurable("Auto Dark Mode") {
+class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     override fun createPanel(): DialogPanel {
         val options = ServiceManager.getService(AutoDarkModeOptions::class.java)
@@ -20,7 +20,7 @@ class DarkModeConfigurable : BoundConfigurable("Auto Dark Mode") {
             options.containers.flatMap { container ->
                 container.namedGroups.forEach { addGroup(it) }
                 container.unnamedGroup
-            }.let { addGroup(it as SettingsGroup, "Other") }
+            }.let { addGroup(it as SettingsGroup, UNNAMED_GROUP_TITLE) }
         }
     }
 
@@ -49,5 +49,10 @@ class DarkModeConfigurable : BoundConfigurable("Auto Dark Mode") {
     override fun apply() {
         super.apply()
         ServiceManager.getService(AutoDarkMode::class.java).onSettingsChange()
+    }
+
+    companion object {
+        const val SETTINGS_TITLE = "Auto Dark Mode"
+        const val UNNAMED_GROUP_TITLE = "Other"
     }
 }
