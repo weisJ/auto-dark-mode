@@ -6,13 +6,12 @@ import kotlin.reflect.KMutableProperty0
 interface SettingsContainer : SettingsGroup {
     val namedGroups: MutableList<NamedSettingsGroup>
     val unnamedGroup: SettingsGroup
+    val enabled : Boolean
 
     @JvmDefault
     fun allProperties(): List<ValueProperty<Any>> {
         return namedGroups.flatten() + unnamedGroup
     }
-
-    fun isEnabled(): Boolean
 }
 
 /**
@@ -23,10 +22,11 @@ interface SettingsContainer : SettingsGroup {
  * to the unnamed group of the container.
  */
 abstract class DefaultSettingsContainer private constructor(
-    override val unnamedGroup: SettingsGroup
+    override val unnamedGroup: SettingsGroup,
+    override val enabled: Boolean
 ) : SettingsContainer, SettingsGroup by unnamedGroup {
 
-    constructor() : this(DefaultSettingsGroup())
+    constructor(enabled : Boolean = true) : this(DefaultSettingsGroup(), enabled)
 
     override val namedGroups: MutableList<NamedSettingsGroup> = mutableListOf()
 }
@@ -74,8 +74,24 @@ interface TransformingValueProperty<R, T> : ValueProperty<T> {
  */
 interface PersistentValueProperty<T> : TransformingValueProperty<T, String>
 
-fun ValueProperty<Any>.asPersistent() : PersistentValueProperty<Any>? =
-    castSafelyTo<PersistentValueProperty<Any>>()
+fun ValueProperty<*>.toTransformer(): TransformingValueProperty<Any, Any>? =
+    castSafelyTo<TransformingValueProperty<Any, Any>>()
+
+inline fun <reified T: Any> ValueProperty<T>.asPersistent() : PersistentValueProperty<T>?
+        = castSafelyTo<PersistentValueProperty<T>>()
+
+/**
+ * The effective value of the property. If the property is a transforming property the
+ * backing field is chosen. Because of this for a reference to a simple ValueProperty<T>
+ * the most general value that can be returned is Any.
+ */
+val <T : Any> ValueProperty<T>.effectiveProperty : KMutableProperty0<Any>
+    get() = toTransformer()?.let { it::backingValue } ?: this::value.withOutType()!!
+
+// Offers type specific overload of effective property for transforming properties.
+val <R, T> TransformingValueProperty<R, T>.effective: KMutableProperty0<R>
+    get() = ::backingValue
+
 
 class SimpleValueProperty<T> internal constructor(
     descr: String?,
@@ -149,7 +165,7 @@ fun SettingsContainer.group(name: String, init: SettingsGroup.() -> Unit) {
     group.init()
 }
 
-fun SettingsContainer.unnamed(init: SettingsGroup.() -> Unit) = this.init()
+fun SettingsContainer.unnamedGroup(init: SettingsGroup.() -> Unit) = this.init()
 
 fun <T> SettingsGroup.property(
     description: String? = null,
@@ -182,10 +198,10 @@ fun <R> SettingsGroup.persistentProperty(
 ) = add(SimplePersistentValueProperty(SimpleValueProperty(description, value), transformer))
 
 fun SettingsGroup.persistentStringProperty(description: String? = null, value: KMutableProperty0<String>) =
-    persistentProperty(description, value, constantTransformer())
+    persistentProperty(description, value, identityTransformer())
 
 fun SettingsGroup.persistentBooleanProperty(description: String? = null, value: KMutableProperty0<Boolean>) =
-    persistentProperty(description, value, Transformer(String::toBoolean, Boolean::toString))
+    persistentProperty(description, value, transformerOf(String::toBoolean, Boolean::toString))
 
 fun <R> SettingsGroup.persistentChoiceProperty(
     description: String? = null,

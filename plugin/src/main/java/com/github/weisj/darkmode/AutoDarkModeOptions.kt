@@ -2,7 +2,10 @@ package com.github.weisj.darkmode
 
 import com.github.weisj.darkmode.platform.ServiceUtil
 import com.github.weisj.darkmode.platform.settings.*
-import com.intellij.openapi.components.*
+import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.RoamingType
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
 import kotlin.reflect.KMutableProperty0
 
 /**
@@ -19,7 +22,7 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
 
     val properties: MutableMap<String, PersistentValueProperty<Any>> = HashMap()
     val containers: List<SettingsContainer> =
-        ServiceUtil.load(SettingsContainer::class.java).filter(SettingsContainer::isEnabled).asSequence().toList()
+        ServiceUtil.load(SettingsContainer::class.java).filter { it.enabled }.asSequence().toList()
 
     init {
         containers

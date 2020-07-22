@@ -32,9 +32,8 @@ class DarkModeConfigurable : BoundConfigurable("Auto Dark Mode") {
             }
             return
         }
-        val value = valueProp.asPersistent()?.backingValue?:valueProp.value
-        val property = valueProp.asPersistent()?.let { it::backingValue }?: valueProp::value
-        when (value) {
+        val property = valueProp.effectiveProperty
+        when (property.get()) {
             is Boolean -> row { checkBox(valueProp.description, property.withType()!!) }
             is String -> row(valueProp.description) { textField(property.withType()!!) }
             else -> throw IllegalArgumentException("Not yet implemented")

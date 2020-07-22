@@ -17,84 +17,82 @@ import javax.swing.UIManager
 @AutoService(SettingsContainer::class)
 class GeneralThemeSettingsProxy : SettingsContainer by GeneralThemeSettings
 
-typealias LafInfo = UIManager.LookAndFeelInfo
-
 object GeneralThemeSettings : DefaultSettingsContainer() {
 
-    private val DEFAULT_DARK_THEME: LafInfo = DarculaLookAndFeelInfo()
-    private val DEFAULT_LIGHT_THEME: LafInfo = searchLaf("IntelliJ Light") ?: IntelliJLookAndFeelInfo()
-    private val DEFAULT_HIGH_CONTRAST_THEME: LafInfo = searchLaf("High Contrast") ?: IntelliJLookAndFeelInfo()
+    private enum class DefaultLaf(val info : UIManager.LookAndFeelInfo) {
+        DARK(DarculaLookAndFeelInfo()),
+        LIGHT(searchLaf("IntelliJ Light") ?: IntelliJLookAndFeelInfo()),
+        HIGH_CONTRAST(searchLaf("High Contrast") ?: IntelliJLookAndFeelInfo())
+    }
 
-    private val DEFAULT_LIGHT_SCHEME: EditorColorsScheme =
-        searchScheme("IntelliJ Light", EditorColorsScheme.DEFAULT_SCHEME_NAME)
-    private val DEFAULT_DARK_SCHEME: EditorColorsScheme =
-        searchScheme("Darcula")
-    private val DEFAULT_HIGH_CONTRAST_SCHEME: EditorColorsScheme =
+    private enum class DefaultScheme(val scheme: EditorColorsScheme) {
+        LIGHT(searchScheme("IntelliJ Light", EditorColorsScheme.DEFAULT_SCHEME_NAME)),
+        DARK(searchScheme("Darcula")),
         /*
          *  Note: The small c in the second "contrast" is the cyrillic character `с`.
          * Some versions of IDEA use the incorrect character. We simply search for both version.
          */
-        searchScheme("High contrast", "High сontrast")
+        HIGH_CONTRAST(searchScheme("High contrast", "High сontrast"))
+    }
 
     private const val DEFAULT_CHECK_HIGH_CONTRAST = true
 
-    var darkTheme = DEFAULT_DARK_THEME
-    var lightTheme = DEFAULT_LIGHT_THEME
-    var highContrastTheme = DEFAULT_HIGH_CONTRAST_THEME
+    var darkTheme = DefaultLaf.DARK.info
+    var lightTheme = DefaultLaf.LIGHT.info
+    var highContrastTheme = DefaultLaf.HIGH_CONTRAST.info
 
-    var lightCodeScheme = DEFAULT_LIGHT_SCHEME
-    var darkCodeScheme = DEFAULT_DARK_SCHEME
-    var highContrastCodeScheme = DEFAULT_HIGH_CONTRAST_SCHEME
+    var lightCodeScheme = DefaultScheme.LIGHT.scheme
+    var darkCodeScheme = DefaultScheme.DARK.scheme
+    var highContrastCodeScheme = DefaultScheme.HIGH_CONTRAST.scheme
 
     var checkHighContrast = DEFAULT_CHECK_HIGH_CONTRAST
 
     init {
         group("IDE Theme") {
             val installedLafs = LafManager.getInstance().installedLookAndFeels.asList()
-            val lafRenderer = { obj: LafInfo -> obj.name }
-            val createLafTransformer = { fallback: LafInfo -> Transformer(parseLaf(fallback), ::writeLaf) }
+            val lafRenderer = UIManager.LookAndFeelInfo::getName
+            val lafTransformer = transformerOf(write = ::parseLaf, read = ::readLaf.or(""))
 
             persistentChoiceProperty(
                 description = "Light",
                 value = ::lightTheme,
-                transformer = createLafTransformer(DEFAULT_LIGHT_THEME)
+                transformer = lafTransformer.writeFallback(DefaultLaf.LIGHT.info)
             ) { choices = installedLafs; renderer = lafRenderer }
             persistentChoiceProperty(
                 description = "Dark",
                 value = ::darkTheme,
-                transformer = createLafTransformer(DEFAULT_DARK_THEME)
+                transformer = lafTransformer.writeFallback(DefaultLaf.DARK.info)
             ) { choices = installedLafs; renderer = lafRenderer }
             persistentChoiceProperty(
                 description = "High Contrast",
                 value = ::highContrastTheme,
-                transformer = createLafTransformer(DEFAULT_HIGH_CONTRAST_THEME)
+                transformer = lafTransformer.writeFallback(DefaultLaf.HIGH_CONTRAST.info)
             ) { choices = installedLafs; renderer = lafRenderer }
         }
 
         group("Editor Theme") {
             val installedSchemes = EditorColorsManager.getInstance().allSchemes.asList()
-            val schemeRenderer = { obj: EditorColorsScheme -> obj.displayName }
-            val createSchemeTransformer =
-                { fallback: EditorColorsScheme -> Transformer(parseScheme(fallback), ::writeScheme) }
+            val schemeRenderer = EditorColorsScheme::getDisplayName
+            val schemeTransformer = transformerOf(write = ::parseScheme, read = ::readScheme.or(""))
 
             persistentChoiceProperty(
                 description = "Light",
                 value = ::lightCodeScheme,
-                transformer = createSchemeTransformer(DEFAULT_LIGHT_SCHEME)
+                transformer = schemeTransformer.writeFallback(DefaultScheme.LIGHT.scheme)
             ) { choices = installedSchemes; renderer = schemeRenderer }
             persistentChoiceProperty(
                 description = "Dark",
                 value = ::darkCodeScheme,
-                transformer = createSchemeTransformer(DEFAULT_DARK_SCHEME)
+                transformer = schemeTransformer.writeFallback(DefaultScheme.DARK.scheme)
             ) { choices = installedSchemes; renderer = schemeRenderer }
             persistentChoiceProperty(
                 description = "High Contrast",
                 value = ::highContrastCodeScheme,
-                transformer = createSchemeTransformer(DEFAULT_HIGH_CONTRAST_SCHEME)
+                transformer = schemeTransformer.writeFallback(DefaultScheme.HIGH_CONTRAST.scheme)
             ) { choices = installedSchemes; renderer = schemeRenderer }
         }
 
-        unnamed {
+        unnamedGroup {
             persistentBooleanProperty(
                 description = "Check for high contrast",
                 value = ::checkHighContrast
@@ -102,27 +100,15 @@ object GeneralThemeSettings : DefaultSettingsContainer() {
         }
     }
 
-    override fun isEnabled(): Boolean = true
+    private fun readLaf(info: UIManager.LookAndFeelInfo): String = "${info.className} ${info.name}"
 
-    /**
-     * Returns a parser function with the given fallback.
-     */
-    private fun parseLaf(fallback: LafInfo): (String) -> LafInfo {
-        return { s -> s.toPair('|')?.let { searchLaf(it.first, it.second) } ?: fallback }
+    private fun readScheme(scheme: EditorColorsScheme): String = scheme.name
+
+    private fun parseLaf(name: String?): UIManager.LookAndFeelInfo? = name?.toPair(' ')?.let {
+        searchLaf(it.first, it.second)
     }
 
-    private fun writeLaf(info: LafInfo): String = "${info.className} ${info.name}"
-
-    /**
-     * Returns a parser function with the given fallback.
-     */
-    private fun parseScheme(fallback: EditorColorsScheme): (String) -> EditorColorsScheme {
-        return { s -> getScheme(s) ?: fallback }
-    }
-
-    private fun writeScheme(scheme: EditorColorsScheme): String = scheme.name
-
-    private fun getScheme(name: String): EditorColorsScheme? =
+    private fun parseScheme(name: String?): EditorColorsScheme? =
         EditorColorsManager.getInstance().allSchemes.firstOrNull { it.name == name }
 
     /**
@@ -143,9 +129,10 @@ object GeneralThemeSettings : DefaultSettingsContainer() {
     }
 
     /**
-     * Search for a given LookAndFeelInfo. The name has to match. If the className isn't empty it also has to match.
+     * Search for a given LookAndFeelInfo.
+     * The name has to match. If the className isn't empty it also has to match.
      */
-    private fun searchLaf(name: String, className: String = ""): LafInfo? {
+    private fun searchLaf(name: String, className: String = ""): UIManager.LookAndFeelInfo? {
         return LafManager.getInstance().installedLookAndFeels.firstOrNull {
             it.name.toLowerCase() == name.toLowerCase() && (className.isEmpty() || it.className == className)
         }
