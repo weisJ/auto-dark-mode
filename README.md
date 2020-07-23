@@ -61,5 +61,5 @@ to try running the task `:auto-dark-mode-plugin:runIde` instead.
 If you experience other issues, you can try a clean
 environment by running the following command.
 ```
-./gradlew :clean :build :auto-dark-mode-plugin:buildPlugin :auto-dark-mode-plugin:runIde
+./gradlew :clean :build :auto-dark-mode-plugin:runIde
 ```
