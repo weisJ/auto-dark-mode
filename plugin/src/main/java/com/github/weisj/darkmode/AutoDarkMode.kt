@@ -85,13 +85,11 @@ class AutoDarkMode : Disposable, ThemeCallback {
         stop()
     }
 
-    fun uninstall() {
+    fun pluginUnloaded() {
         stop()
-        if (monitor.isInitialized()) monitor.value.uninstall()
     }
 
-    fun install() {
-        monitor.value.install()
+    fun pluginLoaded() {
         start()
     }
 

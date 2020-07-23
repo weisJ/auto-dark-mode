@@ -36,10 +36,4 @@ public class NullMonitor implements ThemeMonitor {
     public boolean isRunning() {
         return false;
     }
-
-    @Override
-    public void install() {}
-
-    @Override
-    public void uninstall() {}
 }
