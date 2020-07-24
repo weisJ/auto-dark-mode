@@ -25,13 +25,13 @@ By default, the following themes are used:
 | Operating System | x86 Support        | x86_64 Support     |
 |------------------|--------------------|--------------------|
 | Windows          | :heavy_check_mark: | :heavy_check_mark: |
-| Mac OS           | :x:                | :heavy_check_mark: |
+| macOS           | :x:                | :heavy_check_mark: |
 | Linux            | :x:                | :heavy_check_mark: |
 
 ### OS-dependent build components
 When Gradle builds the plugin, it will only be able to compile 
 native components for the operating system running the build.
-For example, Mac OS toolchains won't be available to someone 
+For example, macOS toolchains won't be available to someone 
 who is compiling on Windows. For this reason, this plugin depends on 
 artifacts built by a [custom GitHub Actions workflow](.github/workflows/libs.yml) for the platforms which cannot be compiled 
 in the given environment. [A custom Gradle plugin](buildSrc/src/main/groovy/UsePrebuiltBinariesWhenUnbuildablePlugin.groovy) 
@@ -44,7 +44,7 @@ For Gradle to be able to retrieve the pre-built artifacts, you need to provide a
 
 With exception to Linux, this plugin only requires that a standard 
 C++ toolchain be installed when building on Windows (i.e. VisualCpp) 
-and an Objective-C++ toolchain when building on Mac OS (i.e. Gcc or Clang).
+and an Objective-C++ toolchain when building on macOS (i.e. Gcc or Clang).
 
 At the moment, Linux requires a standard C++ toolchain like Gcc
 as well as the following packages.
