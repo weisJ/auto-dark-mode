@@ -1,6 +1,5 @@
 package com.github.weisj.darkmode.platform.settings
 
-import com.intellij.util.castSafelyTo
 import kotlin.reflect.KMutableProperty0
 
 interface SettingsContainer : SettingsGroup {

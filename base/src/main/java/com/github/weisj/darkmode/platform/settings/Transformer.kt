@@ -1,6 +1,5 @@
 package com.github.weisj.darkmode.platform.settings
 
-import com.intellij.util.castSafelyTo
 
 /**
  * Transformer for changing the outwards type of a property.
