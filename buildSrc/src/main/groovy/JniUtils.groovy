@@ -1,5 +1,5 @@
-import dev.nokee.platform.nativebase.OperatingSystemFamily
-import dev.nokee.platform.nativebase.TargetMachine
+import dev.nokee.runtime.nativebase.TargetMachine
+import dev.nokee.runtime.nativebase.OperatingSystemFamily
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 
