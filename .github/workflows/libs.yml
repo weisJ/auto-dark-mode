@@ -17,7 +17,7 @@ on:
     types:
       - published
   schedule:
-    - cron:  '0 0 1 * *'
+    - cron: '0 0 1 * *'
 jobs:
   windows:
     name: Windows (Java 11)
