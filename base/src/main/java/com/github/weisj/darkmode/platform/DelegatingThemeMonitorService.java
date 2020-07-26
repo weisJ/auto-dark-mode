@@ -24,16 +24,45 @@
  */
 package com.github.weisj.darkmode.platform;
 
-public class NullMonitor implements ThemeMonitor {
+public class DelegatingThemeMonitorService implements ThemeMonitorService {
+    private final ThemeMonitorService delegate;
+
+    public DelegatingThemeMonitorService(ThemeMonitorService delegate) {
+        this.delegate = delegate;
+    }
 
     @Override
-    public void requestUpdate() {}
+    public boolean isDarkThemeEnabled() {
+        return delegate.isDarkThemeEnabled();
+    }
 
     @Override
-    public void setRunning(boolean running) {}
+    public boolean isHighContrastEnabled() {
+        return delegate.isHighContrastEnabled();
+    }
 
     @Override
-    public boolean isRunning() {
-        return false;
+    public long createEventHandler(Runnable callback) {
+        return delegate.createEventHandler(callback);
+    }
+
+    @Override
+    public void deleteEventHandler(long eventHandle) {
+        delegate.deleteEventHandler(eventHandle);
+    }
+
+    @Override
+    public boolean isSupported() {
+        return delegate.isSupported();
+    }
+
+    @Override
+    public void uninstall() {
+        delegate.uninstall();
+    }
+
+    @Override
+    public void install() {
+        delegate.install();
     }
 }

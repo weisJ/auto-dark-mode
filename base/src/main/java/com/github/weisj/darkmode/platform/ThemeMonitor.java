@@ -31,8 +31,4 @@ public interface ThemeMonitor {
     void setRunning(final boolean running);
 
     boolean isRunning();
-
-    void install();
-
-    void uninstall();
 }

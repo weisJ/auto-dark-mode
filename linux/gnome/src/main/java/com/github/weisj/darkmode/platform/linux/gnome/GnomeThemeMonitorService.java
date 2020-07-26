@@ -22,34 +22,44 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.windows;
+package com.github.weisj.darkmode.platform.linux.gnome;
 
 import com.github.weisj.darkmode.platform.ThemeMonitorService;
 
-public class WindowsThemeMonitorService implements ThemeMonitorService {
+public class GnomeThemeMonitorService implements ThemeMonitorService {
 
     @Override
     public boolean isDarkThemeEnabled() {
-        return WindowsNative.isDarkThemeEnabled();
+        // TODO: Stop guessing and check the settings when available (like what is mentioned in the GtkVariants class)
+        String currentTheme = GnomeNative.getCurrentTheme();
+        return currentTheme.equals(GtkVariants.guessFrom(currentTheme).get(GtkVariants.Variant.Night));
     }
 
     @Override
     public boolean isHighContrastEnabled() {
-        return WindowsNative.isHighContrastEnabled();
+        // TODO: This right now isn't exactly doable with the guessing implementation. It requires a user-accessible
+        // place to
+        // set which theme is their "high contrast theme"
+        return false;
     }
 
     @Override
     public long createEventHandler(Runnable callback) {
-        return WindowsNative.createEventHandler(callback);
+        return GnomeNative.createEventHandler(callback);
     }
 
     @Override
     public void deleteEventHandler(long eventHandle) {
-        WindowsNative.deleteEventHandler(eventHandle);
+        GnomeNative.deleteEventHandler(eventHandle);
     }
 
     @Override
     public boolean isSupported() {
-        return WindowsLibrary.get().isLoaded();
+        return GnomeLibrary.get().isLoaded();
+    }
+
+    @Override
+    public void install() {
+        GnomeNative.init();
     }
 }

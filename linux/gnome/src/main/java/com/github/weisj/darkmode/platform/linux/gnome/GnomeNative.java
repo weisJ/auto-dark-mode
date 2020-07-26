@@ -22,18 +22,15 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform;
+package com.github.weisj.darkmode.platform.linux.gnome;
 
-public class NullMonitor implements ThemeMonitor {
+public class GnomeNative {
 
-    @Override
-    public void requestUpdate() {}
+    static native String getCurrentTheme();
 
-    @Override
-    public void setRunning(boolean running) {}
+    static native long createEventHandler(final Runnable callback);
 
-    @Override
-    public boolean isRunning() {
-        return false;
-    }
+    static native void deleteEventHandler(final long handle);
+
+    static native void init();
 }

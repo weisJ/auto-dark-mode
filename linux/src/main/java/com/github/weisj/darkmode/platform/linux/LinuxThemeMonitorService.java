@@ -22,18 +22,24 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform;
+package com.github.weisj.darkmode.platform.linux;
 
-public class NullMonitor implements ThemeMonitor {
+import com.github.weisj.darkmode.platform.DelegatingThemeMonitorService;
+import com.github.weisj.darkmode.platform.LibraryUtil;
+import com.github.weisj.darkmode.platform.NullThemeMonitorService;
+import com.github.weisj.darkmode.platform.ThemeMonitorService;
+import com.github.weisj.darkmode.platform.linux.gnome.GnomeThemeMonitorService;
 
-    @Override
-    public void requestUpdate() {}
+public class LinuxThemeMonitorService extends DelegatingThemeMonitorService {
+    public LinuxThemeMonitorService() {
+        super(getDelegate());
+    }
 
-    @Override
-    public void setRunning(boolean running) {}
-
-    @Override
-    public boolean isRunning() {
-        return false;
+    private static ThemeMonitorService getDelegate() {
+        if (LibraryUtil.isGnome) {
+            return new GnomeThemeMonitorService();
+        } else {
+            return new NullThemeMonitorService();
+        }
     }
 }

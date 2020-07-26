@@ -34,7 +34,7 @@ public interface ThemeMonitorService {
 
     void deleteEventHandler(final long eventHandle);
 
-    boolean isActive();
+    boolean isSupported();
 
     default void uninstall() {}
 

@@ -42,9 +42,10 @@ public class AbstractThemeMonitor implements ThemeMonitor {
     public AbstractThemeMonitor(final ThemeMonitorService monitorService, final ThemeCallback callback) {
         this.monitorService = monitorService;
         this.onThemeChange = callback;
-        if (monitorService == null || !monitorService.isActive()) {
+        if (monitorService == null || !monitorService.isSupported()) {
             throw new IllegalStateException("Could not load library.");
         }
+        monitorService.install();
     }
 
     private void onNotification() {
@@ -98,15 +99,5 @@ public class AbstractThemeMonitor implements ThemeMonitor {
 
     public boolean isRunning() {
         return running;
-    }
-
-    public void install() {
-        monitorService.install();
-    }
-
-    public void uninstall() {
-        monitorService.uninstall();
-        onThemeChange = null;
-        monitorService = null;
     }
 }

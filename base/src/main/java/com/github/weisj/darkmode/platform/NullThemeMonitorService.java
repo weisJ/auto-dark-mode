@@ -24,16 +24,36 @@
  */
 package com.github.weisj.darkmode.platform;
 
-public class NullMonitor implements ThemeMonitor {
+/**
+ * This class is a no-op {@link ThemeMonitorService}. This class
+ * is used when a ThemeMonitorService needs to be created for a given environment but no
+ * ThemeMonitorService has been created to suit that environment yet.
+ * <p>
+ * By returning {@code false} from {@link #isSupported()}, this class signals to {@link AbstractThemeMonitor} that
+ * delegation failed and no suitable
+ * ThemeMonitorService could be found for the current environment.
+ */
+public class NullThemeMonitorService implements ThemeMonitorService {
+    @Override
+    public boolean isDarkThemeEnabled() {
+        return false;
+    }
 
     @Override
-    public void requestUpdate() {}
+    public boolean isHighContrastEnabled() {
+        return false;
+    }
 
     @Override
-    public void setRunning(boolean running) {}
+    public long createEventHandler(Runnable callback) {
+        return 0;
+    }
 
     @Override
-    public boolean isRunning() {
+    public void deleteEventHandler(long eventHandle) {}
+
+    @Override
+    public boolean isSupported() {
         return false;
     }
 }

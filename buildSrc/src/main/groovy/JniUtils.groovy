@@ -8,6 +8,8 @@ class JniUtils {
         String operatingSystemFamily = 'macos'
         if (targetMachine.operatingSystemFamily.windows) {
             operatingSystemFamily = 'windows'
+        } else if (targetMachine.operatingSystemFamily.linux) {
+            operatingSystemFamily = 'linux'
         }
 
         String architecture = 'x86-64'
