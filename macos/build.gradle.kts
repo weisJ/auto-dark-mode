@@ -10,7 +10,7 @@ plugins {
 
 library {
     val minOs = "10.14"
-    val frameworkVersion = "10.15.4"
+    val frameworkVersion = "10.15,6"
 
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
