@@ -52,6 +52,8 @@ allprojects {
             mavenLocal()
         }
         mavenCentral()
+        maven { url = uri("https://www.jetbrains.com/intellij-repository/releases") }
+        maven { url = uri("https://www.jetbrains.bintray.com/intellij-third-party-dependencies") }
     }
 
     val githubAccessToken by props("")

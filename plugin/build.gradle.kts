@@ -10,11 +10,12 @@ plugins {
     kotlin("jvm")
 }
 
+val String.v: String get() = rootProject.extra["$this.version"] as String
 val isPublished by props()
 val intellijPublishToken: String by props("")
 
 intellij {
-    version = "2020.1"
+    version = "ideaPlugin".v
 }
 
 tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
@@ -25,8 +26,8 @@ tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
         </ul>
         """
     )
-    sinceBuild("201")
-    untilBuild("201.*")
+    sinceBuild("ideaPlugin.since".v)
+    untilBuild("ideaPlugin.until".v)
 }
 
 dependencies {
@@ -40,12 +41,6 @@ tasks.withType<PublishTask> {
     token(intellijPublishToken)
     if (version.toString().contains("pre")) {
         channels("pre-release")
-    }
-}
-
-tasks.buildPlugin {
-    project.rootProject.subprojects.forEach {
-        dependsOn(it.tasks.withType<Jar>())
     }
 }
 

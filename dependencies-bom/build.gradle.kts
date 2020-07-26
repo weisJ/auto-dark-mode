@@ -30,5 +30,6 @@ dependencies {
         // In other words, marking dependency as "runtime" would avoid accidental
         // dependency on it during compilation.
         apiv("com.github.weisj:darklaf-native-utils", "darklaf")
+        apiv("com.jetbrains.intellij.platform:util", "idea")
     }
 }

@@ -1,4 +1,7 @@
 plugins {
     `java-library`
-    id("org.jetbrains.intellij")
+}
+
+dependencies {
+    compileOnly("com.jetbrains.intellij.platform:util")
 }
