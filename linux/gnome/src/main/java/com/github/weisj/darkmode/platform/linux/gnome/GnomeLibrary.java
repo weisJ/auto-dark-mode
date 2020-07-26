@@ -24,12 +24,11 @@
  */
 package com.github.weisj.darkmode.platform.linux.gnome;
 
-import java.util.logging.Logger;
-
-import com.github.weisj.darklaf.platform.AbstractLibrary;
+import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
 import com.github.weisj.darkmode.platform.LibraryUtil;
+import com.github.weisj.darkmode.platform.PluginLogger;
 
-public class GnomeLibrary extends AbstractLibrary {
+public class GnomeLibrary extends AbstractPluginLibrary {
 
     private static final String PROJECT_NAME = "auto-dark-mode-linux-gnome";
     private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/linux-x86-64/";
@@ -37,7 +36,7 @@ public class GnomeLibrary extends AbstractLibrary {
     private static final GnomeLibrary instance = new GnomeLibrary();
 
     protected GnomeLibrary() {
-        super(PATH, DLL_NAME, Logger.getLogger(GnomeLibrary.class.getName()));
+        super(PATH, DLL_NAME, PluginLogger.getLogger(GnomeLibrary.class));
     }
 
     static GnomeLibrary get() {
