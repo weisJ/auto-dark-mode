@@ -76,8 +76,8 @@ interface PersistentValueProperty<T> : TransformingValueProperty<T, String>
 fun ValueProperty<*>.toTransformer(): TransformingValueProperty<Any, Any>? =
     castSafelyTo<TransformingValueProperty<Any, Any>>()
 
-inline fun <reified T: Any> ValueProperty<T>.asPersistent() : PersistentValueProperty<T>?
-        = castSafelyTo<PersistentValueProperty<T>>()
+inline fun <reified T : Any> ValueProperty<T>.asPersistent(): PersistentValueProperty<T>? =
+    castSafelyTo<PersistentValueProperty<T>>()
 
 /**
  * The effective value of the property. If the property is a transforming property the
@@ -93,10 +93,10 @@ val <R, T> TransformingValueProperty<R, T>.effective: KMutableProperty0<R>
 
 
 class SimpleValueProperty<T> internal constructor(
-    descr: String?,
+    description: String?,
     private val property: KMutableProperty0<T>
 ) : ValueProperty<T> {
-    override val description: String = descr ?: property.name
+    override val description: String = description ?: property.name
     override val name: String = property.name
     override var value: T
         get() = property.get()
