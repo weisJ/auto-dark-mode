@@ -7,7 +7,7 @@ plugins {
 }
 
 intellij {
-    version = "2020.1"
+    version = "2020.2"
 }
 
 tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
@@ -18,8 +18,8 @@ tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
         </ul>
         """
     )
-    sinceBuild("201")
-    untilBuild("201.*")
+    sinceBuild("202")
+    untilBuild("202.*")
 }
 
 dependencies {
