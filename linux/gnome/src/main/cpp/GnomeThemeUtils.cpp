@@ -133,7 +133,8 @@ void verify_css_for_theme(std::map<std::string, std::string> theme, std::vector<
  */
 std::vector<std::string> get_installed_gtk_themes() {
     ensure_gio_init();
-    std::vector < std::string > themes;
+    //These themes come by default
+    std::vector < std::string > themes("Adwaita", "HighContrast", "HighContrastInverse");
     std::vector<std::map<std::string, std::string>> installed_resources = get_installed_resources("themes");
     std::for_each(installed_resources.begin(), installed_resources.end(), [&](std::map<std::string, std::string> i) {
         return verify_css_for_theme(std::move(i), themes);

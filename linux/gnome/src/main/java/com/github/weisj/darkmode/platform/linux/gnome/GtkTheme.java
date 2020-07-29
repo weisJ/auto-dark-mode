@@ -24,43 +24,18 @@
  */
 package com.github.weisj.darkmode.platform.linux.gnome;
 
-import com.github.weisj.darkmode.platform.ThemeMonitorService;
+public class GtkTheme {
+    private String name;
 
-public class GnomeThemeMonitorService implements ThemeMonitorService {
-
-    @Override
-    public boolean isDarkThemeEnabled() {
-        String currentTheme = GnomeNative.getCurrentTheme();
-        if (GnomeSettings.guessLightAndDarkThemes) {
-            return currentTheme.equals(GtkVariants.guessFrom(currentTheme).get(GtkVariants.Variant.Night));
-        } else {
-            return GnomeSettings.darkGtkTheme.getName().equals(currentTheme);
-        }
+    public GtkTheme(String name) {
+        this.name = name;
     }
 
-    @Override
-    public boolean isHighContrastEnabled() {
-        String currentTheme = GnomeNative.getCurrentTheme();
-        return GnomeSettings.highContrastGtkTheme.getName().equals(currentTheme);
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public long createEventHandler(Runnable callback) {
-        return GnomeNative.createEventHandler(callback);
-    }
-
-    @Override
-    public void deleteEventHandler(long eventHandle) {
-        GnomeNative.deleteEventHandler(eventHandle);
-    }
-
-    @Override
-    public boolean isSupported() {
-        return GnomeLibrary.get().isLoaded();
-    }
-
-    @Override
-    public void install() {
-        GnomeNative.init();
+    public void setName(String name) {
+        this.name = name;
     }
 }

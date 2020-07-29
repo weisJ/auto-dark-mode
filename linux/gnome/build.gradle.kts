@@ -7,6 +7,7 @@ plugins {
     `uber-jni-jar`
     `use-prebuilt-binaries`
     kotlin("jvm")
+    kotlin("kapt")
 }
 
 library {
@@ -97,4 +98,7 @@ library {
 
 dependencies {
     compileOnly(kotlin("stdlib-jdk8"))
+    kapt(platform(project(":auto-dark-mode-dependencies-bom")))
+    kapt("com.google.auto.service:auto-service")
+    compileOnly("com.google.auto.service:auto-service-annotations")
 }
