@@ -12,6 +12,12 @@ import kotlin.streams.toList
 @AutoService(SettingsContainer::class)
 class GnomeSettingsProxy : SettingsContainer by GnomeSettings
 
+fun <T> concatenate(vararg lists: List<T>): List<T> {
+    val result: MutableList<T> = ArrayList()
+    lists.forEach { list: List<T> -> result.addAll(list) }
+    return result
+}
+
 object GnomeSettings : DefaultSettingsContainer() {
     override val enabled: Boolean
         get() = super.enabled && LibraryUtil.isGnome
@@ -24,7 +30,7 @@ object GnomeSettings : DefaultSettingsContainer() {
      *
      * **See:** [Arch Wiki on GTK](https://wiki.archlinux.org/index.php/GTK#Themes)
      */
-    private enum class DefaultGtkTheme(val info : GtkTheme) {
+    private enum class DefaultGtkTheme(val info: GtkTheme) {
         DARK(GtkTheme("Adwaita-dark")),
         LIGHT(GtkTheme("Adwaita")),
         HIGH_CONTRAST(GtkTheme("HighContrast")),
@@ -32,21 +38,36 @@ object GnomeSettings : DefaultSettingsContainer() {
 
     private const val DEFAULT_GUESS_LIGHT_AND_DARK_THEMES = true
 
-    @JvmField var darkGtkTheme = DefaultGtkTheme.DARK.info
-    @JvmField var lightGtkTheme = DefaultGtkTheme.LIGHT.info
-    @JvmField var highContrastGtkTheme = DefaultGtkTheme.HIGH_CONTRAST.info
+    @JvmField
+    var darkGtkTheme = DefaultGtkTheme.DARK.info
 
-    @JvmField var guessLightAndDarkThemes = DEFAULT_GUESS_LIGHT_AND_DARK_THEMES
+    @JvmField
+    var lightGtkTheme = DefaultGtkTheme.LIGHT.info
+
+    @JvmField
+    var highContrastGtkTheme = DefaultGtkTheme.HIGH_CONTRAST.info
+
+    @JvmField
+    var guessLightAndDarkThemes = DEFAULT_GUESS_LIGHT_AND_DARK_THEMES
 
     init {
-        if(!GnomeLibrary.get().isLoaded){
+        if (!GnomeLibrary.get().isLoaded) {
             throw IllegalStateException("Gnome library not loaded.")
         }
         group("Gnome Theme") {
             val installedThemes = GnomeThemeUtils.getInstalledThemes()
-            val installedGtkThemes = installedThemes.stream().map { t -> GtkTheme(t) }.toList()
-            val lafRenderer = GtkTheme::getName
-            val lafTransformer = transformerOf(write = ::parseGtkTheme, read = ::readGtkTheme.or(""))
+            /*
+             * The default themes are added to this list. They would already be added to the list because of their
+             * presence when initializing the `themes` vector in GnomeThemeUtils.cpp but because they are not
+             * the same instance as the defaults, the dropdown list would default to random themes because
+             * the instances of the three defaults couldn't be found in ChoiceProperty#choices.
+             */
+            val installedGtkThemes = concatenate(
+                listOf(DefaultGtkTheme.DARK.info, DefaultGtkTheme.LIGHT.info, DefaultGtkTheme.HIGH_CONTRAST.info),
+                installedThemes.stream().map { t -> GtkTheme(t) }.toList()
+            ).distinctBy { it.name }
+            val gtkThemeRenderer = GtkTheme::getName
+            val gtkThemeTransformer = transformerOf(write = ::parseGtkTheme, read = ::readGtkTheme.or(""))
 
             persistentBooleanProperty(
                 description = "Guess light/dark theme based on name",
@@ -56,18 +77,18 @@ object GnomeSettings : DefaultSettingsContainer() {
             persistentChoiceProperty(
                 description = "Light GTK Theme",
                 value = ::lightGtkTheme,
-                transformer = lafTransformer.writeFallback(DefaultGtkTheme.LIGHT.info)
-            ) { choices = installedGtkThemes; renderer = lafRenderer }
+                transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.LIGHT.info)
+            ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
             persistentChoiceProperty(
                 description = "Dark GTK Theme",
                 value = ::darkGtkTheme,
-                transformer = lafTransformer.writeFallback(DefaultGtkTheme.DARK.info)
-            ) { choices = installedGtkThemes; renderer = lafRenderer }
+                transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.DARK.info)
+            ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
             persistentChoiceProperty(
                 description = "High Contrast GTK Theme",
                 value = ::highContrastGtkTheme,
-                transformer = lafTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
-            ) { choices = installedGtkThemes; renderer = lafRenderer }
+                transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
+            ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
         }
     }
 

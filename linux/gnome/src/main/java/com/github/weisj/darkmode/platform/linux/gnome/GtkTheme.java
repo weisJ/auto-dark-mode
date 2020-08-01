@@ -38,4 +38,22 @@ public class GtkTheme {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj instanceof GtkTheme) {
+            GtkTheme other = (GtkTheme) obj;
+            return this.getName().equals(other.getName());
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return this.getName().hashCode();
+    }
 }
