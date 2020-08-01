@@ -23,20 +23,12 @@
  *
  */
 #include "com_github_weisj_darkmode_platform_linux_gnome_GnomeThemeUtils.h"
+#include "GioUtils.hpp"
 
 #include <glibmm-2.4/glibmm.h>
 #include <giomm-2.4/giomm.h>
 #include <gtk/gtk.h>
 #include <utility>
-
-bool gioAlreadyInit = false;
-
-void ensure_gio_init() {
-    if (!gioAlreadyInit) {
-        Gio::init();
-        gioAlreadyInit = true;
-    }
-}
 
 /**
  * Get all the directories of the system for a resource.
