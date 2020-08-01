@@ -40,6 +40,9 @@ public class GnomeThemeMonitorService implements ThemeMonitorService {
 
     @Override
     public boolean isHighContrastEnabled() {
+        if (GnomeSettings.guessLightAndDarkThemes) {
+            return false;
+        }
         String currentTheme = GnomeNative.getCurrentTheme();
         return GnomeSettings.highContrastGtkTheme.getName().equals(currentTheme);
     }
