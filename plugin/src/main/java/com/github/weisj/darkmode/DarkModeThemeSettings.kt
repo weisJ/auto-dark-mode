@@ -14,8 +14,8 @@ import javax.swing.UIManager
  * Workaround for the fact that auto service currently doesn't work with singleton objects.
  * https://github.com/google/auto/issues/785
  */
-@AutoService(SettingsContainer::class)
-class GeneralThemeSettingsProxy : SettingsContainer by GeneralThemeSettings
+@AutoService(SettingsContainerProvider::class)
+class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ GeneralThemeSettings })
 
 object GeneralThemeSettings : DefaultSettingsContainer() {
 
@@ -57,7 +57,7 @@ object GeneralThemeSettings : DefaultSettingsContainer() {
                 description = "Light",
                 value = ::lightTheme,
                 transformer = lafTransformer.writeFallback(DefaultLaf.LIGHT.info)
-            ) { choices = installedLafs; renderer = lafRenderer }
+            ) { choices = installedLafs; renderer = lafRenderer; }
             persistentChoiceProperty(
                 description = "Dark",
                 value = ::darkTheme,
@@ -67,7 +67,7 @@ object GeneralThemeSettings : DefaultSettingsContainer() {
                 description = "High Contrast",
                 value = ::highContrastTheme,
                 transformer = lafTransformer.writeFallback(DefaultLaf.HIGH_CONTRAST.info)
-            ) { choices = installedLafs; renderer = lafRenderer }
+            ) { choices = installedLafs; renderer = lafRenderer; }
         }
 
         group("Editor Theme") {
@@ -89,14 +89,16 @@ object GeneralThemeSettings : DefaultSettingsContainer() {
                 description = "High Contrast",
                 value = ::highContrastCodeScheme,
                 transformer = schemeTransformer.writeFallback(DefaultScheme.HIGH_CONTRAST.scheme)
-            ) { choices = installedSchemes; renderer = schemeRenderer }
+            ) { choices = installedSchemes; renderer = schemeRenderer; active = false }
         }
 
-        unnamedGroup {
+        group("Other") {
             persistentBooleanProperty(
                 description = "Check for high contrast",
                 value = ::checkHighContrast
-            )
+            ) {
+                control(withProperty(::highContrastTheme), withProperty(::highContrastCodeScheme))
+            }
         }
     }
 
