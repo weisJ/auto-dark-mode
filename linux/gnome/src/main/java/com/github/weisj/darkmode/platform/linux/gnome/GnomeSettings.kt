@@ -67,6 +67,13 @@ object GnomeSettings : DefaultSettingsContainer() {
             val gtkThemeRenderer = GtkTheme::getName
             val gtkThemeTransformer = transformerOf(write = ::parseGtkTheme, read = ::readGtkTheme.or(""))
 
+            persistentBooleanProperty(
+                description = "Guess light/dark theme based on name",
+                value = ::guessLightAndDarkThemes
+            ) {
+                control(withProperty(::lightGtkTheme), withProperty(::darkGtkTheme), withProperty(::highContrastGtkTheme))
+            }
+
             persistentChoiceProperty(
                 description = "Light GTK Theme",
                 value = ::lightGtkTheme,
@@ -82,13 +89,6 @@ object GnomeSettings : DefaultSettingsContainer() {
                 value = ::highContrastGtkTheme,
                 transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
             ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
-
-            persistentBooleanProperty(
-                description = "Guess light/dark theme based on name",
-                value = ::guessLightAndDarkThemes
-            ) {
-                control(withProperty(::lightGtkTheme), withProperty(::darkGtkTheme), withProperty(::highContrastGtkTheme))
-            }
         }
     }
 
