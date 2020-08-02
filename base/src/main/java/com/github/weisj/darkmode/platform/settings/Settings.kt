@@ -22,7 +22,7 @@ interface SettingsContainer : SettingsGroup {
 
 fun SettingsContainer.allProperties() : List<ValueProperty<Any>> = namedGroups.flatten() + unnamedGroup
 
-fun SettingsContainer.withName(name : String) = allProperties().first { it.name == name }
+fun SettingsContainer.withName(name : String) = lazy{ allProperties().first { it.name == name } }
 
 fun <T> SettingsContainer.withProperty(prop : KMutableProperty0<T>) = withName(prop.name)
 
@@ -67,7 +67,7 @@ class DefaultNamedSettingsGroup internal constructor(
  * Wrapper for properties that provides a description and parser/writer used
  * for persistent storage.
  */
-interface ValueProperty<T> {
+interface ValueProperty<T> : Observable<ValueProperty<*>> {
     val description: String
     val name: String
     var value: T
@@ -105,20 +105,20 @@ val <R, T> TransformingValueProperty<R, T>.effective: KMutableProperty0<R>
     get() = ::backingValue
 
 
-class SimpleValueProperty<T> internal constructor(
+class SimpleValueProperty<T : Any> internal constructor(
     description: String?,
     property: KMutableProperty0<T>
-) : ValueProperty<T> {
+) : ValueProperty<T>, Observable<ValueProperty<*>> by DefaultObservable() {
     override val description: String = description ?: property.name
     override val name by property::name
     override var value: T by property
-    override var active = true
+    override var active by observable(true)
 }
 
-open class SimpleTransformingValueProperty<R, T> internal constructor(
+open class SimpleTransformingValueProperty<R, T : Any> internal constructor(
     delegate: ValueProperty<R>,
     transformer: Transformer<R, T>
-) : TransformingValueProperty<R, T> {
+) : TransformingValueProperty<R, T>, Observable<ValueProperty<*>> by delegate {
     override val description by delegate::description
     override val name by delegate::name
     override var active by delegate::active
@@ -142,11 +142,9 @@ abstract class ChoiceProperty<R, T> internal constructor(
     var choiceValue: R by ::backingValue
     var choices: List<R> = ArrayList()
     var renderer: (R) -> String = { it.toString() }
-
-    override var active by delegateProperty::active
 }
 
-class TransformingChoiceProperty<R, T> internal constructor(
+class TransformingChoiceProperty<R, T : Any> internal constructor(
     property: TransformingValueProperty<R, T>
 ) : ChoiceProperty<R, T>(property) {
     constructor(property: ValueProperty<R>, transformer: Transformer<R, T>)
@@ -163,15 +161,21 @@ class PersistentChoiceProperty<R>(
 
 interface PropertyController<T> {
     val predicate: (T?) -> Boolean
-    val controlled: MutableSet<ValueProperty<*>>
+    val controlled: MutableSet<Lazy<ValueProperty<*>>>
+
+    @JvmDefault
+    fun control(vararg properties : Lazy<ValueProperty<*>>) {
+        controlled.addAll(properties)
+    }
+
     @JvmDefault
     fun control(vararg properties : ValueProperty<*>) {
-        controlled.addAll(properties)
+        controlled.addAll(properties.map { lazyOf(it) })
     }
 }
 
 class SimplePropertyController<T>(override val predicate: (T?) -> Boolean) : PropertyController<T> {
-    override val controlled: MutableSet<ValueProperty<*>> = mutableSetOf()
+    override val controlled : MutableSet<Lazy<ValueProperty<*>>> = mutableSetOf()
 }
 
 class SimpleBooleanProperty(
@@ -184,7 +188,7 @@ class SimplePersistentBooleanProperty(
     predicate: (Boolean?) -> Boolean = { it?:false }
 ) : PersistentValueProperty<Boolean> by delegate, PropertyController<Boolean> by SimplePropertyController(predicate)
 
-fun SettingsContainer.group(name: String, init: SettingsGroup.() -> Unit) : SettingsGroup {
+fun SettingsContainer.group(name: String = "", init: SettingsGroup.() -> Unit) : SettingsGroup {
     val group = DefaultNamedSettingsGroup(name)
     namedGroups.add(group)
     group.init()
@@ -199,14 +203,14 @@ fun SettingsContainer.unnamedGroup(init: SettingsGroup.() -> Unit) : SettingsGro
 fun <T : ValueProperty<T>> SettingsGroup.property(property: T, init: T.() -> Unit = {}): T =
     property.also { it.init(); add(it) }
 
-fun <T> SettingsGroup.property(
+fun <T : Any> SettingsGroup.property(
     description: String? = null,
     value: KMutableProperty0<T>,
     init: SimpleValueProperty<T>.() -> Unit = {}
 ): ValueProperty<T> =
     SimpleValueProperty(description, value).also { it.init(); add(it) }
 
-fun <R, T> SettingsGroup.property(
+fun <R : Any, T : Any> SettingsGroup.property(
     description: String? = null,
     value: KMutableProperty0<R>,
     transformer: Transformer<R, T>,
@@ -225,7 +229,7 @@ fun SettingsGroup.booleanProperty(
     init: SimpleBooleanProperty.() -> Unit = {}
 ): ValueProperty<Boolean> = SimpleBooleanProperty(SimpleValueProperty(description, value)).also { it.init(); add(it) }
 
-fun <R, T> SettingsGroup.choiceProperty(
+fun <R : Any, T : Any> SettingsGroup.choiceProperty(
     description: String? = null,
     value: KMutableProperty0<R>,
     transformer: Transformer<R, T>,
@@ -243,7 +247,7 @@ fun <T : Any> SettingsGroup.choiceProperty(
         identityTransformer()
     ).also { it.init(); add(it) }
 
-fun <R> SettingsGroup.persistentProperty(
+fun <R : Any> SettingsGroup.persistentProperty(
     description: String? = null,
     value: KMutableProperty0<R>,
     transformer: Transformer<R, String>,
@@ -268,7 +272,7 @@ fun SettingsGroup.persistentBooleanProperty(
         )
     ).also { it.init(); add(it) }
 
-fun <R> SettingsGroup.persistentChoiceProperty(
+fun <R : Any> SettingsGroup.persistentChoiceProperty(
     description: String? = null,
     value: KMutableProperty0<R>,
     transformer: Transformer<R, String>,
