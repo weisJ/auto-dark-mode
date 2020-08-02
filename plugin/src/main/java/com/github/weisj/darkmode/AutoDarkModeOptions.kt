@@ -58,10 +58,23 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     }
 
     override fun loadState(toLoad: State) {
-        toLoad.entries.forEach { properties[it.key]?.value = it.value }
+        toLoad.entries.forEach {
+            properties.getOrPut(it.key, { PersistentValuePropertyStub(it.key, it.value) }).value = it.value
+        }
     }
 
     data class State(var entries: MutableList<Entry> = mutableListOf())
 
-    data class Entry(var key : String = "", var value : String = "")
+    data class Entry(var key: String = "", var value: String = "")
+
+    private class PersistentValuePropertyStub(
+        override val name: String,
+        override var value: String,
+        override val description: String = "",
+        override var active: Boolean = true
+    ) : PersistentValueProperty<Any>, Observable<ValueProperty<*>> by DefaultObservable() {
+        override var backingValue: Any
+            get() = value
+            set(_) = throw IllegalStateException("Settings value of stub property $name.")
+    }
 }
