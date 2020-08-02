@@ -1,6 +1,5 @@
 package com.github.weisj.darkmode.platform.linux.gnome
 
-import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 import kotlin.streams.toList
@@ -16,6 +15,10 @@ fun <T> concatenate(vararg lists: List<T>): List<T> {
     val result: MutableList<T> = ArrayList()
     lists.forEach { list: List<T> -> result.addAll(list) }
     return result
+}
+
+data class GtkTheme(val name: String) : Comparable<GtkTheme> {
+    override fun compareTo(other: GtkTheme): Int = name.compareTo(other.name)
 }
 
 object GnomeSettings : DefaultSettingsContainer() {
@@ -64,7 +67,7 @@ object GnomeSettings : DefaultSettingsContainer() {
                 listOf(DefaultGtkTheme.DARK.info, DefaultGtkTheme.LIGHT.info, DefaultGtkTheme.HIGH_CONTRAST.info),
                 installedThemes.stream().map { t -> GtkTheme(t) }.toList()
             ).distinctBy { it.name }
-            val gtkThemeRenderer = GtkTheme::getName
+            val gtkThemeRenderer = GtkTheme::name
             val gtkThemeTransformer = transformerOf(write = ::parseGtkTheme, read = ::readGtkTheme.or(""))
 
             persistentBooleanProperty(
@@ -94,5 +97,5 @@ object GnomeSettings : DefaultSettingsContainer() {
 
     private fun readGtkTheme(info: GtkTheme): String = info.name
 
-    private fun parseGtkTheme(name: String?): GtkTheme? = GtkTheme(name)
+    private fun parseGtkTheme(name: String): GtkTheme? = GtkTheme(name)
 }
