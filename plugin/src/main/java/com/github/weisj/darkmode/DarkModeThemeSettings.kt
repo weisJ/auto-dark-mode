@@ -48,6 +48,15 @@ object GeneralThemeSettings : DefaultSettingsContainer() {
     var checkHighContrast = DEFAULT_CHECK_HIGH_CONTRAST
 
     init {
+        group {
+            persistentBooleanProperty(
+                description = "Check for high contrast",
+                value = ::checkHighContrast
+            ) {
+                control(withProperty(::highContrastTheme), withProperty(::highContrastCodeScheme))
+            }
+        }
+
         group("IDE Theme") {
             val installedLafs = LafManager.getInstance().installedLookAndFeels.asList()
             val lafRenderer = UIManager.LookAndFeelInfo::getName
@@ -90,15 +99,6 @@ object GeneralThemeSettings : DefaultSettingsContainer() {
                 value = ::highContrastCodeScheme,
                 transformer = schemeTransformer.writeFallback(DefaultScheme.HIGH_CONTRAST.scheme)
             ) { choices = installedSchemes; renderer = schemeRenderer; active = false }
-        }
-
-        group("Other") {
-            persistentBooleanProperty(
-                description = "Check for high contrast",
-                value = ::checkHighContrast
-            ) {
-                control(withProperty(::highContrastTheme), withProperty(::highContrastCodeScheme))
-            }
         }
     }
 

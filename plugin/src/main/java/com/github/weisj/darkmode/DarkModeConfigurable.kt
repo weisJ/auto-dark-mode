@@ -46,19 +46,21 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
                 }
                 else -> throw IllegalArgumentException("Not yet implemented")
             }
+        }.also {
+            valueProp.registerListener(ValueProperty<*>::active) { _, new -> it.enabled = new }
         }
         val propertyController = valueProp.castSafelyTo<PropertyController<Any>>()
         if (propertyController != null) {
-            comp.asPredicate(propertyController.predicate)?.let { predicate ->
-                propertyController.controlled.forEach { controlledProperty ->
-                    rowMap[controlledProperty]?.enableIf(predicate)
-                    predicate.addListener { controlledProperty.active = it }
+            val listener : (Boolean) -> Unit = { enabled -> propertyController.controlled.forEach { it.value.active = enabled } }
+            comp.toPredicate(propertyController.predicate)
+                ?.let {
+                    listener(it())
+                    it.addListener(listener)
                 }
-            }
         }
     }
 
-    private fun JComponent.asPredicate(predicate: (Any?) -> Boolean): ComponentPredicate? {
+    private fun JComponent.toPredicate(predicate: (Any?) -> Boolean): ComponentPredicate? {
         return when (this) {
             is JComboBox<*> -> ComboBoxPredicate(this) { predicate(it) }
             is JToggleButton -> object : ComponentPredicate() {
