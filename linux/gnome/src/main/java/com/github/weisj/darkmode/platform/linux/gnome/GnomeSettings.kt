@@ -9,8 +9,8 @@ import kotlin.streams.toList
  * Workaround for the fact that auto service currently doesn't work with singleton objects.
  * https://github.com/google/auto/issues/785
  */
-@AutoService(SettingsContainer::class)
-class GnomeSettingsProxy : SettingsContainer by GnomeSettings
+@AutoService(SettingsContainerProvider::class)
+class GnomeSettingsProvider : SingletonSettingsContainerProvider({ GnomeSettings })
 
 fun <T> concatenate(vararg lists: List<T>): List<T> {
     val result: MutableList<T> = ArrayList()
@@ -19,8 +19,6 @@ fun <T> concatenate(vararg lists: List<T>): List<T> {
 }
 
 object GnomeSettings : DefaultSettingsContainer() {
-    override val enabled: Boolean
-        get() = super.enabled && LibraryUtil.isGnome
 
     /**
      * This enum holds default values for the light, dark, and high contrast GTK themes.
@@ -69,11 +67,6 @@ object GnomeSettings : DefaultSettingsContainer() {
             val gtkThemeRenderer = GtkTheme::getName
             val gtkThemeTransformer = transformerOf(write = ::parseGtkTheme, read = ::readGtkTheme.or(""))
 
-            persistentBooleanProperty(
-                description = "Guess light/dark theme based on name",
-                value = ::guessLightAndDarkThemes
-            )
-
             persistentChoiceProperty(
                 description = "Light GTK Theme",
                 value = ::lightGtkTheme,
@@ -89,6 +82,13 @@ object GnomeSettings : DefaultSettingsContainer() {
                 value = ::highContrastGtkTheme,
                 transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
             ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+
+            persistentBooleanProperty(
+                description = "Guess light/dark theme based on name",
+                value = ::guessLightAndDarkThemes
+            ) {
+                control(withProperty(::lightGtkTheme), withProperty(::darkGtkTheme), withProperty(::highContrastGtkTheme))
+            }
         }
     }
 
