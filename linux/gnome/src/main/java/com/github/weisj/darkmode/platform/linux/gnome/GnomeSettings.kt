@@ -2,7 +2,6 @@ package com.github.weisj.darkmode.platform.linux.gnome
 
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
-import kotlin.streams.toList
 
 /**
  * Workaround for the fact that auto service currently doesn't work with singleton objects.
@@ -10,12 +9,6 @@ import kotlin.streams.toList
  */
 @AutoService(SettingsContainerProvider::class)
 class GnomeSettingsProvider : SingletonSettingsContainerProvider({ GnomeSettings })
-
-fun <T> concatenate(vararg lists: List<T>): List<T> {
-    val result: MutableList<T> = ArrayList()
-    lists.forEach { list: List<T> -> result.addAll(list) }
-    return result
-}
 
 data class GtkTheme(val name: String) : Comparable<GtkTheme> {
     override fun compareTo(other: GtkTheme): Int = name.compareTo(other.name)
@@ -63,10 +56,11 @@ object GnomeSettings : DefaultSettingsContainer() {
              * the same instance as the defaults, the dropdown list would default to random themes because
              * the instances of the three defaults couldn't be found in ChoiceProperty#choices.
              */
-            val installedGtkThemes = concatenate(
-                listOf(DefaultGtkTheme.DARK.info, DefaultGtkTheme.LIGHT.info, DefaultGtkTheme.HIGH_CONTRAST.info),
-                installedThemes.stream().map { t -> GtkTheme(t) }.toList()
-            ).distinctBy { it.name }
+            val installedGtkThemes =
+                mutableSetOf(DefaultGtkTheme.DARK.info, DefaultGtkTheme.LIGHT.info, DefaultGtkTheme.HIGH_CONTRAST.info)
+                    .apply { addAll(installedThemes.map { GtkTheme(it) }) }
+                    .toList()
+                    .sorted()
             val gtkThemeRenderer = GtkTheme::name
             val gtkThemeTransformer = transformerOf(write = ::parseGtkTheme, read = ::readGtkTheme.or(""))
 
