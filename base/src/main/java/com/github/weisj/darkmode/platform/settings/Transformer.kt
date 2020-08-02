@@ -1,5 +1,10 @@
 package com.github.weisj.darkmode.platform.settings
 
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty0
+import kotlin.reflect.KProperty
+
 
 /**
  * Transformer for changing the outwards type of a property.
@@ -29,7 +34,23 @@ fun <R, T> Transformer<R?, T>.writeFallback(fallback: R): Transformer<R, T> {
 
 object IdentityTransformer : Transformer<Any, Any> by DefaultTransformer({ t -> t }, { t -> t })
 
-inline fun <reified T : Any> identityTransformer(): Transformer<T, T> =
+fun <T : Any> identityTransformer(): Transformer<T, T> =
     IdentityTransformer.castSafelyTo<Transformer<T, T>>()!!
 
 fun <R, T> transformerOf(write: (T) -> R, read: (R) -> T) = DefaultTransformer(write, read)
+
+internal class TransformerDelegate<R, T>(
+    private val prop : KMutableProperty0<R>,
+    private val transformer : Transformer<R, T>
+) : ReadWriteProperty<Any, T> {
+    override fun getValue(thisRef: Any, property: KProperty<*>): T {
+        return transformer.read(prop.get())
+    }
+
+    override fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
+        prop.set(transformer.write(value))
+    }
+}
+
+fun <R, T> Transformer<R, T>.delegate(backingProp : KMutableProperty0<R>) : ReadWriteProperty<Any, T> =
+    TransformerDelegate(backingProp, this)

@@ -22,7 +22,11 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
 
     val properties: MutableMap<String, PersistentValueProperty<Any>> = HashMap()
     val containers: List<SettingsContainer> =
-        ServiceUtil.load(SettingsContainer::class.java).filter { it.enabled }.asSequence().toList()
+        ServiceUtil.load(SettingsContainerProvider::class.java)
+            .filter { it.enabled }
+            .map { it.create() }
+            .asSequence()
+            .toList()
 
     init {
         containers
