@@ -15,12 +15,20 @@ class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ Genera
 
 object GeneralThemeSettings : DefaultSettingsContainer() {
 
+    /**
+     * Default values for the LookAndFeel which are guaranteed to be bundled with any
+     * IntelliJ based product.
+     */
     private enum class DefaultLaf(val info : UIManager.LookAndFeelInfo) {
         DARK(DarculaLookAndFeelInfo()),
         LIGHT(searchLaf("IntelliJ Light") ?: IntelliJLookAndFeelInfo()),
         HIGH_CONTRAST(searchLaf("High Contrast") ?: IntelliJLookAndFeelInfo())
     }
 
+    /**
+     * Default values for the code scheme which are guaranteed to be bundled with any
+     * IntelliJ based product.
+     */
     private enum class DefaultScheme(val scheme: EditorColorsScheme) {
         LIGHT(searchScheme("IntelliJ Light", EditorColorsScheme.DEFAULT_SCHEME_NAME)),
         DARK(searchScheme("Darcula")),
