@@ -41,18 +41,6 @@ class ObservableManager<T> {
     }
 }
 
-class WriteDelegateRWProperty<T, V>(
-    private val valueProp: KMutableProperty0<V>,
-    private val delegate: ReadWriteProperty<T, V>
-) : ReadWriteProperty<T, V> {
-    override fun getValue(thisRef: T, property: KProperty<*>): V = valueProp.get()
-
-    override fun setValue(thisRef: T, property: KProperty<*>, value: V) {
-        valueProp.set(value)
-        delegate.setValue(thisRef, property, value)
-    }
-}
-
 interface DelegateProvider<T, V> {
     operator fun provideDelegate(
         thisRef: T,
@@ -71,18 +59,6 @@ class ObservableValue<T, V : Any>(
     ): ReadWriteProperty<T, V> = delegate.WrappingRWProperty(prop, value, type)
 }
 
-class ObservablePropertyValue<T, V : Any>(
-    private val delegate: ObservableManager<T>,
-    private val property: KMutableProperty0<V>,
-    private val type: KClass<V>
-) : DelegateProvider<T, V> {
-    override operator fun provideDelegate(
-        thisRef: T,
-        prop: KProperty<*>
-    ): ReadWriteProperty<T, V> =
-        WriteDelegateRWProperty(property, delegate.WrappingRWProperty(prop, property.get(), type))
-}
-
 interface Observable<T> {
     val manager: ObservableManager<T>
 }
@@ -93,9 +69,6 @@ open class DefaultObservable<T> : Observable<T> {
 
 inline fun <T, reified V : Any> Observable<T>.observable(value: V): DelegateProvider<T, V> =
     ObservableValue(manager, value, V::class)
-
-fun <T, V : Any> Observable<T>.observableProperty(prop: KMutableProperty0<V>): DelegateProvider<T, V> =
-    ObservablePropertyValue(manager, prop, prop.get().javaClass.kotlin)
 
 inline fun <T, reified V : Any> Observable<T>.registerListener(
     property: KProperty1<T, V>,
