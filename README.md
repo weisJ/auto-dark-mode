@@ -49,7 +49,7 @@ and an Objective-C++ toolchain when building on macOS (i.e. Gcc or Clang).
 At the moment, Linux requires a standard C++ toolchain like Gcc
 as well as the following packages.
 ```
-libsigc++-2.0-dev libglibmm-2.4-dev
+libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev
 ```
 
 

@@ -29,11 +29,9 @@ import java.util.EnumMap
 /**
  * This class is effectively a conversion of the GtkVariants.js module seen [here](https://gitlab.com/rmnvgr/nightthemeswitcher-gnome-shell-extension/-/blob/0d32907de1d004a6a92f02b8e0b79302340e5244/src/modules/GtkVariants.js).
  *
- * This class should only be used as a temporary solution until settings are implemented which allow the user to
- * denote which of their themes they consider to be their light and dark themes. This settings should be applicable to
- * all distributions (not just ones using Gnome) as most distributions have different themes which provide a dark and
- * light variant. Very few distributions will simply have a "dark *mode*" and a "light *mode*" like Windows
- * and Mac OS.
+ * The logic of guessFrom will be used if the user chooses to have the plugin guess which of their themes is their
+ * light and dark theme (guessing is enabled by default).
+ * @see GnomeSettings.guessLightAndDarkThemes
  */
 object GtkVariants {
     /**
@@ -88,7 +86,7 @@ object GtkVariants {
             themeName.contains("Flat-Remix-GTK") -> {
                 val isSolid = themeName.contains("-Solid")
                 val withoutBorder = themeName.contains("-NoBorder")
-                val basename = themeName.split(Regex("-")).slice(IntRange(0,3)).joinToString(separator = "-")
+                val basename = themeName.split(Regex("-")).slice(IntRange(0, 3)).joinToString(separator = "-")
                 variants[Variant.Day] =
                     basename + (if (themeName.contains("-Darker")) "-Darker" else "") + if (isSolid) "-Solid" else ""
                 variants[Variant.Night] =

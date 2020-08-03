@@ -23,6 +23,7 @@
  *
  */
 #include "com_github_weisj_darkmode_platform_linux_gnome_GnomeNative.h"
+#include "GioUtils.hpp"
 
 #include <string>
 #include <glibmm-2.4/glibmm.h>
@@ -104,6 +105,6 @@ Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_deleteEventHandl
 
 JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_init(JNIEnv *env, jclass obj) {
-    Gio::init();
+    ensure_gio_init();
     settings = Gio::Settings::create(SETTINGS_SCHEMA_NAME);
 }
