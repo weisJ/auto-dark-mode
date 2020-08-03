@@ -29,7 +29,6 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun start() {
-        Notifications.dispatchNotification("test", NotificationType.ERROR)
         monitor.value.isRunning = true
     }
 
