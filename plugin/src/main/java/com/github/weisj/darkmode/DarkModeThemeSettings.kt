@@ -10,10 +10,6 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
 import javax.swing.UIManager
 
-/**
- * Workaround for the fact that auto service currently doesn't work with singleton objects.
- * https://github.com/google/auto/issues/785
- */
 @AutoService(SettingsContainerProvider::class)
 class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ GeneralThemeSettings })
 
