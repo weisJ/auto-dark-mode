@@ -160,7 +160,7 @@ class PersistentChoiceProperty<R>(
 }
 
 interface PropertyController<T> {
-    val predicate: (T?) -> Boolean
+    var predicate: (T?) -> Boolean
     val controlled: MutableSet<Lazy<ValueProperty<*>>>
 
     @JvmDefault
@@ -174,9 +174,11 @@ interface PropertyController<T> {
     }
 }
 
-class SimplePropertyController<T>(override val predicate: (T?) -> Boolean) : PropertyController<T> {
+class SimplePropertyController<T>(override var predicate: (T?) -> Boolean) : PropertyController<T> {
     override val controlled : MutableSet<Lazy<ValueProperty<*>>> = mutableSetOf()
 }
+
+fun <T> PropertyController<T>.inverted() = predicate.let { predicate = { t -> !it(t) } }
 
 class SimpleBooleanProperty(
     delegate: SimpleValueProperty<Boolean>,

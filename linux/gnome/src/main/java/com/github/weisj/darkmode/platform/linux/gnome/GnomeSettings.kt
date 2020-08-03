@@ -69,6 +69,7 @@ object GnomeSettings : DefaultSettingsContainer() {
                 description = "Guess light/dark theme based on name",
                 value = ::guessLightAndDarkThemes
             ) {
+                inverted()
                 control(withProperty(::lightGtkTheme), withProperty(::darkGtkTheme), withProperty(::highContrastGtkTheme))
             }
 
