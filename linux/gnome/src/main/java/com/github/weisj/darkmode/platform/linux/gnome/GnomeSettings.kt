@@ -1,5 +1,6 @@
 package com.github.weisj.darkmode.platform.linux.gnome
 
+import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 
@@ -8,7 +9,7 @@ import com.google.auto.service.AutoService
  * https://github.com/google/auto/issues/785
  */
 @AutoService(SettingsContainerProvider::class)
-class GnomeSettingsProvider : SingletonSettingsContainerProvider({ GnomeSettings })
+class GnomeSettingsProvider : SingletonSettingsContainerProvider({ GnomeSettings }, enabled = LibraryUtil.isGnome)
 
 data class GtkTheme(val name: String) : Comparable<GtkTheme> {
     override fun compareTo(other: GtkTheme): Int = name.compareTo(other.name)
