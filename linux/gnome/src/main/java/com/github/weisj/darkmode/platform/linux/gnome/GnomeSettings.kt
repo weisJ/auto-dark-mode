@@ -4,10 +4,6 @@ import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 
-/**
- * Workaround for the fact that auto service currently doesn't work with singleton objects.
- * https://github.com/google/auto/issues/785
- */
 @AutoService(SettingsContainerProvider::class)
 class GnomeSettingsProvider : SingletonSettingsContainerProvider({ GnomeSettings }, enabled = LibraryUtil.isGnome)
 
@@ -56,6 +52,8 @@ object GnomeSettings : DefaultSettingsContainer() {
              * presence when initializing the `themes` vector in GnomeThemeUtils.cpp but because they are not
              * the same instance as the defaults, the dropdown list would default to random themes because
              * the instances of the three defaults couldn't be found in ChoiceProperty#choices.
+             * For this reason, the default themes that the native code adds to this list are overwritten
+             * with the instances created inside the enum constructors of DefaultGtkTheme.
              */
             val installedGtkThemes =
                 mutableSetOf(DefaultGtkTheme.DARK.info, DefaultGtkTheme.LIGHT.info, DefaultGtkTheme.HIGH_CONTRAST.info)
