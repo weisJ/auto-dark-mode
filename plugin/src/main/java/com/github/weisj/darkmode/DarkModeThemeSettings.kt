@@ -1,5 +1,6 @@
 package com.github.weisj.darkmode
 
+import com.github.weisj.darkmode.platform.Notifications
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 import com.intellij.ide.ui.LafManager

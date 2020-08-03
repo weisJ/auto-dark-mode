@@ -5,7 +5,6 @@ import com.intellij.ide.actions.QuickChangeLookAndFeel
 import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.util.registry.Registry
@@ -30,6 +29,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun start() {
+        Notifications.dispatchNotification("test", NotificationType.ERROR)
         monitor.value.isRunning = true
     }
 
@@ -99,5 +99,9 @@ class AutoDarkMode : Disposable, ThemeCallback {
     companion object {
         private val LOGGER = PluginLogger.getLogger(AutoDarkMode::class.java)
         private val OPTIONS = ServiceManager.getService(AutoDarkModeOptions::class.java)
+
+        init {
+            OPTIONS.settingsLoaded()
+        }
     }
 }

@@ -61,6 +61,11 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
         toLoad.entries.forEach {
             properties.getOrPut(it.key, { PersistentValuePropertyStub(it.key, it.value) }).value = it.value
         }
+        settingsLoaded()
+    }
+
+    fun settingsLoaded() {
+        containers.forEach { it.onSettingsLoaded() }
     }
 
     data class State(var entries: MutableList<Entry> = mutableListOf())

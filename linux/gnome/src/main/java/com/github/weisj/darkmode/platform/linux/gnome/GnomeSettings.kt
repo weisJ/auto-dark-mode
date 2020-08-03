@@ -1,6 +1,7 @@
 package com.github.weisj.darkmode.platform.linux.gnome
 
 import com.github.weisj.darkmode.platform.LibraryUtil
+import com.github.weisj.darkmode.platform.Notifications
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 
@@ -40,6 +41,12 @@ object GnomeSettings : DefaultSettingsContainer() {
 
     @JvmField
     var guessLightAndDarkThemes = DEFAULT_GUESS_LIGHT_AND_DARK_THEMES
+
+    /*
+     * Ensures the information about the guessing mechanism is only logged
+     * once.
+     */
+    private var guessingMechanismInfoLogged = false
 
     init {
         if (!GnomeLibrary.get().isLoaded) {
@@ -86,6 +93,23 @@ object GnomeSettings : DefaultSettingsContainer() {
                 value = ::highContrastGtkTheme,
                 transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
             ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+        }
+
+        hidden {
+            persistentBooleanProperty(value = ::guessingMechanismInfoLogged)
+        }
+    }
+
+    override fun onSettingsLoaded() {
+        if (!guessingMechanismInfoLogged) {
+            Notifications.dispatchNotification(
+                """
+                Auto Dark Mode is currently guessing the whether the current Gnome theme
+                is dark or light. You can explicitly specify which theme is your light/dark/high-contrast theme
+                in the settings for better results.
+                """.trimIndent()
+            )
+            guessingMechanismInfoLogged = true
         }
     }
 

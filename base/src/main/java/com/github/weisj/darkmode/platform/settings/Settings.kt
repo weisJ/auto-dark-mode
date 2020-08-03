@@ -18,9 +18,12 @@ open class SingletonSettingsContainerProvider(
 interface SettingsContainer : SettingsGroup {
     val namedGroups: MutableList<NamedSettingsGroup>
     val unnamedGroup: SettingsGroup
+    val hiddenGroup: SettingsGroup
+
+    fun onSettingsLoaded()
 }
 
-fun SettingsContainer.allProperties() : List<ValueProperty<Any>> = namedGroups.flatten() + unnamedGroup
+fun SettingsContainer.allProperties() : List<ValueProperty<Any>> = namedGroups.flatten() + unnamedGroup + hiddenGroup
 
 fun SettingsContainer.withName(name : String) = lazy{ allProperties().first { it.name == name } }
 
@@ -34,12 +37,14 @@ fun <T> SettingsContainer.withProperty(prop : KMutableProperty0<T>) = withName(p
  * to the unnamed group of the container.
  */
 abstract class DefaultSettingsContainer private constructor(
-    override val unnamedGroup: SettingsGroup
+    override val unnamedGroup: SettingsGroup,
+    override val hiddenGroup: SettingsGroup
 ) : SettingsContainer, SettingsGroup by unnamedGroup {
-
-    constructor() : this(DefaultSettingsGroup())
+    constructor() : this(DefaultSettingsGroup(), DefaultSettingsGroup())
 
     override val namedGroups: MutableList<NamedSettingsGroup> = mutableListOf()
+
+    override fun onSettingsLoaded() {}
 }
 
 fun <T> SettingsGroup.add(property: ValueProperty<T>) {
@@ -197,10 +202,9 @@ fun SettingsContainer.group(name: String = "", init: SettingsGroup.() -> Unit) :
     return group
 }
 
-fun SettingsContainer.unnamedGroup(init: SettingsGroup.() -> Unit) : SettingsGroup {
-    init()
-    return this
-}
+fun SettingsContainer.unnamedGroup(init: SettingsGroup.() -> Unit) : SettingsGroup = this.also(init)
+
+fun SettingsContainer.hidden(init: SettingsGroup.() -> Unit) : SettingsGroup = hiddenGroup.also(init)
 
 fun <T : ValueProperty<T>> SettingsGroup.property(property: T, init: T.() -> Unit = {}): T =
     property.also { it.init(); add(it) }
