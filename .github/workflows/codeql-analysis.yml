@@ -34,7 +34,7 @@ jobs:
       # with:
       #   languages: go, javascript, csharp, python, cpp, java
 
-    - run: sudo apt-get install libsigc++-2.0-dev libglibmm-2.4-dev
+    - run: sudo apt-get install libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev
     - run: ./gradlew build -PgithubAccessToken=${{ secrets.GITHUB_TOKEN }}
 
     - name: Perform CodeQL Analysis
