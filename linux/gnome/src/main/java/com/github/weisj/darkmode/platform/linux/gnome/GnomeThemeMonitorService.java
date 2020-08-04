@@ -30,17 +30,21 @@ public class GnomeThemeMonitorService implements ThemeMonitorService {
 
     @Override
     public boolean isDarkThemeEnabled() {
-        // TODO: Stop guessing and check the settings when available (like what is mentioned in the GtkVariants class)
         String currentTheme = GnomeNative.getCurrentTheme();
-        return currentTheme.equals(GtkVariants.guessFrom(currentTheme).get(GtkVariants.Variant.Night));
+        if (GnomeSettings.guessLightAndDarkThemes) {
+            return currentTheme.equals(GtkVariants.guessFrom(currentTheme).get(GtkVariants.Variant.Night));
+        } else {
+            return GnomeSettings.darkGtkTheme.getName().equals(currentTheme);
+        }
     }
 
     @Override
     public boolean isHighContrastEnabled() {
-        // TODO: This right now isn't exactly doable with the guessing implementation. It requires a user-accessible
-        // place to
-        // set which theme is their "high contrast theme"
-        return false;
+        if (GnomeSettings.guessLightAndDarkThemes) {
+            return false;
+        }
+        String currentTheme = GnomeNative.getCurrentTheme();
+        return GnomeSettings.highContrastGtkTheme.getName().equals(currentTheme);
     }
 
     @Override

@@ -13,14 +13,12 @@ val String.v: String get() = rootProject.extra["$this.version"] as String
 fun DependencyConstraintHandlerScope.apiv(
     notation: String,
     versionProp: String = notation.substringAfterLast(':')
-) =
-    "api"(notation + ":" + versionProp.v)
+) = "api"("$notation:${versionProp.v}")
 
 fun DependencyConstraintHandlerScope.runtimev(
     notation: String,
     versionProp: String = notation.substringAfterLast(':')
-) =
-    "runtime"(notation + ":" + versionProp.v)
+) = "runtimeOnly"("$notation:${versionProp.v}")
 
 dependencies {
     // Parenthesis are needed here: https://github.com/gradle/gradle/issues/9248
@@ -31,5 +29,7 @@ dependencies {
         // dependency on it during compilation.
         apiv("com.github.weisj:darklaf-native-utils", "darklaf")
         apiv("com.jetbrains.intellij.platform:util", "idea")
+        apiv("com.google.auto.service:auto-service-annotations", "auto-service")
+        apiv("com.google.auto.service:auto-service", "auto-service")
     }
 }

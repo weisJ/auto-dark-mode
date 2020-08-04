@@ -82,7 +82,7 @@ jobs:
         with:
           java-version: 11
       - name: Install libsigc++ and glibmm
-        run: sudo apt-get install libsigc++-2.0-dev libglibmm-2.4-dev
+        run: sudo apt-get install libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev
       - name: Build
         run: ./gradlew :auto-dark-mode-linux-gnome:build
       - name: Upload artifact

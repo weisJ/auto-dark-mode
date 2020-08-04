@@ -24,12 +24,11 @@
  */
 package com.github.weisj.darkmode.platform.windows;
 
-import java.util.logging.Logger;
-
-import com.github.weisj.darklaf.platform.AbstractLibrary;
+import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
 import com.github.weisj.darkmode.platform.LibraryUtil;
+import com.github.weisj.darkmode.platform.PluginLogger;
 
-public class WindowsLibrary extends AbstractLibrary {
+public class WindowsLibrary extends AbstractPluginLibrary {
 
     private static final String PROJECT_NAME = "auto-dark-mode-windows";
     private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/";
@@ -44,7 +43,7 @@ public class WindowsLibrary extends AbstractLibrary {
     }
 
     protected WindowsLibrary() {
-        super(PATH, DLL_NAME, Logger.getLogger(WindowsLibrary.class.getName()));
+        super(PATH, DLL_NAME, PluginLogger.getLogger(WindowsLibrary.class));
     }
 
     @Override

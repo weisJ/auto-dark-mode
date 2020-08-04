@@ -24,12 +24,11 @@
  */
 package com.github.weisj.darkmode.platform.macos;
 
-import java.util.logging.Logger;
-
-import com.github.weisj.darklaf.platform.AbstractLibrary;
+import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
 import com.github.weisj.darkmode.platform.LibraryUtil;
+import com.github.weisj.darkmode.platform.PluginLogger;
 
-public class MacOSLibrary extends AbstractLibrary {
+public class MacOSLibrary extends AbstractPluginLibrary {
 
     private static final String PROJECT_NAME = "auto-dark-mode-macos";
     private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/macos-x86-64/";
@@ -42,7 +41,7 @@ public class MacOSLibrary extends AbstractLibrary {
     }
 
     protected MacOSLibrary() {
-        super(PATH, DLL_NAME, Logger.getLogger(MacOSLibrary.class.getName()));
+        super(PATH, DLL_NAME, PluginLogger.getLogger(MacOSLibrary.class));
     }
 
     @Override

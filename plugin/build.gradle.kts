@@ -8,17 +8,18 @@ plugins {
     id("org.jetbrains.intellij")
     id("com.github.vlsi.gradle-extensions")
     kotlin("jvm")
+    kotlin("kapt")
 }
 
 val String.v: String get() = rootProject.extra["$this.version"] as String
-val isPublished by props()
+val isPublished by props(true)
 val intellijPublishToken: String by props("")
 
 intellij {
     version = "ideaPlugin".v
 }
 
-tasks.getByName<PatchPluginXmlTask>("patchPluginXml") {
+tasks.withType<PatchPluginXmlTask> {
     changeNotes(
         """
         <ul>
@@ -35,6 +36,10 @@ dependencies {
     implementation(project(":auto-dark-mode-windows"))
     implementation(project(":auto-dark-mode-macos"))
     implementation(project(":auto-dark-mode-linux"))
+
+    kapt(platform(project(":auto-dark-mode-dependencies-bom")))
+    kapt("com.google.auto.service:auto-service")
+    compileOnly("com.google.auto.service:auto-service-annotations")
 }
 
 tasks.withType<PublishTask> {

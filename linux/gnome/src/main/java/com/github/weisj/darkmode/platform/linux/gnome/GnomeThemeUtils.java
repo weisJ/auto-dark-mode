@@ -24,28 +24,11 @@
  */
 package com.github.weisj.darkmode.platform.linux.gnome;
 
-import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
-import com.github.weisj.darkmode.platform.LibraryUtil;
-import com.github.weisj.darkmode.platform.PluginLogger;
+import java.util.ArrayList;
 
-public class GnomeLibrary extends AbstractPluginLibrary {
-
-    private static final String PROJECT_NAME = "auto-dark-mode-linux-gnome";
-    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/linux-x86-64/";
-    private static final String DLL_NAME = "lib" + PROJECT_NAME + ".so";
-    private static final GnomeLibrary instance = new GnomeLibrary();
-
-    protected GnomeLibrary() {
-        super(PATH, DLL_NAME, PluginLogger.getLogger(GnomeLibrary.class));
-    }
-
-    static GnomeLibrary get() {
-        instance.updateLibrary();
-        return instance;
-    }
-
-    @Override
-    protected boolean canLoad() {
-        return LibraryUtil.isX64 && LibraryUtil.isGnome;
-    }
+public class GnomeThemeUtils {
+    /**
+     * @return a list of the currently installed GTK themes.
+     */
+    static native ArrayList<String> getInstalledThemes();
 }

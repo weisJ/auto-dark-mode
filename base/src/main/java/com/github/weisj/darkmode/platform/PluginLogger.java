@@ -22,30 +22,39 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.linux.gnome;
+package com.github.weisj.darkmode.platform;
 
-import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
-import com.github.weisj.darkmode.platform.LibraryUtil;
-import com.github.weisj.darkmode.platform.PluginLogger;
+import com.intellij.openapi.diagnostic.Logger;
 
-public class GnomeLibrary extends AbstractPluginLibrary {
+public class PluginLogger {
 
-    private static final String PROJECT_NAME = "auto-dark-mode-linux-gnome";
-    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/linux-x86-64/";
-    private static final String DLL_NAME = "lib" + PROJECT_NAME + ".so";
-    private static final GnomeLibrary instance = new GnomeLibrary();
-
-    protected GnomeLibrary() {
-        super(PATH, DLL_NAME, PluginLogger.getLogger(GnomeLibrary.class));
+    public static PluginLogger getLogger(final Class<?> type) {
+        return new PluginLogger(Logger.getInstance(type));
     }
 
-    static GnomeLibrary get() {
-        instance.updateLibrary();
-        return instance;
+    private final Logger logger;
+
+    public PluginLogger(final Logger logger) {
+        this.logger = logger;
     }
 
-    @Override
-    protected boolean canLoad() {
-        return LibraryUtil.isX64 && LibraryUtil.isGnome;
+    public void info(final String msg) {
+        logger.info(msg);
+    }
+
+    public void warn(final String msg) {
+        logger.warn(msg);
+    }
+
+    public void error(final String msg) {
+        logger.error(msg);
+    }
+
+    public void error(final Throwable e) {
+        logger.error(e);
+    }
+
+    public void error(final String msg, final Throwable e) {
+        logger.error(msg, e);
     }
 }
