@@ -23,7 +23,7 @@ tasks.withType<PatchPluginXmlTask> {
     changeNotes(
         """
         <ul>
-            <li>Added option to choose editor theme independent from IDE theme.</li>
+            <li>Added Gnome support on Linux.</li>
         </ul>
         """
     )

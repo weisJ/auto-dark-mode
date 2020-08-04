@@ -35,7 +35,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         LIGHT(searchScheme("IntelliJ Light", EditorColorsScheme.DEFAULT_SCHEME_NAME)),
         DARK(searchScheme("Darcula")),
         /*
-         *  Note: The small c in the second "contrast" is the cyrillic character `с`.
+         * Note: The small c in the second "contrast" is the cyrillic character `с`.
          * Some versions of IDEA use the incorrect character. We simply search for both version.
          */
         HIGH_CONTRAST(searchScheme("High contrast", "High сontrast"))
