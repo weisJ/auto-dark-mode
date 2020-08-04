@@ -1,111 +1,79 @@
 package com.github.weisj.darkmode
 
-import com.intellij.ide.ui.LafManager
-import com.intellij.ide.ui.laf.IntelliJLookAndFeelInfo
-import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo
+import com.github.weisj.darkmode.platform.ServiceUtil
+import com.github.weisj.darkmode.platform.settings.*
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.RoamingType
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.colors.EditorColorsScheme
-import com.intellij.openapi.editor.colors.EditorColorsScheme.DEFAULT_SCHEME_NAME
-import javax.swing.UIManager
+import kotlin.reflect.KMutableProperty0
 
-@State(name = "AutoDarkMode", storages = [Storage("auto-dark-mode.xml", roamingType = RoamingType.PER_OS)])
+/**
+ * The storage for plugin options.
+ *
+ * Settings can be declared by registering a {@link SettingsContainerProvider} service.
+ */
+@State(name = "AutoDarkMode", storages = [Storage("autoDarkMode.xml", roamingType = RoamingType.PER_OS)])
 class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> {
 
-    @Volatile
-    var darkTheme: UIManager.LookAndFeelInfo = DEFAULT_DARK_THEME
+    private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> = HashMap()
+    private val containers: List<SettingsContainer> =
+        ServiceUtil.load(SettingsContainerProvider::class.java)
+            .filter { it.enabled }
+            .map { it.create() }
+            .asSequence()
+            .toList()
 
-    @Volatile
-    var lightTheme: UIManager.LookAndFeelInfo = DEFAULT_LIGHT_THEME
-
-    @Volatile
-    var highContrastTheme: UIManager.LookAndFeelInfo = DEFAULT_HIGH_CONTRAST_THEME
-
-    @Volatile
-    var lightCodeScheme: EditorColorsScheme = DEFAULT_LIGHT_SCHEME
-
-    @Volatile
-    var darkCodeScheme: EditorColorsScheme = DEFAULT_DARK_SCHEME
-
-    @Volatile
-    var highContrastCodeScheme: EditorColorsScheme = DEFAULT_HIGH_CONTRAST_SCHEME
-
-    @Volatile
-    var checkHighContrast: Boolean = DEFAULT_CHECK_HIGH_CONTRAST
+    init {
+        containers
+            .flatMap { it.allProperties() }
+            .mapNotNull { it.asPersistent() }
+            .forEach {
+                val identifier = it.identifier
+                properties[identifier]?.let { other ->
+                    throw IllegalStateException(
+                        "$it clashes with $other. Property with identifier $identifier already defined."
+                    )
+                }
+                properties[it.identifier] = it
+            }
+    }
 
     override fun getState(): State? {
-        return State(
-            darkTheme.name, darkTheme.className,
-            lightTheme.name, lightTheme.className,
-            highContrastTheme.name, highContrastTheme.className,
-            lightCodeScheme.name, darkCodeScheme.name,
-            highContrastCodeScheme.name, checkHighContrast
-        )
+        return State(properties.map { (k, v) -> Entry(k.groupIdentifier, k.name, v.value) }.toMutableList())
     }
 
-    override fun loadState(state: State) {
-        val lafManager = LafManager.getInstance()
-        darkTheme = lafManager.installedLookAndFeels
-            .first { it.name == state.darkName && it.className == state.darkClassName }
-            ?: DEFAULT_DARK_THEME
-        lightTheme = lafManager.installedLookAndFeels
-            .first { it.name == state.lightName && it.className == state.lightClassName }
-            ?: DEFAULT_LIGHT_THEME
-        highContrastTheme = lafManager.installedLookAndFeels
-            .first { it.name == state.highContrastName && it.className == state.highContrastNameClassName }
-            ?: DEFAULT_HIGH_CONTRAST_THEME
-
-        val schemes = EditorColorsManager.getInstance().allSchemes
-        lightCodeScheme = schemes
-            .first { it.name == state.lightSchemeName }
-            ?: DEFAULT_LIGHT_SCHEME
-        darkCodeScheme = schemes
-            .first { it.name == state.darkSchemeName }
-            ?: DEFAULT_DARK_SCHEME
-        highContrastCodeScheme = schemes
-            .first { it.name == state.highContrastSchemeName }
-            ?: DEFAULT_HIGH_CONTRAST_SCHEME
-
-        checkHighContrast = state.checkHighContrast ?: DEFAULT_CHECK_HIGH_CONTRAST
-    }
-
-    data class State(
-        var darkName: String? = DEFAULT_DARK_THEME.name,
-        var darkClassName: String? = DEFAULT_DARK_THEME.className,
-        var lightName: String? = DEFAULT_LIGHT_THEME.name,
-        var lightClassName: String? = DEFAULT_LIGHT_THEME.className,
-        var highContrastName: String? = DEFAULT_HIGH_CONTRAST_THEME.name,
-        var highContrastNameClassName: String? = DEFAULT_HIGH_CONTRAST_THEME.className,
-        var lightSchemeName: String? = DEFAULT_LIGHT_SCHEME.name,
-        var darkSchemeName: String? = DEFAULT_DARK_SCHEME.name,
-        var highContrastSchemeName: String? = DEFAULT_HIGH_CONTRAST_SCHEME.name,
-        var checkHighContrast: Boolean? = DEFAULT_CHECK_HIGH_CONTRAST
-    )
-
-    companion object {
-        const val EDITABLE_COPY_PREFIX = "_@user_"
-
-        private fun searchScheme(vararg names: String): EditorColorsScheme = EditorColorsManager.getInstance().run {
-            names.mapNotNull { name ->
-                allSchemes.find { it.name == name } ?: allSchemes.find { it.name == "${EDITABLE_COPY_PREFIX}${name}" }
-            }.firstOrNull() ?: globalScheme
+    override fun loadState(toLoad: State) {
+        toLoad.entries.forEach {
+            properties.getOrPut(
+                PropertyIdentifier(it.groupIdentifier, it.name),
+                { PersistentValuePropertyStub(it.name, it.value, it.groupIdentifier) }
+            ).value = it.value
         }
+        settingsLoaded()
+    }
 
-        val DEFAULT_DARK_THEME: UIManager.LookAndFeelInfo = DarculaLookAndFeelInfo()
-        val DEFAULT_LIGHT_THEME: UIManager.LookAndFeelInfo = IntelliJLookAndFeelInfo()
-        val DEFAULT_HIGH_CONTRAST_THEME: UIManager.LookAndFeelInfo = LafManager.getInstance()
-            .installedLookAndFeels.find { it.name.toLowerCase() == "high contrast" }
-            ?: IntelliJLookAndFeelInfo()
+    fun settingsLoaded() {
+        containers.forEach { it.onSettingsLoaded() }
+    }
 
-        val DEFAULT_LIGHT_SCHEME: EditorColorsScheme = searchScheme("IntelliJ Light", DEFAULT_SCHEME_NAME)
-        val DEFAULT_DARK_SCHEME: EditorColorsScheme = searchScheme("Darcula")
+    data class PropertyIdentifier(val groupIdentifier: String, val name: String)
 
-        // Note: The small c in the second contrast is the cyrillic letter `с`.
-        val DEFAULT_HIGH_CONTRAST_SCHEME: EditorColorsScheme = searchScheme("High contrast", "High сontrast")
+    private val <T> ValueProperty<T>.identifier
+        get() = PropertyIdentifier(group.identifier, name)
 
-        const val DEFAULT_CHECK_HIGH_CONTRAST = true
+    data class State(var entries: MutableList<Entry> = mutableListOf())
+
+    data class Entry(var groupIdentifier: String = "", var name: String = "", var value: String = "")
+
+    private class PersistentValuePropertyStub(
+        override val name: String,
+        override var value: String,
+        groupIdentifier: String,
+        override val description: String = "",
+        override var active: Boolean = true
+    ) : PersistentValueProperty<Any>, Observable<ValueProperty<*>> by DefaultObservable() {
+        override val group: SettingsGroup = DefaultSettingsGroup(null, groupIdentifier)
+        override var backingValue: Any by ::value.withOutType()
     }
 }

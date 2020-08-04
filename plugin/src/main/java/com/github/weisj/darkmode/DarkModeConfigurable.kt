@@ -1,69 +1,105 @@
 package com.github.weisj.darkmode
 
-import com.intellij.ide.ui.LafManager
+import com.github.weisj.darkmode.platform.settings.*
 import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
-import com.intellij.openapi.util.text.StringUtil
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
-import com.intellij.ui.layout.InnerCell
-import com.intellij.ui.layout.Row
-import com.intellij.ui.layout.panel
-import javax.swing.UIManager
-import kotlin.reflect.KMutableProperty0
+import com.intellij.ui.layout.*
+import com.intellij.util.castSafelyTo
+import javax.swing.JComboBox
+import javax.swing.JComponent
+import javax.swing.JToggleButton
 
-class DarkModeConfigurable(private val lafManager: LafManager) : BoundConfigurable("Auto Dark Mode") {
+class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     override fun createPanel(): DialogPanel {
         val options = ServiceManager.getService(AutoDarkModeOptions::class.java)
-
-        val lookAndFeels = lafManager.installedLookAndFeels.asList()
-        val lafRenderer = SimpleListCellRenderer.create("") { obj: UIManager.LookAndFeelInfo -> obj.name }
-
-        val schemes = EditorColorsManager.getInstance().allSchemes.asList()
-        val schemeRenderer = SimpleListCellRenderer.create("") { obj: EditorColorsScheme ->
-            StringUtil.trimStart(obj.name, AutoDarkModeOptions.EDITABLE_COPY_PREFIX)
-        }
-
-        fun Row.themeMode(
-            label: String,
-            themeProperty: KMutableProperty0<UIManager.LookAndFeelInfo>,
-            schemeProperty: KMutableProperty0<EditorColorsScheme>
-        ) {
-            row(label) {
-                cell {
-                    comboBox(CollectionComboBoxModel(lookAndFeels), themeProperty, renderer = lafRenderer)
-                    label(" / ")
-                    comboBox(CollectionComboBoxModel(schemes), schemeProperty, renderer = schemeRenderer)
-                }
-            }
-        }
+        val rowMap: MutableMap<ValueProperty<*>, Row> = mutableMapOf()
 
         return panel {
-            titledRow("IDE Theme / Editor Theme") {
-                themeMode("Light Mode:", options::lightTheme, options::lightCodeScheme)
-                themeMode("Dark Mode:", options::darkTheme, options::darkCodeScheme)
-                themeMode("High Contrast Mode:", options::highContrastTheme, options::highContrastCodeScheme)
-            }
-            titledRow("Options") {
-                row {
-                    checkBox("Check for high contrast", options::checkHighContrast)
-                }
+            options.containers.forEach { container ->
+                container.namedGroups.forEach { addGroup(it, rowMap) }
+                addGroup(container.unnamedGroup, UNNAMED_GROUP_TITLE, rowMap)
             }
         }
     }
 
-    private fun Row.cellRow(title: String = "", init: InnerCell.() -> Unit) {
-        row(title) {
-            cell { this.init() }
+    private fun Row.addProperty(valueProp: ValueProperty<Any>, rowMap: MutableMap<ValueProperty<*>, Row>) {
+        val choiceProperty = valueProp.castSafelyTo<ChoiceProperty<Any, Any>>()
+        val property = valueProp.effectiveProperty
+        val rowName = if (property.get() is Boolean) "" else valueProp.description
+        lateinit var comp: JComponent
+        rowMap[valueProp] = maybeNamedRow(rowName) {
+            comp = when {
+                choiceProperty != null -> comboBox(
+                    CollectionComboBoxModel(choiceProperty.choices),
+                    choiceProperty::choiceValue,
+                    renderer = SimpleListCellRenderer.create<Any>("", choiceProperty.renderer)
+                ).component
+                property.get() is Boolean -> {
+                    checkBox(valueProp.description, property.withType()!!).component
+                }
+                property.get() is String -> {
+                    textField(property.withType()!!).component
+                }
+                else -> throw IllegalArgumentException("Not yet implemented")
+            }
+        }.also {
+            valueProp.registerListener(ValueProperty<*>::active) { _, new -> it.enabled = new }
         }
+        val propertyController = valueProp.castSafelyTo<PropertyController<Any>>()
+        if (propertyController != null) {
+            val listener : (Boolean) -> Unit = { enabled -> propertyController.controlled.forEach { it.value.active = enabled } }
+            comp.toPredicate(propertyController.predicate)
+                ?.let {
+                    listener(it())
+                    it.addListener(listener)
+                }
+        }
+    }
+
+    private fun JComponent.toPredicate(predicate: (Any?) -> Boolean): ComponentPredicate? {
+        return when (this) {
+            is JComboBox<*> -> ComboBoxPredicate(this) { predicate(it) }
+            is JToggleButton -> object : ComponentPredicate() {
+                override fun invoke(): Boolean = predicate(isSelected)
+
+                override fun addListener(listener: (Boolean) -> Unit) {
+                    addChangeListener { listener(predicate(isSelected)) }
+                }
+            }
+            else -> null
+        }
+    }
+
+    private fun LayoutBuilder.addGroup(
+        properties: SettingsGroup,
+        name: String?,
+        rowMap: MutableMap<ValueProperty<*>, Row>
+    ) {
+        maybeTitledRow(name) { properties.forEach { addProperty(it, rowMap) } }
+    }
+
+    private fun LayoutBuilder.addGroup(group: NamedSettingsGroup, rowMap: MutableMap<ValueProperty<*>, Row>) =
+        addGroup(group, group.name, rowMap)
+
+    private fun RowBuilder.maybeTitledRow(name: String?, init: Row.() -> Unit): Row {
+        return if (!name.isNullOrEmpty()) titledRow(name, init) else row { init() }
+    }
+
+    private fun RowBuilder.maybeNamedRow(name: String?, init: Row.() -> Unit): Row {
+        return if (!name.isNullOrEmpty()) row(name) { init() } else row { init() }
     }
 
     override fun apply() {
         super.apply()
         ServiceManager.getService(AutoDarkMode::class.java).onSettingsChange()
+    }
+
+    companion object {
+        const val SETTINGS_TITLE: String = "Auto Dark Mode"
+        val UNNAMED_GROUP_TITLE: String? = null
     }
 }
