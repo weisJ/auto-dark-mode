@@ -2,6 +2,7 @@ package com.github.weisj.darkmode
 
 import com.intellij.ide.plugins.DynamicPluginListener
 import com.intellij.ide.plugins.IdeaPluginDescriptor
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.ServiceManager
 
 class AutoDarkModePluginListener : DynamicPluginListener {
@@ -11,6 +12,6 @@ class AutoDarkModePluginListener : DynamicPluginListener {
     }
 
     override fun beforePluginUnload(pluginDescriptor: IdeaPluginDescriptor, isUpdate: Boolean) {
-        ServiceManager.getServiceIfCreated(AutoDarkMode::class.java)?.pluginUnloaded()
+        ApplicationManager.getApplication().getServiceIfCreated(AutoDarkMode::class.java)?.pluginUnloaded()
     }
 }
