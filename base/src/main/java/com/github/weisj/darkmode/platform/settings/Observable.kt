@@ -32,9 +32,9 @@ class ObservableManager<T> {
             properties[prop.name] = value
         }
 
-        @ExperimentalStdlibApi
-        override operator fun getValue(thisRef: T, property: KProperty<*>) =
-            type.safeCast(properties[property.name])!!
+        @Suppress("UNCHECKED_CAST")
+        override operator fun getValue(thisRef: T, property: KProperty<*>) : V =
+            properties[property.name] as V
 
         override operator fun setValue(thisRef: T, property: KProperty<*>, value: V) =
             updateValue(property.name, value)
