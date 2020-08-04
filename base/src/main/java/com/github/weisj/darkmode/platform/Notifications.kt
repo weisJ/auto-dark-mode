@@ -25,15 +25,39 @@
 package com.github.weisj.darkmode.platform
 
 object Notifications : NotificationsService by ServiceUtil.load(
-    NotificationsService::class.java).iterator().next()
+    NotificationsService::class.java).asSequence().firstOrNull()?:LogNotificationsService()
 
 interface NotificationsService {
+
+    /**
+     * Display the notification in the ide. HTML content is allowed.
+     *
+     * @param message the message
+     * @param type the notification type
+     * @param showSettingsLink Whether a link to the plugin settings should be added to the notification.
+     */
     fun dispatchNotification(
         message: String,
-        type: NotificationType = NotificationType.INFO
+        type: NotificationType = NotificationType.INFO,
+        showSettingsLink : Boolean = false
     )
 }
 
 enum class NotificationType {
     INFO, WARNING, ERROR
+}
+
+private class LogNotificationsService : NotificationsService {
+
+    override fun dispatchNotification(message: String, type: NotificationType, showSettingsLink: Boolean) {
+        when(type) {
+            NotificationType.INFO -> LOGGER.info(message)
+            NotificationType.WARNING -> LOGGER.warn(message)
+            NotificationType.ERROR -> LOGGER.error(message)
+        }
+    }
+
+    companion object {
+        private val LOGGER = PluginLogger.getLogger(Notifications::class.java)
+    }
 }

@@ -105,9 +105,10 @@ object GnomeSettings : DefaultSettingsContainer() {
             Notifications.dispatchNotification(
                 """
                 Auto Dark Mode is currently guessing whether the current Gnome theme
-                is dark or light. You can explicitly specify your light/dark/high-contrast themes
-                in "File | Settings | Auto Dark Mode" for better results.
-                """.trimIndent()
+                is dark or light. You can explicitly specify your light, dark and high-contrast
+                theme in <nobr>"File | Settings | Auto Dark Mode"</nobr> for better results.
+                """.trimIndent(),
+                showSettingsLink = true
             )
             guessingMechanismInfoLogged = true
         }
