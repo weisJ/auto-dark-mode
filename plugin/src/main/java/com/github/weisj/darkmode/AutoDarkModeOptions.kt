@@ -11,17 +11,13 @@ import kotlin.reflect.KMutableProperty0
 /**
  * The storage for plugin options.
  *
- * Settings can be declared by registering a {@link SettingsContainer} service.
- *
- * Options can be read and written to by addressing them with their name.
- * Though accessing fields directly through this class is discouraged. Instead use them through the
- * {@link SettingsContainer} that provides them.
+ * Settings can be declared by registering a {@link SettingsContainerProvider} service.
  */
 @State(name = "AutoDarkMode", storages = [Storage("autoDarkMode.xml", roamingType = RoamingType.PER_OS)])
 class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> {
 
-    val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> = HashMap()
-    val containers: List<SettingsContainer> =
+    private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> = HashMap()
+    private val containers: List<SettingsContainer> =
         ServiceUtil.load(SettingsContainerProvider::class.java)
             .filter { it.enabled }
             .map { it.create() }
@@ -42,25 +38,6 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
                 properties[it.identifier] = it
             }
     }
-
-    inline fun <reified T : Any> getProperty(identifier: PropertyIdentifier): KMutableProperty0<T>? {
-        return properties[identifier]?.let { it::backingValue.withType() }
-    }
-
-    inline fun <reified T : Any> getReadProperty(identifier: PropertyIdentifier): KMutableProperty0<T>? {
-        return properties[identifier]?.let { it::backingValue.withOutType() }
-    }
-
-    inline fun <reified T : Any> getWriteProperty(identifier: PropertyIdentifier): KMutableProperty0<T>? {
-        return properties[identifier]?.let { it::backingValue.withInType() }
-    }
-
-    inline fun <reified T : Any> readOrNull(identifier: PropertyIdentifier): T? = getReadProperty<T>(identifier)?.get()
-
-    inline fun <reified T : Any> read(identifier: PropertyIdentifier): T = readOrNull(identifier)!!
-
-    inline fun <reified T : Any> write(identifier: PropertyIdentifier, value: T) =
-        getWriteProperty<T>(identifier)?.set(value)
 
     override fun getState(): State? {
         return State(properties.map { (k, v) -> Entry(k.groupIdentifier, k.name, v.value) }.toMutableList())
