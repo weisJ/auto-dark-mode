@@ -11,7 +11,6 @@ plugins {
 library {
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
-        jvmImplementation("com.github.weisj:darklaf-native-utils")
     }
     targetMachines.addAll(machines.windows.x86, machines.windows.x86_64)
     variants.configureEach {
