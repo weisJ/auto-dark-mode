@@ -1,6 +1,7 @@
 package com.github.weisj.darkmode
 
 import com.github.weisj.darkmode.platform.Notifications
+import com.github.weisj.darkmode.platform.OneTimeAction
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 import com.intellij.ide.ui.LafManager
@@ -14,7 +15,7 @@ import javax.swing.UIManager
 @AutoService(SettingsContainerProvider::class)
 class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ GeneralThemeSettings })
 
-object GeneralThemeSettings : DefaultSettingsContainer() {
+object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_settings") {
 
     /**
      * Default values for the LookAndFeel which are guaranteed to be bundled with any

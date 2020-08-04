@@ -2,6 +2,7 @@ package com.github.weisj.darkmode.platform.linux.gnome
 
 import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.Notifications
+import com.github.weisj.darkmode.platform.OneTimeAction
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 
@@ -12,7 +13,7 @@ data class GtkTheme(val name: String) : Comparable<GtkTheme> {
     override fun compareTo(other: GtkTheme): Int = name.compareTo(other.name)
 }
 
-object GnomeSettings : DefaultSettingsContainer() {
+object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
 
     /**
      * This enum holds default values for the light, dark, and high contrast GTK themes.
@@ -43,10 +44,18 @@ object GnomeSettings : DefaultSettingsContainer() {
     var guessLightAndDarkThemes = DEFAULT_GUESS_LIGHT_AND_DARK_THEMES
 
     /*
-     * Ensures the information about the guessing mechanism is only logged
-     * once.
+     * Notify user about guessing mechanism. This notice should only be logged once.
      */
-    private var guessingMechanismInfoLogged = false
+    private val guessingMechanismLogAction = OneTimeAction {
+        Notifications.dispatchNotification(
+            """
+                Auto Dark Mode is currently guessing whether the current Gnome theme
+                is dark or light. You can explicitly specify your light, dark and high-contrast
+                theme in <nobr>"File | Settings | Auto Dark Mode"</nobr> for better results.
+                """.trimIndent(),
+            showSettingsLink = true
+        )
+    }
 
     init {
         if (!GnomeLibrary.get().isLoaded) {
@@ -96,22 +105,12 @@ object GnomeSettings : DefaultSettingsContainer() {
         }
 
         hidden {
-            persistentBooleanProperty(value = ::guessingMechanismInfoLogged)
+            persistentBooleanProperty(value = guessingMechanismLogAction::executed)
         }
     }
 
     override fun onSettingsLoaded() {
-        if (!guessingMechanismInfoLogged) {
-            Notifications.dispatchNotification(
-                """
-                Auto Dark Mode is currently guessing whether the current Gnome theme
-                is dark or light. You can explicitly specify your light, dark and high-contrast
-                theme in <nobr>"File | Settings | Auto Dark Mode"</nobr> for better results.
-                """.trimIndent(),
-                showSettingsLink = true
-            )
-            guessingMechanismInfoLogged = true
-        }
+        guessingMechanismLogAction()
     }
 
     private fun readGtkTheme(info: GtkTheme): String = info.name

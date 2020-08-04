@@ -20,7 +20,7 @@ import kotlin.reflect.KMutableProperty0
 @State(name = "AutoDarkMode", storages = [Storage("autoDarkMode.xml", roamingType = RoamingType.PER_OS)])
 class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> {
 
-    val properties: MutableMap<String, PersistentValueProperty<Any>> = HashMap()
+    val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> = HashMap()
     val containers: List<SettingsContainer> =
         ServiceUtil.load(SettingsContainerProvider::class.java)
             .filter { it.enabled }
@@ -32,34 +32,46 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
         containers
             .flatMap { it.allProperties() }
             .mapNotNull { it.asPersistent() }
-            .forEach { properties[it.name] = it }
+            .forEach {
+                val identifier = it.identifier
+                properties[identifier]?.let { other ->
+                    throw IllegalStateException(
+                        "$it clashes with $other. Property with identifier $identifier already defined."
+                    )
+                }
+                properties[it.identifier] = it
+            }
     }
 
-    inline fun <reified T : Any> getProperty(name: String): KMutableProperty0<T>? {
-        return properties[name]?.let { it::backingValue.withType() }
+    inline fun <reified T : Any> getProperty(identifier: PropertyIdentifier): KMutableProperty0<T>? {
+        return properties[identifier]?.let { it::backingValue.withType() }
     }
 
-    inline fun <reified T : Any> getReadProperty(name: String): KMutableProperty0<T>? {
-        return properties[name]?.let { it::backingValue.withOutType() }
+    inline fun <reified T : Any> getReadProperty(identifier: PropertyIdentifier): KMutableProperty0<T>? {
+        return properties[identifier]?.let { it::backingValue.withOutType() }
     }
 
-    inline fun <reified T : Any> getWriteProperty(name: String): KMutableProperty0<T>? {
-        return properties[name]?.let { it::backingValue.withInType() }
+    inline fun <reified T : Any> getWriteProperty(identifier: PropertyIdentifier): KMutableProperty0<T>? {
+        return properties[identifier]?.let { it::backingValue.withInType() }
     }
 
-    inline fun <reified T : Any> readOrNull(name: String): T? = getReadProperty<T>(name)?.get()
+    inline fun <reified T : Any> readOrNull(identifier: PropertyIdentifier): T? = getReadProperty<T>(identifier)?.get()
 
-    inline fun <reified T : Any> read(name: String): T = readOrNull(name)!!
+    inline fun <reified T : Any> read(identifier: PropertyIdentifier): T = readOrNull(identifier)!!
 
-    inline fun <reified T : Any> write(name: String, value: T) = getWriteProperty<T>(name)?.set(value)
+    inline fun <reified T : Any> write(identifier: PropertyIdentifier, value: T) =
+        getWriteProperty<T>(identifier)?.set(value)
 
     override fun getState(): State? {
-        return State(properties.map { (k, v) -> Entry(k, v.value) }.toMutableList())
+        return State(properties.map { (k, v) -> Entry(k.groupIdentifier, k.name, v.value) }.toMutableList())
     }
 
     override fun loadState(toLoad: State) {
         toLoad.entries.forEach {
-            properties.getOrPut(it.key, { PersistentValuePropertyStub(it.key, it.value) }).value = it.value
+            properties.getOrPut(
+                PropertyIdentifier(it.groupIdentifier, it.name),
+                { PersistentValuePropertyStub(it.name, it.value, it.groupIdentifier) }
+            ).value = it.value
         }
         settingsLoaded()
     }
@@ -68,18 +80,23 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
         containers.forEach { it.onSettingsLoaded() }
     }
 
+    data class PropertyIdentifier(val groupIdentifier: String, val name: String)
+
+    private val <T> ValueProperty<T>.identifier
+        get() = PropertyIdentifier(group.identifier, name)
+
     data class State(var entries: MutableList<Entry> = mutableListOf())
 
-    data class Entry(var key: String = "", var value: String = "")
+    data class Entry(var groupIdentifier: String = "", var name: String = "", var value: String = "")
 
     private class PersistentValuePropertyStub(
         override val name: String,
         override var value: String,
+        groupIdentifier: String,
         override val description: String = "",
         override var active: Boolean = true
     ) : PersistentValueProperty<Any>, Observable<ValueProperty<*>> by DefaultObservable() {
-        override var backingValue: Any
-            get() = value
-            set(_) = throw IllegalStateException("Settings value of stub property $name.")
+        override val group: SettingsGroup = DefaultSettingsGroup(null, groupIdentifier)
+        override var backingValue: Any by ::value.withOutType()
     }
 }

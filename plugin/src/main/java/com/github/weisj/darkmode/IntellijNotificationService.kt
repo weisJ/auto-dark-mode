@@ -36,7 +36,6 @@ object IntellijNotificationService : NotificationsService {
     private var started = false
 
     fun initialize() {
-        println("Initialize")
         started = true
         val project = ProjectUtil.getOpenProjects().firstOrNull()
         while (messageQueue.isNotEmpty()) {
@@ -58,7 +57,6 @@ object IntellijNotificationService : NotificationsService {
             }
         }
         if (!started) {
-            println("Offer")
             messageQueue.offer(notification)
         } else {
             notification.notify(ProjectUtil.getOpenProjects().firstOrNull())
