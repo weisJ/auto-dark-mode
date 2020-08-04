@@ -4,11 +4,13 @@ import com.github.weisj.darkmode.platform.NotificationType
 import com.github.weisj.darkmode.platform.NotificationsService
 import com.google.auto.service.AutoService
 import com.intellij.ide.impl.ProjectUtil
+import com.intellij.ide.plugins.PluginManager
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationDisplayType
 import com.intellij.notification.NotificationGroup
 import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.util.IconLoader
 import java.util.*
 
 typealias IntelliJNotificationType = com.intellij.notification.NotificationType
@@ -21,6 +23,8 @@ typealias IntelliJNotificationType = com.intellij.notification.NotificationType
 class IntellijNotificationServiceProxy : NotificationsService by IntellijNotificationService
 
 object IntellijNotificationService : NotificationsService {
+
+    private val ICON = IconLoader.getIcon("/META-INF/pluginIcon.svg")
 
     private val NOTIFICATION_GROUP = NotificationGroup(
         displayId = "Auto Dark Mode",
@@ -50,6 +54,7 @@ object IntellijNotificationService : NotificationsService {
             content = message,
             type = type.toIntelliJType()
         ).also {
+            it.icon = ICON
             if (showSettingsLink) {
                 it.addAction(NotificationAction.create("View Settings") { _, _ ->
                     ShowSettingsUtil.getInstance().showSettingsDialog(null, DarkModeConfigurable::class.java)
