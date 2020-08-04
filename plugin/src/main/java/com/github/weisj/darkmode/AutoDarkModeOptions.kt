@@ -17,7 +17,7 @@ import kotlin.reflect.KMutableProperty0
 class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> {
 
     private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> = HashMap()
-    private val containers: List<SettingsContainer> =
+    val containers: List<SettingsContainer> =
         ServiceUtil.load(SettingsContainerProvider::class.java)
             .filter { it.enabled }
             .map { it.create() }

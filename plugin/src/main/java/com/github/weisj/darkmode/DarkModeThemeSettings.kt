@@ -1,7 +1,5 @@
 package com.github.weisj.darkmode
 
-import com.github.weisj.darkmode.platform.Notifications
-import com.github.weisj.darkmode.platform.OneTimeAction
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 import com.intellij.ide.ui.LafManager
@@ -10,6 +8,7 @@ import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
+import com.intellij.openapi.util.text.StringUtil
 import javax.swing.UIManager
 
 @AutoService(SettingsContainerProvider::class)
@@ -17,11 +16,13 @@ class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ Genera
 
 object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_settings") {
 
+    private const val EDITABLE_COPY_PREFIX = "_@user_"
+
     /**
      * Default values for the LookAndFeel which are guaranteed to be bundled with any
      * IntelliJ based product.
      */
-    private enum class DefaultLaf(val info : UIManager.LookAndFeelInfo) {
+    private enum class DefaultLaf(val info: UIManager.LookAndFeelInfo) {
         DARK(DarculaLookAndFeelInfo()),
         LIGHT(searchLaf("IntelliJ Light") ?: IntelliJLookAndFeelInfo()),
         HIGH_CONTRAST(searchLaf("High Contrast") ?: IntelliJLookAndFeelInfo())
@@ -35,7 +36,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         LIGHT(searchScheme("IntelliJ Light", EditorColorsScheme.DEFAULT_SCHEME_NAME)),
         DARK(searchScheme("Darcula")),
         /*
-         *  Note: The small c in the second "contrast" is the cyrillic character `с`.
+         * Note: The small c in the second "contrast" is the cyrillic character `с`.
          * Some versions of IDEA use the incorrect character. We simply search for both version.
          */
         HIGH_CONTRAST(searchScheme("High contrast", "High сontrast"))
@@ -87,7 +88,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
 
         group("Editor Theme") {
             val installedSchemes = EditorColorsManager.getInstance().allSchemes.asList()
-            val schemeRenderer = EditorColorsScheme::getDisplayName
+            val schemeRenderer = { s: EditorColorsScheme -> StringUtil.trimStart(s.name, EDITABLE_COPY_PREFIX) }
             val schemeTransformer = transformerOf(write = ::parseScheme, read = ::readScheme.or(""))
 
             persistentChoiceProperty(
@@ -131,7 +132,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         return EditorColorsManager.getInstance().run {
             names.mapNotNull { name ->
                 allSchemes.firstOrNull { it.name == name }
-                    ?: allSchemes.firstOrNull { it.name == "${Scheme.EDITABLE_COPY_PREFIX}${name}" }
+                    ?: allSchemes.firstOrNull { it.name == "${EDITABLE_COPY_PREFIX}${name}" }
             }.firstOrNull() ?: globalScheme
         }
     }

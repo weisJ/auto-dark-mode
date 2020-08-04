@@ -23,9 +23,9 @@ class IntellijNotificationServiceProxy : NotificationsService by IntellijNotific
 object IntellijNotificationService : NotificationsService {
 
     private val NOTIFICATION_GROUP = NotificationGroup(
-        displayId = "Auto Dark Mode",
-        displayType = NotificationDisplayType.STICKY_BALLOON,
-        isLogByDefault = true
+        "Auto Dark Mode",
+        NotificationDisplayType.STICKY_BALLOON,
+        true
     )
 
     /*
@@ -45,10 +45,10 @@ object IntellijNotificationService : NotificationsService {
 
     override fun dispatchNotification(message: String, type: NotificationType, showSettingsLink: Boolean) {
         val notification = NOTIFICATION_GROUP.createNotification(
-            title = "Auto Dark Mode",
-            subtitle = null,
-            content = message,
-            type = type.toIntelliJType()
+            "Auto Dark Mode",
+            null,
+            message,
+            type.toIntelliJType()
         ).also {
             if (showSettingsLink) {
                 it.addAction(NotificationAction.create("View Settings") { _, _ ->
