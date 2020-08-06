@@ -43,10 +43,14 @@ class AutoDarkMode : Disposable, ThemeCallback {
     override fun themeChanged(isDark: Boolean, isHighContrast: Boolean) {
         val (lafTarget, colorSchemeTarget) = getTargetLaf(isDark, isHighContrast)
         resetRequests()
-        if (lafTarget != LafManager.getInstance().currentLookAndFeel) {
+        if (GeneralThemeSettings.changeIdeTheme
+            && lafTarget != LafManager.getInstance().currentLookAndFeel
+        ) {
             updateLaf(lafTarget)
         }
-        if (colorSchemeTarget != EditorColorsManager.getInstance().globalScheme) {
+        if (GeneralThemeSettings.changeEditorTheme
+            && colorSchemeTarget != EditorColorsManager.getInstance().globalScheme
+        ) {
             updateEditorScheme(colorSchemeTarget)
         }
     }
@@ -54,9 +58,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     private fun getTargetLaf(dark: Boolean, highContrast: Boolean): Pair<LookAndFeelInfo, EditorColorsScheme> {
         return GeneralThemeSettings.run {
             when {
-                highContrast && checkHighContrast -> {
-                    Pair(highContrastTheme, highContrastCodeScheme)
-                }
+                highContrast && checkHighContrast -> Pair(highContrastTheme, highContrastCodeScheme)
                 dark -> Pair(darkTheme, darkCodeScheme)
                 else -> Pair(lightTheme, lightCodeScheme)
             }

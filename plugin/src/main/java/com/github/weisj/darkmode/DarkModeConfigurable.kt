@@ -6,7 +6,9 @@ import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
-import com.intellij.ui.layout.*
+import com.intellij.ui.layout.Row
+import com.intellij.ui.layout.RowBuilder
+import com.intellij.ui.layout.panel
 import com.intellij.util.castSafelyTo
 import javax.swing.JComboBox
 import javax.swing.JComponent
@@ -16,22 +18,39 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     override fun createPanel(): DialogPanel {
         val options = ServiceManager.getService(AutoDarkModeOptions::class.java)
-        val rowMap: MutableMap<ValueProperty<*>, Row> = mutableMapOf()
 
         return panel {
             options.containers.forEach { container ->
-                container.namedGroups.forEach { addGroup(it, rowMap) }
-                addGroup(container.unnamedGroup, UNNAMED_GROUP_TITLE, rowMap)
+                container.subgroups.forEach { addGroup(it) }
+                addGroup(container.unnamedGroup, UNNAMED_GROUP_TITLE)
             }
         }
     }
 
-    private fun Row.addProperty(valueProp: ValueProperty<Any>, rowMap: MutableMap<ValueProperty<*>, Row>) {
+    private fun RowBuilder.addGroup(group: NamedSettingsGroup) = addGroup(group, group.name)
+
+    private fun RowBuilder.addGroup(
+        properties: SettingsGroup,
+        name: String?
+    ) {
+        maybeTitledRow(name) {
+            properties.forEach { addProperty(it) }
+            properties.subgroups.forEach {
+                if (it.name.isEmpty()) {
+                    it.forEach { addProperty(it) }
+                } else {
+                    addGroup(it)
+                }
+            }
+        }
+    }
+
+    private fun Row.addProperty(valueProp: ValueProperty<Any>) {
         val choiceProperty = valueProp.castSafelyTo<ChoiceProperty<Any, Any>>()
         val property = valueProp.effectiveProperty
         val rowName = if (property.get() is Boolean) "" else valueProp.description
         lateinit var comp: JComponent
-        rowMap[valueProp] = maybeNamedRow(rowName) {
+        maybeNamedRow(rowName) {
             comp = when {
                 choiceProperty != null -> comboBox(
                     CollectionComboBoxModel(choiceProperty.choices),
@@ -44,46 +63,22 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
                 property.get() is String -> {
                     textField(property.withType()!!).component
                 }
-                else -> throw IllegalArgumentException("Not yet implemented")
+                else -> throw IllegalArgumentException("Not yet implemented!")
             }
         }.also {
-            valueProp.registerListener(ValueProperty<*>::active) { _, new -> it.enabled = new }
-        }
-        val propertyController = valueProp.castSafelyTo<PropertyController<Any>>()
-        if (propertyController != null) {
-            val listener : (Boolean) -> Unit = { enabled -> propertyController.controlled.forEach { it.value.active = enabled } }
-            comp.toPredicate(propertyController.predicate)
-                ?.let {
-                    listener(it())
-                    it.addListener(listener)
-                }
-        }
-    }
-
-    private fun JComponent.toPredicate(predicate: (Any?) -> Boolean): ComponentPredicate? {
-        return when (this) {
-            is JComboBox<*> -> ComboBoxPredicate(this) { predicate(it) }
-            is JToggleButton -> object : ComponentPredicate() {
-                override fun invoke(): Boolean = predicate(isSelected)
-
-                override fun addListener(listener: (Boolean) -> Unit) {
-                    addChangeListener { listener(predicate(isSelected)) }
-                }
+            valueProp.activeCondition.registerListener(Condition::value) { _, _ ->
+                it.enabled = valueProp.activeCondition.value
             }
-            else -> null
+        }
+        comp.addPreviewListener { valueProp.effective<Any>().preview = it }
+    }
+
+    private fun JComponent.addPreviewListener(listener: (Any) -> Unit) {
+        when (this) {
+            is JComboBox<*> -> addItemListener { listener(it.item) }
+            is JToggleButton -> addChangeListener { listener(isSelected) }
         }
     }
-
-    private fun LayoutBuilder.addGroup(
-        properties: SettingsGroup,
-        name: String?,
-        rowMap: MutableMap<ValueProperty<*>, Row>
-    ) {
-        maybeTitledRow(name) { properties.forEach { addProperty(it, rowMap) } }
-    }
-
-    private fun LayoutBuilder.addGroup(group: NamedSettingsGroup, rowMap: MutableMap<ValueProperty<*>, Row>) =
-        addGroup(group, group.name, rowMap)
 
     private fun RowBuilder.maybeTitledRow(name: String?, init: Row.() -> Unit): Row {
         return if (!name.isNullOrEmpty()) titledRow(name, init) else row { init() }
