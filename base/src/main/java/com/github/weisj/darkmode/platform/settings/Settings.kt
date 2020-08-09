@@ -202,9 +202,13 @@ class SimpleValueProperty<T : Any> internal constructor(
 ) : ValueProperty<T>, Observable<ValueProperty<T>> by DefaultObservable() {
     override val description: String = description ?: property.name
     override val name: String = name ?: property.name
-    override var value: T by property
+    override var value: T by observable(property)
     override var preview: T by observable(value)
     override var activeCondition: Condition = conditionOf(true)
+
+    init {
+        registerListener(ValueProperty<T>::value) { _, new -> preview = new }
+    }
 }
 
 open class SimpleTransformingValueProperty<R : Any, T : Any> internal constructor(

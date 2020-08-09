@@ -66,6 +66,7 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
                 else -> throw IllegalArgumentException("Not yet implemented!")
             }
         }.also {
+            it.enabled = valueProp.activeCondition()
             valueProp.activeCondition.registerListener(Condition::value) { _, _ ->
                 it.enabled = valueProp.activeCondition.value
             }
