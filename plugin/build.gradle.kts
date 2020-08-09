@@ -23,7 +23,8 @@ tasks.withType<PatchPluginXmlTask> {
     changeNotes(
         """
         <ul>
-            <li>Added Gnome support on Linux.</li>
+            <li>1.4.1 Fixed problem where settings aren't saved between sessions.
+            <li>1.4.0 Added Gnome support on Linux.</li>
         </ul>
         """
     )
