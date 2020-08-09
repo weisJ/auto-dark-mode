@@ -23,8 +23,8 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      */
     private enum class DefaultLaf(val info : UIManager.LookAndFeelInfo) {
         DARK(DarculaLookAndFeelInfo()),
-        LIGHT(searchLaf("IntelliJ Light") ?: IntelliJLookAndFeelInfo()),
-        HIGH_CONTRAST(searchLaf("High Contrast") ?: IntelliJLookAndFeelInfo())
+        LIGHT(searchLaf(name = "IntelliJ Light") ?: IntelliJLookAndFeelInfo()),
+        HIGH_CONTRAST(searchLaf(name = "High Contrast") ?: IntelliJLookAndFeelInfo())
     }
 
     /**
@@ -113,7 +113,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private fun readScheme(scheme: EditorColorsScheme): String = scheme.name
 
     private fun parseLaf(name: String?): UIManager.LookAndFeelInfo? = name?.toPair(' ')?.let {
-        searchLaf(it.first, it.second)
+        searchLaf(name = it.second, className = it.first)
     }
 
     private fun parseScheme(name: String?): EditorColorsScheme? =
