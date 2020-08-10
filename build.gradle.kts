@@ -58,7 +58,7 @@ allprojects {
 
     val githubAccessToken by props("")
 
-    plugins.withType<UsePrebuiltBinariesWhenUnbuildablePlugin>() {
+    plugins.withType<UsePrebuiltBinariesWhenUnbuildablePlugin> {
         prebuildBinaries {
             prebuildLibrariesFolder = "pre-build-libraries"
             github {

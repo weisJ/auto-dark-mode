@@ -1,7 +1,6 @@
 package com.github.weisj.darkmode.platform.settings
 
 import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty
 
