@@ -54,7 +54,6 @@ class ObservableManager<T> {
     }
 
     inner class WrappingDelegateRWProperty<V : Any>(
-        prop: KProperty<*>,
         private val delegate: KMutableProperty0<V>
     ) : ReadWriteProperty<T, V> {
 
@@ -92,7 +91,7 @@ class ObservablePropertyValue<T, V : Any>(
     override operator fun provideDelegate(
         thisRef: T,
         prop: KProperty<*>
-    ): ReadWriteProperty<T, V> = delegate.WrappingDelegateRWProperty(prop, property)
+    ): ReadWriteProperty<T, V> = delegate.WrappingDelegateRWProperty(property)
 }
 
 interface Observable<T> {
