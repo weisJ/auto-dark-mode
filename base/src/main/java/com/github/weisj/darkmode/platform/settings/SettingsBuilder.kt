@@ -2,28 +2,63 @@ package com.github.weisj.darkmode.platform.settings
 
 import kotlin.reflect.KMutableProperty0
 
-private data class Counter(var count : Int) {
+private data class UnnamedGroupCounter(var count: Int) {
 
-    fun increment() : Int {
-        val c = count
-        count++
-        return c
+    companion object {
+        private val counterMap = mutableMapOf<SettingsGroup, UnnamedGroupCounter>()
+
+        fun get(group: SettingsGroup): UnnamedGroupCounter = counterMap.getOrPut(group) { UnnamedGroupCounter(0) }
+    }
+
+    fun increment(): Int {
+        return count++
     }
 }
 
-private val SettingsContainer.unnamedGroupCounter by lazy { Counter(0) }
+private val SettingsGroup.unnamedGroupCounter
+    get() = UnnamedGroupCounter.get(this)
 
-fun SettingsContainer.group(name: String = "", init: SettingsGroup.() -> Unit) : SettingsGroup {
-    val identifier = if (name.isEmpty()) "${this.identifier}:group_${unnamedGroupCounter.increment()}" else null
-    val group = DefaultNamedSettingsGroup(this, name, identifier)
-    namedGroups.add(group)
-    group.init()
+class SettingsGroupBuilder(group: SettingsGroup) : SettingsGroup by group {
+    internal var activeCondition: Condition? = null
+
+    fun KMutableProperty0<Boolean>.isTrue() = isTrue(getWithProperty(this))
+    fun KMutableProperty0<Boolean>.isFalse() = isFalse(getWithProperty(this))
+    fun <T : Any> KMutableProperty0<T>.isEqual(expected: T) = isEqual(getWithProperty(this), expected)
+}
+
+fun SettingsGroupBuilder.activeIf(condition: Condition) {
+    activeCondition = condition
+}
+
+//fun SettingsGroupBuilder.isTrue(prop: KMutableProperty0<Boolean>) = isTrue(getWithProperty(prop))
+
+private fun initGroup(group: SettingsGroup, init: SettingsGroupBuilder.() -> Unit): SettingsGroup {
+    val builder = SettingsGroupBuilder(group)
+    builder.init()
+    builder.activeCondition?.let { cond ->
+        group.forEach {
+            if (it.activeCondition is ConstantCondition) {
+                if (it.activeCondition.value) {
+                    it.activeIf(cond)
+                }
+            } else {
+                it.activeIf(it.activeCondition and cond)
+            }
+        }
+    }
     return group
 }
 
-fun SettingsContainer.unnamedGroup(init: SettingsGroup.() -> Unit) : SettingsGroup = this.also(init)
+fun SettingsGroup.group(name: String = "", init: SettingsGroupBuilder.() -> Unit): SettingsGroup {
+    val identifier = if (name.isEmpty()) "group_${unnamedGroupCounter.increment()}" else null
+    val group = DefaultNamedSettingsGroup(this, name, identifier)
+    subgroups.add(group)
+    return initGroup(group, init)
+}
 
-fun SettingsContainer.hidden(init: SettingsGroup.() -> Unit) : SettingsGroup = hiddenGroup.also(init)
+fun SettingsContainer.unnamedGroup(init: SettingsGroup.() -> Unit): SettingsGroup = initGroup(this, init)
+
+fun SettingsContainer.hidden(init: SettingsGroup.() -> Unit): SettingsGroup = initGroup(hiddenGroup, init)
 
 fun <T : ValueProperty<T>> SettingsGroup.property(property: T, init: T.() -> Unit = {}): T =
     property.also { it.init(); add(it) }
@@ -58,9 +93,9 @@ fun SettingsGroup.booleanProperty(
     name: String? = null,
     description: String? = null,
     value: KMutableProperty0<Boolean>,
-    init: SimpleBooleanProperty.() -> Unit = {}
+    init: ValueProperty<Boolean>.() -> Unit = {}
 ): ValueProperty<Boolean> =
-    SimpleBooleanProperty(SimpleValueProperty(name, description, value, this)).also { it.init(); add(it) }
+    SimpleValueProperty(name, description, value, this).also { it.init(); add(it) }
 
 fun <R : Any, T : Any> SettingsGroup.choiceProperty(
     name: String? = null,
@@ -70,9 +105,7 @@ fun <R : Any, T : Any> SettingsGroup.choiceProperty(
     init: ChoiceProperty<R, T>.() -> Unit = {}
 ): ChoiceProperty<R, T> =
     TransformingChoiceProperty(SimpleValueProperty(name, description, value, this), transformer).also {
-        it.init(); add(
-        it
-    )
+        it.init(); add(it)
     }
 
 fun <T : Any> SettingsGroup.choiceProperty(
@@ -108,13 +141,11 @@ fun SettingsGroup.persistentBooleanProperty(
     description: String? = null,
     value: KMutableProperty0<Boolean>,
     name: String? = null,
-    init: SimplePersistentBooleanProperty.() -> Unit = {}
+    init: PersistentValueProperty<Boolean>.() -> Unit = {}
 ): PersistentValueProperty<Boolean> =
-    SimplePersistentBooleanProperty(
-        SimplePersistentValueProperty(
-            SimpleValueProperty(name, description, value, this),
-            transformerOf(String::toBoolean, Boolean::toString)
-        )
+    SimplePersistentValueProperty(
+        SimpleValueProperty(name, description, value, this),
+        transformerOf(String::toBoolean, Boolean::toString)
     ).also { it.init(); add(it) }
 
 fun <R : Any> SettingsGroup.persistentChoiceProperty(

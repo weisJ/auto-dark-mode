@@ -4,7 +4,6 @@ import com.github.weisj.darkmode.platform.NotificationType
 import com.github.weisj.darkmode.platform.NotificationsService
 import com.google.auto.service.AutoService
 import com.intellij.ide.impl.ProjectUtil
-import com.intellij.ide.plugins.PluginManager
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationDisplayType
