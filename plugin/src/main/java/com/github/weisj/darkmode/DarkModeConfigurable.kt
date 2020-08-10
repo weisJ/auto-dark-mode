@@ -6,13 +6,13 @@ import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.layout.Row
 import com.intellij.ui.layout.RowBuilder
 import com.intellij.ui.layout.panel
 import com.intellij.util.castSafelyTo
 import javax.swing.JComboBox
 import javax.swing.JComponent
-import javax.swing.JToggleButton
 
 class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
@@ -35,11 +35,11 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
     ) {
         maybeTitledRow(name) {
             properties.forEach { addProperty(it) }
-            properties.subgroups.forEach {
-                if (it.name.isEmpty()) {
-                    it.forEach { addProperty(it) }
+            properties.subgroups.forEach { group ->
+                if (group.name.isEmpty()) {
+                    group.forEach { addProperty(it) }
                 } else {
-                    addGroup(it)
+                    addGroup(group)
                 }
             }
         }
@@ -49,9 +49,8 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
         val choiceProperty = valueProp.castSafelyTo<ChoiceProperty<Any, Any>>()
         val property = valueProp.effectiveProperty
         val rowName = if (property.get() is Boolean) "" else valueProp.description
-        lateinit var comp: JComponent
         maybeNamedRow(rowName) {
-            comp = when {
+            val comp: JComponent = when {
                 choiceProperty != null -> comboBox(
                     CollectionComboBoxModel(choiceProperty.choices),
                     choiceProperty::choiceValue,
@@ -65,19 +64,19 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
                 }
                 else -> throw IllegalArgumentException("Not yet implemented!")
             }
+            comp.addPreviewListener { valueProp.effective<Any>().preview = it }
         }.also {
             it.enabled = valueProp.activeCondition()
             valueProp.activeCondition.registerListener(Condition::value) { _, _ ->
                 it.enabled = valueProp.activeCondition.value
             }
         }
-        comp.addPreviewListener { valueProp.effective<Any>().preview = it }
     }
 
     private fun JComponent.addPreviewListener(listener: (Any) -> Unit) {
         when (this) {
-            is JComboBox<*> -> addItemListener { listener(it.item) }
-            is JToggleButton -> addChangeListener { listener(isSelected) }
+            is JComboBox<*> -> addItemListener { listener(it.itemSelectable.selectedObjects[0]) }
+            is JBCheckBox -> addItemListener { listener(isSelected) }
         }
     }
 
