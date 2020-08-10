@@ -1,6 +1,8 @@
 package com.github.weisj.darkmode
 
 import com.github.weisj.darkmode.platform.*
+import com.github.weisj.darkmode.platform.settings.ifPresent
+import com.github.weisj.darkmode.platform.settings.letValue
 import com.intellij.ide.actions.QuickChangeLookAndFeel
 import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.Disposable
@@ -15,7 +17,7 @@ import javax.swing.UIManager.LookAndFeelInfo
  * Automatically changes the IDEA theme based on system settings.
  */
 class AutoDarkMode : Disposable, ThemeCallback {
-    private val alarm = Alarm()
+    private val alarm = Alarm(Alarm.ThreadToUse.SWING_THREAD, this)
     private val monitor = lazy { createMonitor() }
 
     private fun createMonitor(): ThemeMonitor {
@@ -29,24 +31,28 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun start() {
-        monitor.value.isRunning = true
+        monitor.letValue { it.isRunning = true }
     }
 
     fun stop() {
-        if (monitor.isInitialized()) monitor.value.isRunning = false
+        monitor.ifPresent { it.isRunning = false }
     }
 
     fun onSettingsChange() {
-        monitor.value.requestUpdate()
+        monitor.letValue { it.requestUpdate() }
     }
 
     override fun themeChanged(isDark: Boolean, isHighContrast: Boolean) {
         val (lafTarget, colorSchemeTarget) = getTargetLaf(isDark, isHighContrast)
         resetRequests()
-        if (lafTarget != LafManager.getInstance().currentLookAndFeel) {
+        if (GeneralThemeSettings.changeIdeTheme
+            && lafTarget != LafManager.getInstance().currentLookAndFeel
+        ) {
             updateLaf(lafTarget)
         }
-        if (colorSchemeTarget != EditorColorsManager.getInstance().globalScheme) {
+        if (GeneralThemeSettings.changeEditorTheme
+            && colorSchemeTarget != EditorColorsManager.getInstance().globalScheme
+        ) {
             updateEditorScheme(colorSchemeTarget)
         }
     }
@@ -54,9 +60,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     private fun getTargetLaf(dark: Boolean, highContrast: Boolean): Pair<LookAndFeelInfo, EditorColorsScheme> {
         return GeneralThemeSettings.run {
             when {
-                highContrast && checkHighContrast -> {
-                    Pair(highContrastTheme, highContrastCodeScheme)
-                }
+                highContrast && checkHighContrast -> Pair(highContrastTheme, highContrastCodeScheme)
                 dark -> Pair(darkTheme, darkCodeScheme)
                 else -> Pair(lightTheme, lightCodeScheme)
             }
@@ -80,7 +84,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     private fun scheduleRequest(runnable: () -> Unit) {
-        alarm.addRequest(runnable, Registry.intValue("ide.instant.theme.switch.delay", 0))
+        alarm.addRequest(runnable, Registry.intValue(INSTANT_DELAY_KEY, 0))
     }
 
     override fun dispose() {
@@ -96,6 +100,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     companion object {
+        private const val INSTANT_DELAY_KEY = "ide.instant.theme.switch.delay"
         private val LOGGER = PluginLogger.getLogger(AutoDarkMode::class.java)
         private val OPTIONS = ServiceManager.getService(AutoDarkModeOptions::class.java)
 

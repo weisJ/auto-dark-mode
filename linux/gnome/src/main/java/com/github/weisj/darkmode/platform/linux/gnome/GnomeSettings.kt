@@ -82,26 +82,27 @@ object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
             persistentBooleanProperty(
                 description = "Guess light/dark theme based on name",
                 value = ::guessLightAndDarkThemes
-            ) {
-                inverted()
-                control(withProperty(::lightGtkTheme), withProperty(::darkGtkTheme), withProperty(::highContrastGtkTheme))
-            }
+            )
 
-            persistentChoiceProperty(
-                description = "Light GTK Theme",
-                value = ::lightGtkTheme,
-                transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.LIGHT.info)
-            ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
-            persistentChoiceProperty(
-                description = "Dark GTK Theme",
-                value = ::darkGtkTheme,
-                transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.DARK.info)
-            ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
-            persistentChoiceProperty(
-                description = "High Contrast GTK Theme",
-                value = ::highContrastGtkTheme,
-                transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
-            ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+            group {
+                activeIf(::guessLightAndDarkThemes.isFalse())
+
+                persistentChoiceProperty(
+                    description = "Light GTK Theme",
+                    value = ::lightGtkTheme,
+                    transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.LIGHT.info)
+                ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+                persistentChoiceProperty(
+                    description = "Dark GTK Theme",
+                    value = ::darkGtkTheme,
+                    transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.DARK.info)
+                ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+                persistentChoiceProperty(
+                    description = "High Contrast GTK Theme",
+                    value = ::highContrastGtkTheme,
+                    transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
+                ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+            }
         }
 
         hidden {

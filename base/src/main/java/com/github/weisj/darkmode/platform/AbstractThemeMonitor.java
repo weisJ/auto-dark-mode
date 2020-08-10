@@ -28,8 +28,8 @@ public class AbstractThemeMonitor implements ThemeMonitor {
 
     private static final PluginLogger LOGGER = PluginLogger.getLogger(AbstractThemeMonitor.class);
 
-    private ThemeCallback onThemeChange;
-    private ThemeMonitorService monitorService;
+    private final ThemeCallback onThemeChange;
+    private final ThemeMonitorService monitorService;
 
     private boolean dark;
     private boolean highContrast;
