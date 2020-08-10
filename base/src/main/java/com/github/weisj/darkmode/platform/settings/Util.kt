@@ -24,3 +24,7 @@ fun <T> Lazy<T>.ifPresent(block: (T) -> Unit) {
 fun <T> Lazy<T>.letValue(block: (T) -> Unit) {
     block(value)
 }
+
+fun <T, K> Lazy<T>.map(block: (T) -> K): Lazy<K> = lazy { block(value) }
+
+fun <T, K> Lazy<T>.lazyCall(block : T.() -> Lazy<K>) : Lazy<K> = lazy { block(this.value).value }

@@ -30,47 +30,16 @@ fun SettingsContainer.init() {
     allProperties().forEach { it.activeCondition.build() }
 }
 
-fun SettingsContainer.getWithName(name: String): Lazy<ValueProperty<Any>> =
-    allProperties().findWithName(name).assertNonNull("Property with name '$name' not found.")
-
-fun <T> SettingsContainer.getWithProperty(prop: KMutableProperty0<T>): Lazy<ValueProperty<T>> =
-    allProperties().findWithProperty(prop).assertNonNull("Property with name '${prop.name}' not found.")
-
 fun SettingsGroup.getWithName(name: String): Lazy<ValueProperty<Any>> =
     lazy {
         allProperties().findWithName(name).value ?: parent?.getWithName(name)?.value
     }.assertNonNull("Property with name '$name' not found.")
 
 fun <T> SettingsGroup.getWithProperty(prop: KMutableProperty0<T>): Lazy<ValueProperty<T>> =
-    lazy {
-        allProperties().findWithProperty(prop).value ?: parent?.getWithProperty(prop)?.value
-    }.assertNonNull("Property with name '${prop.name}' not found.")
-
-fun SettingsContainer.getGroup(name: String): Lazy<SettingsGroup> =
-    lazy { subgroups.find { it.name == name } }.assertNonNull("Group with name '$name' not found.")
-
-fun Lazy<SettingsGroup>.getWithName(name: String): Lazy<ValueProperty<Any>> =
-    lazy {
-        findWithName(name).value ?: value.parent?.findWithName(name)?.value
-    }.assertNonNull("Property with name '$name' not found.")
-
-fun <T> Lazy<SettingsGroup>.getWithProperty(prop: KMutableProperty0<T>): Lazy<ValueProperty<T>> =
-    lazy {
-        findWithProperty(prop).value ?: value.parent?.findWithProperty(prop)?.value
-    }.assertNonNull("Property with property '${prop.name}' not found.")
-
+    getWithName(prop.name).map { it.castSafelyTo<ValueProperty<T>>()!! }
 
 private fun Collection<ValueProperty<Any>>.findWithName(name: String): Lazy<ValueProperty<Any>?> =
     lazy { find { it.name == name } ?: throw IllegalStateException(name) }
-
-private fun Lazy<Collection<ValueProperty<Any>>>.findWithName(name: String): Lazy<ValueProperty<Any>?> =
-    lazy { value.findWithName(name).value }
-
-private fun <T> Collection<ValueProperty<Any>>.findWithProperty(prop: KMutableProperty0<T>): Lazy<ValueProperty<T>?> =
-    lazy { find { it.name == prop.name }?.castSafelyTo<ValueProperty<T>>() }
-
-private fun <T> Lazy<Collection<ValueProperty<Any>>>.findWithProperty(prop: KMutableProperty0<T>): Lazy<ValueProperty<T>?> =
-    lazy { value.findWithProperty(prop).value }
 
 /**
  * Container for {@link ValueProperty}s. Properties can be group into
@@ -164,7 +133,7 @@ interface TransformingValueProperty<R, T> : ValueProperty<T> {
 /**
  * Property that can be stored in String format.
  */
-interface PersistentValueProperty<T> : TransformingValueProperty<T, String>
+typealias PersistentValueProperty<T> : TransformingValueProperty<T, String>
 
 fun ValueProperty<*>.toTransformer(): TransformingValueProperty<Any, Any>? =
     castSafelyTo<TransformingValueProperty<Any, Any>>()
