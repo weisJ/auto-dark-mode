@@ -94,8 +94,7 @@ fun SettingsGroup.booleanProperty(
     description: String? = null,
     value: KMutableProperty0<Boolean>,
     init: ValueProperty<Boolean>.() -> Unit = {}
-): ValueProperty<Boolean> =
-    SimpleValueProperty(name, description, value, this).also { it.init(); add(it) }
+): ValueProperty<Boolean> = property(name, description, value, init)
 
 fun <R : Any, T : Any> SettingsGroup.choiceProperty(
     name: String? = null,
