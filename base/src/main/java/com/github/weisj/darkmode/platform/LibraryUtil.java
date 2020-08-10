@@ -36,10 +36,10 @@ public final class LibraryUtil {
     public static final boolean undefinedArchitecture;
     public static final String X86 = "32";
     public static final String X64 = "64";
-    public static boolean isWin10OrNewer = SystemInfo.isWin10OrNewer;
-    public static boolean isMacOSMojave = SystemInfo.isMacOSMojave;
-    public static boolean isMacOSCatalina = SystemInfo.isMacOSCatalina;
-    public static boolean isGnome = SystemInfo.isGNOME;
+    public static final boolean isWin10OrNewer = SystemInfo.isWin10OrNewer;
+    public static final boolean isMacOSMojave = SystemInfo.isMacOSMojave;
+    public static final boolean isMacOSCatalina = SystemInfo.isMacOSCatalina;
+    public static final boolean isGnome = SystemInfo.isGNOME;
 
     static {
         isX64 = X64.equals(jreArchitecture);

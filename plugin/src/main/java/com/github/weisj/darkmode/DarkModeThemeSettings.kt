@@ -1,7 +1,5 @@
 package com.github.weisj.darkmode
 
-import com.github.weisj.darkmode.platform.Notifications
-import com.github.weisj.darkmode.platform.OneTimeAction
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 import com.intellij.ide.ui.LafManager
@@ -34,6 +32,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private enum class DefaultScheme(val scheme: EditorColorsScheme) {
         LIGHT(searchScheme("IntelliJ Light", EditorColorsScheme.DEFAULT_SCHEME_NAME)),
         DARK(searchScheme("Darcula")),
+
         /*
          * Note: The small c in the second "contrast" is the cyrillic character `с`.
          * Some versions of IDEA use the incorrect character. We simply search for both version.
@@ -41,6 +40,8 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         HIGH_CONTRAST(searchScheme("High contrast", "High сontrast"))
     }
 
+    private const val DEFAULT_CHANGE_IDE_THEME = true
+    private const val DEFAULT_CHANGE_EDITOR_THEME = true
     private const val DEFAULT_CHECK_HIGH_CONTRAST = true
 
     var darkTheme = DefaultLaf.DARK.info
@@ -51,38 +52,43 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     var darkCodeScheme = DefaultScheme.DARK.scheme
     var highContrastCodeScheme = DefaultScheme.HIGH_CONTRAST.scheme
 
+    var changeIdeTheme = DEFAULT_CHANGE_IDE_THEME
+    var changeEditorTheme = DEFAULT_CHANGE_EDITOR_THEME
     var checkHighContrast = DEFAULT_CHECK_HIGH_CONTRAST
 
     init {
-        group {
-            persistentBooleanProperty(
-                description = "Check for high contrast",
-                value = ::checkHighContrast
-            ) {
-                control(withProperty(::highContrastTheme), withProperty(::highContrastCodeScheme))
-            }
-        }
-
         group("IDE Theme") {
             val installedLafs = LafManager.getInstance().installedLookAndFeels.asList()
             val lafRenderer = UIManager.LookAndFeelInfo::getName
             val lafTransformer = transformerOf(write = ::parseLaf, read = ::readLaf.or(""))
 
-            persistentChoiceProperty(
-                description = "Light",
-                value = ::lightTheme,
-                transformer = lafTransformer.writeFallback(DefaultLaf.LIGHT.info)
-            ) { choices = installedLafs; renderer = lafRenderer; }
-            persistentChoiceProperty(
-                description = "Dark",
-                value = ::darkTheme,
-                transformer = lafTransformer.writeFallback(DefaultLaf.DARK.info)
-            ) { choices = installedLafs; renderer = lafRenderer }
-            persistentChoiceProperty(
-                description = "High Contrast",
-                value = ::highContrastTheme,
-                transformer = lafTransformer.writeFallback(DefaultLaf.HIGH_CONTRAST.info)
-            ) { choices = installedLafs; renderer = lafRenderer; }
+            persistentBooleanProperty(
+                description = "Change IDE Theme",
+                value = ::changeIdeTheme
+            )
+
+            group {
+                activeIf(::changeIdeTheme.isTrue())
+
+                persistentChoiceProperty(
+                    description = "Light",
+                    value = ::lightTheme,
+                    transformer = lafTransformer.writeFallback(DefaultLaf.LIGHT.info)
+                ) { choices = installedLafs; renderer = lafRenderer; }
+                persistentChoiceProperty(
+                    description = "Dark",
+                    value = ::darkTheme,
+                    transformer = lafTransformer.writeFallback(DefaultLaf.DARK.info)
+                ) { choices = installedLafs; renderer = lafRenderer }
+                persistentChoiceProperty(
+                    description = "High Contrast",
+                    value = ::highContrastTheme,
+                    transformer = lafTransformer.writeFallback(DefaultLaf.HIGH_CONTRAST.info)
+                ) {
+                    choices = installedLafs; renderer = lafRenderer
+                    activeIf(::checkHighContrast.isTrue())
+                }
+            }
         }
 
         group("Editor Theme") {
@@ -90,21 +96,40 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
             val schemeRenderer = EditorColorsScheme::getDisplayName
             val schemeTransformer = transformerOf(write = ::parseScheme, read = ::readScheme.or(""))
 
-            persistentChoiceProperty(
-                description = "Light",
-                value = ::lightCodeScheme,
-                transformer = schemeTransformer.writeFallback(DefaultScheme.LIGHT.scheme)
-            ) { choices = installedSchemes; renderer = schemeRenderer }
-            persistentChoiceProperty(
-                description = "Dark",
-                value = ::darkCodeScheme,
-                transformer = schemeTransformer.writeFallback(DefaultScheme.DARK.scheme)
-            ) { choices = installedSchemes; renderer = schemeRenderer }
-            persistentChoiceProperty(
-                description = "High Contrast",
-                value = ::highContrastCodeScheme,
-                transformer = schemeTransformer.writeFallback(DefaultScheme.HIGH_CONTRAST.scheme)
-            ) { choices = installedSchemes; renderer = schemeRenderer; active = false }
+            persistentBooleanProperty(
+                description = "Change Editor Theme",
+                value = ::changeEditorTheme
+            )
+
+            group {
+                activeIf(::changeEditorTheme.isTrue())
+
+                persistentChoiceProperty(
+                    description = "Light",
+                    value = ::lightCodeScheme,
+                    transformer = schemeTransformer.writeFallback(DefaultScheme.LIGHT.scheme)
+                ) { choices = installedSchemes; renderer = schemeRenderer }
+                persistentChoiceProperty(
+                    description = "Dark",
+                    value = ::darkCodeScheme,
+                    transformer = schemeTransformer.writeFallback(DefaultScheme.DARK.scheme)
+                ) { choices = installedSchemes; renderer = schemeRenderer }
+                persistentChoiceProperty(
+                    description = "High Contrast",
+                    value = ::highContrastCodeScheme,
+                    transformer = schemeTransformer.writeFallback(DefaultScheme.HIGH_CONTRAST.scheme)
+                ) {
+                    choices = installedSchemes; renderer = schemeRenderer
+                    activeIf(::checkHighContrast.isTrue())
+                }
+            }
+        }
+
+        group("Other") {
+            persistentBooleanProperty(
+                description = "Check for high contrast",
+                value = ::checkHighContrast
+            )
         }
     }
 
