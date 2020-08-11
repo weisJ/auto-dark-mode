@@ -39,7 +39,7 @@ fun <T> SettingsGroup.getWithProperty(prop: KMutableProperty0<T>): Lazy<ValuePro
     getWithName(prop.name).map { it.castSafelyTo<ValueProperty<T>>()!! }
 
 private fun Collection<ValueProperty<Any>>.findWithName(name: String): Lazy<ValueProperty<Any>?> =
-    lazy { find { it.name == name } ?: throw IllegalStateException(name) }
+    lazy { find { it.name == name } }
 
 /**
  * Container for {@link ValueProperty}s. Properties can be group into
