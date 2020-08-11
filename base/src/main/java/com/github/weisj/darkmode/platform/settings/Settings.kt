@@ -133,7 +133,7 @@ interface TransformingValueProperty<R, T> : ValueProperty<T> {
 /**
  * Property that can be stored in String format.
  */
-typealias PersistentValueProperty<T> : TransformingValueProperty<T, String>
+typealias PersistentValueProperty<T> = TransformingValueProperty<T, String>
 
 fun ValueProperty<*>.toTransformer(): TransformingValueProperty<Any, Any>? =
     castSafelyTo<TransformingValueProperty<Any, Any>>()
