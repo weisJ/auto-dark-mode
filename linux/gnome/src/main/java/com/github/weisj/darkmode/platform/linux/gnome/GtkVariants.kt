@@ -57,9 +57,9 @@ object GtkVariants {
      * - '-dark'
      * - '-darkest'
      *
-     * @param  themeName the name of a theme. This could be one of the many variants of your theme (i.e. the dark
+     * @param themeName the name of a theme. This could be one of the many variants of your theme (i.e. the dark
      * version or whatever other variants the theme offers)
-     * @return           a map containing three keys: [Variant.Original] (the provided themeName), [Variant.Day] (the guessed day
+     * @return a map containing three keys: [Variant.Original] (the provided themeName), [Variant.Day] (the guessed day
      * variant), and [Variant.Night] (the guessed night variant)
      */
     @JvmStatic
@@ -90,8 +90,8 @@ object GtkVariants {
                 variants[Variant.Day] =
                     basename + (if (themeName.contains("-Darker")) "-Darker" else "") + if (isSolid) "-Solid" else ""
                 variants[Variant.Night] =
-                    (basename + (if (themeName.contains("-Darkest")) "-Darkest" else "-Dark") + (if (isSolid) "-Solid" else "")
-                            + if (withoutBorder) "-NoBorder" else "")
+                    (basename + (if (themeName.contains("-Darkest")) "-Darkest" else "-Dark") + (if (isSolid) "-Solid" else "") +
+                            if (withoutBorder) "-NoBorder" else "")
             }
             themeName.contains("HighContrast") -> {
                 variants[Variant.Day] = "HighContrast"
