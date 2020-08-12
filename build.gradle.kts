@@ -119,6 +119,16 @@ allprojects {
                 }
             }
         }
+        plugins.withType<JavaBasePlugin> {
+            autostyle {
+                kotlin {
+                    ktlint {
+                        userData(mapOf("disabled_rules" to "no-wildcard-imports"))
+                    }
+                    license()
+                }
+            }
+        }
     }
 
     tasks.withType<AbstractArchiveTask>().configureEach {
