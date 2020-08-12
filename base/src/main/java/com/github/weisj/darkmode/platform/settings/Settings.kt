@@ -1,16 +1,40 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 Jannis Weis
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package com.github.weisj.darkmode.platform.settings
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty0
 
 interface SettingsContainerProvider {
-    val enabled : Boolean
-    fun create() : SettingsContainer
+    val enabled: Boolean
+    fun create(): SettingsContainer
 }
 
 open class SingletonSettingsContainerProvider(
-    provider : () -> SettingsContainer,
-    override val enabled : Boolean = true
+    provider: () -> SettingsContainer,
+    override val enabled: Boolean = true
 ) : SettingsContainerProvider {
     private val container by lazy(provider)
     override fun create(): SettingsContainer = container
@@ -146,7 +170,7 @@ inline fun <reified T : Any> ValueProperty<T>.asPersistent(): PersistentValuePro
  * backing field is chosen. Because of this for a reference to a simple ValueProperty<T>
  * the most general value that can be returned is Any.
  */
-val <T : Any> ValueProperty<T>.effectiveProperty : KMutableProperty0<Any>
+val <T : Any> ValueProperty<T>.effectiveProperty: KMutableProperty0<Any>
     get() = effective<Any>()::value
 
 inline fun <reified K : Any> ValueProperty<*>.effective(): ValueProperty<K> = effective(K::class)
@@ -214,14 +238,14 @@ abstract class ChoiceProperty<R, T> internal constructor(
 class TransformingChoiceProperty<R : Any, T : Any> internal constructor(
     property: TransformingValueProperty<R, T>
 ) : ChoiceProperty<R, T>(property) {
-    constructor(property: ValueProperty<R>, transformer: Transformer<R, T>)
-            : this(SimpleTransformingValueProperty(property, transformer))
+    constructor(property: ValueProperty<R>, transformer: Transformer<R, T>) :
+        this(SimpleTransformingValueProperty(property, transformer))
 }
 
 class PersistentChoiceProperty<R : Any>(
     property: PersistentValueProperty<R>
 ) : ChoiceProperty<R, String>(property),
     PersistentValueProperty<R> {
-    constructor(property: ValueProperty<R>, transformer: Transformer<R, String>)
-            : this(SimplePersistentValueProperty(property, transformer))
+    constructor(property: ValueProperty<R>, transformer: Transformer<R, String>) :
+        this(SimplePersistentValueProperty(property, transformer))
 }
