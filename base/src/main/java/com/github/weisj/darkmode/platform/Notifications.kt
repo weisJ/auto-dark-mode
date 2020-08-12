@@ -25,7 +25,8 @@
 package com.github.weisj.darkmode.platform
 
 object Notifications : NotificationsService by ServiceUtil.load(
-    NotificationsService::class.java).asSequence().firstOrNull()?:LogNotificationsService()
+        NotificationsService::class.java
+    ).asSequence().firstOrNull() ?: LogNotificationsService()
 
 interface NotificationsService {
 
@@ -39,7 +40,7 @@ interface NotificationsService {
     fun dispatchNotification(
         message: String,
         type: NotificationType = NotificationType.INFO,
-        showSettingsLink : Boolean = false
+        showSettingsLink: Boolean = false
     )
 }
 
@@ -50,7 +51,7 @@ enum class NotificationType {
 private class LogNotificationsService : NotificationsService {
 
     override fun dispatchNotification(message: String, type: NotificationType, showSettingsLink: Boolean) {
-        when(type) {
+        when (type) {
             NotificationType.INFO -> LOGGER.info(message)
             NotificationType.WARNING -> LOGGER.warn(message)
             NotificationType.ERROR -> LOGGER.error(message)
