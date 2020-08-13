@@ -111,7 +111,7 @@ BOOL isDarkModeMojave() {
     return [VALUE_DARK caseInsensitiveCompare:interfaceStyle] == NSOrderedSame;
 }
 
-BOOl isAutoMode() {
+BOOL isAutoMode() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:KEY_SWITCHES_AUTOMATICALLY];
 }
 
