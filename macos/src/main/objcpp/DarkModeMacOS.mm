@@ -102,7 +102,7 @@ BOOL isPatched = NO;
 BOOL isDarkModeCatalina() {
     NSAppearance *appearance = NSApp.effectiveAppearance;
     NSAppearanceName appearanceName = [appearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,
-                                                                                          NSAppearanceNameDarkAqua]];
+                                                                                      NSAppearanceNameDarkAqua]];
     return [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
 }
 
@@ -111,11 +111,15 @@ BOOL isDarkModeMojave() {
     return [VALUE_DARK caseInsensitiveCompare:interfaceStyle] == NSOrderedSame;
 }
 
+BOOl isAutoMode() {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:KEY_SWITCHES_AUTOMATICALLY];
+}
+
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if(@available(macOS 10.15, *)) {
-        if (isPatched) {
+        if (isPatched && !isAutoMode()) {
             return (jboolean) isDarkModeCatalina();
         }
     }
