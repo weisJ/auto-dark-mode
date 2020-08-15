@@ -39,6 +39,7 @@
 #define VALUE_DARK @"Dark"
 
 BOOL isPatched = NO;
+BOOL manuallyPatched = NO;
 
 @interface PreferenceChangeListener:NSObject {
     @public JavaVM *jvm;
@@ -56,19 +57,22 @@ BOOL isPatched = NO;
     [self listenToKey:EVENT_THEME_CHANGE onCenter:distributedCenter];
     [self listenToKey:EVENT_HIGH_CONTRAST onCenter:distributedCenter];
 
-    NSNotificationCenter defaultCenter = [NSNotificationCenter defaultCenter];
-    [defaultCenter addObserver:self
-                      selector:@selector(dispatchEvent:)
-                          name:KEY_RECEIVED_EVENT
-                        object:nil];
+    if(@available(macOS 10.15, *)) {
+        [NSApp addObserver:self
+                forKeyPath:NSStringFromSelector(@selector(effectiveAppearance))
+                   options:0
+                   context:nil];
+    }
     return self;
 }
 
 - (void)dealloc {
     NSDistributedNotificationCenter *sharedCenter = [NSDistributedNotificationCenter defaultCenter];
     [sharedCenter removeObserver:self]; // Removes all registered notifications.
-    NSNotificationCenter defaultCenter = [NSNotificationCenter defaultCenter];
-    [defaultCenter removeObserver:self];
+    if(@available(macOS 10.15, *)) {
+        [NSApp removeObserver:self
+                   forKeyPath:NSStringFromSelector(@selector(effectiveAppearance))];
+    }
     [super dealloc];
 }
 
@@ -101,20 +105,22 @@ BOOL isPatched = NO;
     if (detach) jvm->DetachCurrentThread();
 }
 
-- (void)notificationEvent:(NSNotification *)notification {
-    NSLog(@"Received Event");
+- (void)dispatchCallback {
     [JNFRunLoop performOnMainThreadWaiting:NO withBlock:^{
-        NSNotificationCenter defaultCenter = [NSNotificationCenter defaultCenter];
-        [defaultCenter postNotificationName:KEY_RECEIVED_EVENT
-                                     object:self];
+        [self runCallback];
     }];
 }
 
-- (void)dispatchEvent:(NSNotification *)notification {
-    NSLog(@"Dispatching to IDEA.");
-    [JNFRunLoop performOnMainThreadWaiting:NO withBlock:^{
-            [self runCallback];
-    }];
+- (void)notificationEvent:(NSNotification *)notification {
+    [self dispatchCallback];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+    NSLog(@"effectiveAppearance Changed");
+    [self dispatchCallback];
 }
 
 @end
@@ -195,17 +201,16 @@ Java_com_github_weisj_darkmode_platform_macos_MacOSNative_patchAppBundle(JNIEnv 
 JNF_COCOA_ENTER(env);
     if (@available(macOS 10.15, *)) {
         NSString *name = [[NSBundle mainBundle] bundleIdentifier];
-        if ([name containsString:@"jetbrains"]) {
-            CFStringRef bundleName = (__bridge CFStringRef)name;
+        NSLog(@"Patch BundleName: %@", name);
+        CFStringRef bundleName = (__bridge CFStringRef)name;
 
-            Boolean exists = false;
-            CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
-            isPatched = exists ? YES : NO;
-
-            if (!isPatched) {
-                CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
-                CFPreferencesAppSynchronize(bundleName);
-            }
+        Boolean exists = false;
+        CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
+        isPatched = exists ? YES : NO;
+        if (!isPatched && [name containsString:@"jetbrains"]) {
+            CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
+            CFPreferencesAppSynchronize(bundleName);
+            manuallyPatched = YES;
         }
     } else {
         isPatched = false;
@@ -216,8 +221,10 @@ JNF_COCOA_EXIT(env);
 JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_unpatchAppBundle(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
+    if (!manuallyPatched) return;
     if (@available(macOS 10.15, *)) {
         NSString *name = [[NSBundle mainBundle] bundleIdentifier];
+        NSLog(@"Unpatch BundleName: %@", name);
         if ([name containsString:@"jetbrains"]) {
             CFStringRef bundleName = (__bridge CFStringRef)name;
             CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, nil, bundleName);
