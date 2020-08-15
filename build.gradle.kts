@@ -66,6 +66,7 @@ allprojects {
                 repository = "auto-dark-mode"
                 workflow = "libs.yml"
                 accessToken = githubAccessToken
+                branches = listOf("night_owl_support")
                 manualDownloadUrl =
                     "https://github.com/weisJ/auto-dark-mode/actions?query=workflow%3A%22Build+Native+Libraries%22+is%3Asuccess"
             }

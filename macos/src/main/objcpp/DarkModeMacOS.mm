@@ -32,6 +32,8 @@
 #define KEY_APPLE_INTERFACE_STYLE @"AppleInterfaceStyle"
 #define KEY_SWITCHES_AUTOMATICALLY @"AppleInterfaceStyleSwitchesAutomatically"
 
+#define KEY_RECEIVED_EVENT @"AutoDarkModeReceivedEvent"
+
 #define EVENT_THEME_CHANGE @"AppleInterfaceThemeChangedNotification"
 #define EVENT_HIGH_CONTRAST @"AXInterfaceIncreaseContrastStatusDidChange"
 #define VALUE_DARK @"Dark"
@@ -50,15 +52,23 @@ BOOL isPatched = NO;
     self->jvm = jvm_;
     self->callback = callback_;
 
-    NSDistributedNotificationCenter *center = [NSDistributedNotificationCenter defaultCenter];
-    [self listenToKey:EVENT_THEME_CHANGE onCenter:center];
-    [self listenToKey:EVENT_HIGH_CONTRAST onCenter:center];
+    NSDistributedNotificationCenter *distributedCenter = [NSDistributedNotificationCenter defaultCenter];
+    [self listenToKey:EVENT_THEME_CHANGE onCenter:distributedCenter];
+    [self listenToKey:EVENT_HIGH_CONTRAST onCenter:distributedCenter];
+
+    NSNotificationCenter defaultCenter = [NSNotificationCenter defaultCenter];
+    [defaultCenter addObserver:self
+                      selector:@selector(dispatchEvent:)
+                          name:KEY_RECEIVED_EVENT
+                        object:nil];
     return self;
 }
 
 - (void)dealloc {
-    NSDistributedNotificationCenter *center = [NSDistributedNotificationCenter defaultCenter];
-    [center removeObserver:self]; // Removes all registered notifications.
+    NSDistributedNotificationCenter *sharedCenter = [NSDistributedNotificationCenter defaultCenter];
+    [sharedCenter removeObserver:self]; // Removes all registered notifications.
+    NSNotificationCenter defaultCenter = [NSNotificationCenter defaultCenter];
+    [defaultCenter removeObserver:self];
     [super dealloc];
 }
 
@@ -92,8 +102,18 @@ BOOL isPatched = NO;
 }
 
 - (void)notificationEvent:(NSNotification *)notification {
+    NSLog(@"Received Event");
     [JNFRunLoop performOnMainThreadWaiting:NO withBlock:^{
-        [self runCallback];
+        NSNotificationCenter defaultCenter = [NSNotificationCenter defaultCenter];
+        [defaultCenter postNotificationName:KEY_RECEIVED_EVENT
+                                     object:self];
+    }];
+}
+
+- (void)dispatchEvent:(NSNotification *)notification {
+    NSLog(@"Dispatching to IDEA.");
+    [JNFRunLoop performOnMainThreadWaiting:NO withBlock:^{
+            [self runCallback];
     }];
 }
 
@@ -118,12 +138,15 @@ BOOL isAutoMode() {
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
+    NSLog(isPatched ? @"Patched: Yes" : @"Patched: No");
     if(@available(macOS 10.15, *)) {
-        if (isPatched && !isAutoMode()) {
+        if (isPatched) {
+            NSLog(isDarkModeCatalina() ? @"Catalina-Dark: Yes" : @"Catalina-Dark: No");
             return (jboolean) isDarkModeCatalina();
         }
     }
     if (@available(macOS 10.14, *)) {
+        NSLog(isDarkModeMojave() ? @"Mojave-Dark: Yes" : @"Mojave-Dark: No");
         return (jboolean) isDarkModeMojave();
     } else {
         return (jboolean) NO;
