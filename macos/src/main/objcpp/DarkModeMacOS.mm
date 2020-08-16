@@ -144,7 +144,7 @@ JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
     if(@available(macOS 10.15, *)) {
-        if (isPatched && isAutoMode()) {
+        if (isPatched) {
             return (jboolean) isDarkModeCatalina();
         }
     }
