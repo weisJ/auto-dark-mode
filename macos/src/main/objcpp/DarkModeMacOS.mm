@@ -119,7 +119,6 @@ BOOL manuallyPatched = NO;
                       ofObject:(id)object
                         change:(NSDictionary *)change
                        context:(void *)context {
-    NSLog(@"effectiveAppearance Changed");
     [self dispatchCallback];
 }
 
@@ -144,15 +143,12 @@ BOOL isAutoMode() {
 JNIEXPORT jboolean JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
-    NSLog(isPatched ? @"Patched: Yes" : @"Patched: No");
     if(@available(macOS 10.15, *)) {
-        if (isPatched) {
-            NSLog(isDarkModeCatalina() ? @"Catalina-Dark: Yes" : @"Catalina-Dark: No");
+        if (isPatched && isAutoMode()) {
             return (jboolean) isDarkModeCatalina();
         }
     }
     if (@available(macOS 10.14, *)) {
-        NSLog(isDarkModeMojave() ? @"Mojave-Dark: Yes" : @"Mojave-Dark: No");
         return (jboolean) isDarkModeMojave();
     } else {
         return (jboolean) NO;
@@ -201,13 +197,13 @@ Java_com_github_weisj_darkmode_platform_macos_MacOSNative_patchAppBundle(JNIEnv 
 JNF_COCOA_ENTER(env);
     if (@available(macOS 10.15, *)) {
         NSString *name = [[NSBundle mainBundle] bundleIdentifier];
-        NSLog(@"Patch BundleName: %@", name);
         CFStringRef bundleName = (__bridge CFStringRef)name;
 
         Boolean exists = false;
-        CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
-        isPatched = exists ? YES : NO;
-        if (!isPatched && [name containsString:@"jetbrains"]) {
+        Boolean value = CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
+        isPatched = value ? YES : NO;
+
+        if (!exists && [name containsString:@"jetbrains"]) {
             CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
             CFPreferencesAppSynchronize(bundleName);
             manuallyPatched = YES;
@@ -224,7 +220,6 @@ JNF_COCOA_ENTER(env);
     if (!manuallyPatched) return;
     if (@available(macOS 10.15, *)) {
         NSString *name = [[NSBundle mainBundle] bundleIdentifier];
-        NSLog(@"Unpatch BundleName: %@", name);
         if ([name containsString:@"jetbrains"]) {
             CFStringRef bundleName = (__bridge CFStringRef)name;
             CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, nil, bundleName);
