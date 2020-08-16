@@ -32,8 +32,6 @@
 #define KEY_APPLE_INTERFACE_STYLE @"AppleInterfaceStyle"
 #define KEY_SWITCHES_AUTOMATICALLY @"AppleInterfaceStyleSwitchesAutomatically"
 
-#define KEY_RECEIVED_EVENT @"AutoDarkModeReceivedEvent"
-
 #define EVENT_THEME_CHANGE @"AppleInterfaceThemeChangedNotification"
 #define EVENT_HIGH_CONTRAST @"AXInterfaceIncreaseContrastStatusDidChange"
 #define VALUE_DARK @"Dark"
