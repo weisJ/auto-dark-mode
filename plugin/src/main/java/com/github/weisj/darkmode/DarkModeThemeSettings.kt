@@ -31,7 +31,6 @@ import com.intellij.ide.ui.laf.IntelliJLookAndFeelInfo
 import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
-import com.intellij.openapi.options.Scheme
 import com.intellij.openapi.util.text.StringUtil
 import javax.swing.UIManager
 
@@ -183,7 +182,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         return EditorColorsManager.getInstance().run {
             names.mapNotNull { name ->
                 allSchemes.firstOrNull { it.name == name }
-                    ?: allSchemes.firstOrNull { it.name == "${EDITABLE_COPY_PREFIX}${name}" }
+                    ?: allSchemes.firstOrNull { it.name == "${EDITABLE_COPY_PREFIX}$name" }
             }.firstOrNull() ?: globalScheme
         }
     }
