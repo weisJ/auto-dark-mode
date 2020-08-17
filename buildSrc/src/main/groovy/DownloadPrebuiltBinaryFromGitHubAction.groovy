@@ -156,10 +156,10 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             getBinaryFromUrl(variant, it.url).orElse(null)
         }
 
-        downloadedFile.ifPresentOrElse {
+        if (downloadedFile.isPresent()) {
             DownloadInfo info = downloadInfo.get()
-            writeToCache(variant, info.timeStamp, info.branch, it)
-        } {
+            writeToCache(variant, info.timeStamp, info.branch, downloadedFile.get())
+        } else {
             info("No file found for variant $variant")
         }
 
