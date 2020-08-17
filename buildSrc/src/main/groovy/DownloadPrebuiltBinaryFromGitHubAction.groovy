@@ -132,11 +132,11 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         return cacheInfo
     }
 
-    private void writeToCache(String variantName, String timeStamp, File file) {
+    private void writeToCache(String variantName, String timeStamp, String branch, File file) {
         LOCK.writeLock().lock()
         try {
             Map cacheInfo = getCacheInfo()
-            Map entry = [timeStamp: timeStamp, path: file.absolutePath]
+            Map entry = [timeStamp: timeStamp, branch: branch, path: file.absolutePath]
             cacheInfo.put(variantName, entry)
             getCacheInfoFile().write(JsonOutput.prettyPrint(JsonOutput.toJson(cacheInfo)))
         } finally {
@@ -157,7 +157,8 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         }
 
         if (downloadedFile.isPresent()) {
-            writeToCache(variant, downloadInfo.get()?.timeStamp, downloadedFile.get())
+            DownloadInfo info = downloadInfo.get()
+            writeToCache(variant, info.timeStamp, info.branch, downloadedFile.get())
         } else {
             info("No file found for variant $variant")
         }
@@ -211,9 +212,11 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         boolean isUptoDate = false
         File cachedFile = null
         String timeStamp = null
+        String branch = null
         String artifactUrl = getLatestRun(getJson(getWorkflowsUrl())).with {
             timeStamp = it.get("created_at")
-            Optional<String> cachedFilePath = getCachedFilePath(variantName, timeStamp)
+            branch = it.get("head_branch")
+            Optional<String> cachedFilePath = getCachedFilePath(variantName, timeStamp, branch)
             isUptoDate = cachedFilePath.isPresent()
             if (isUptoDate) {
                 cachedFile = new File(cachedFilePath.get())
@@ -229,7 +232,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             Map[] artifacts = getJson(url).get("artifacts") as Map[]
             String artifactDownloadUrl = artifacts?.find { variantName == it.get("name") }?.get("url") as String
             return artifactDownloadUrl?.with {
-                new DownloadInfo(getJson(it)?.get("archive_download_url") as String, timeStamp)
+                new DownloadInfo(getJson(it)?.get("archive_download_url") as String, timeStamp, branch)
             }
         }
 
@@ -240,10 +243,11 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         return "https://api.github.com/repos/$user/$repository/actions/workflows/$workflow/runs"
     }
 
-    private Optional<String> getCachedFilePath(String variantName, String timeStamp) {
+    private Optional<String> getCachedFilePath(String variantName, String timeStamp, String branch) {
         Map cacheInfo = getCacheInfo()
         boolean isLatest = (cacheInfo[variantName] as Map)?.get("timeStamp") == timeStamp
-        if (isLatest) {
+        boolean correctBranch = (cacheInfo[variantName] as Map)?.get("head_branch") == branch
+        if (isLatest && correctBranch) {
             return Optional.ofNullable((cacheInfo[variantName] as Map)?.get("path") as String)
         } else {
             return Optional.empty()
@@ -266,7 +270,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             boolean completed = "completed" == run.get("status")
             boolean success = "success" == run.get("conclusion")
             boolean isCorrectBranch = branches.isEmpty() || branches.contains(run.get("head_branch")?.toString())
-            return completed && success && isCorrectBranch
+            completed && success && isCorrectBranch
         }).orElseGet {
             log("No suitable workflow run found.")
             return Collections.emptyMap()
@@ -334,10 +338,12 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
     private class DownloadInfo {
         protected String url
         protected String timeStamp
+        protected String branch
 
-        private DownloadInfo(String url, String timeStamp) {
+        private DownloadInfo(String url, String timeStamp, String branch) {
             this.url = url
             this.timeStamp = timeStamp
+            this.branch = branch
         }
     }
 }
