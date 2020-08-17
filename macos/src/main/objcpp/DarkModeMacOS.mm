@@ -37,6 +37,7 @@
 #define VALUE_DARK @"Dark"
 
 BOOL isPatched = NO;
+BOOL manuallyPatched = NO;
 
 @interface PreferenceChangeListener:NSObject {
     @public JavaVM *jvm;
@@ -50,15 +51,26 @@ BOOL isPatched = NO;
     self->jvm = jvm_;
     self->callback = callback_;
 
-    NSDistributedNotificationCenter *center = [NSDistributedNotificationCenter defaultCenter];
-    [self listenToKey:EVENT_THEME_CHANGE onCenter:center];
-    [self listenToKey:EVENT_HIGH_CONTRAST onCenter:center];
+    NSDistributedNotificationCenter *distributedCenter = [NSDistributedNotificationCenter defaultCenter];
+    [self listenToKey:EVENT_THEME_CHANGE onCenter:distributedCenter];
+    [self listenToKey:EVENT_HIGH_CONTRAST onCenter:distributedCenter];
+
+    if(@available(macOS 10.15, *)) {
+        [NSApp addObserver:self
+                forKeyPath:NSStringFromSelector(@selector(effectiveAppearance))
+                   options:0
+                   context:nil];
+    }
     return self;
 }
 
 - (void)dealloc {
-    NSDistributedNotificationCenter *center = [NSDistributedNotificationCenter defaultCenter];
-    [center removeObserver:self]; // Removes all registered notifications.
+    NSDistributedNotificationCenter *sharedCenter = [NSDistributedNotificationCenter defaultCenter];
+    [sharedCenter removeObserver:self]; // Removes all registered notifications.
+    if(@available(macOS 10.15, *)) {
+        [NSApp removeObserver:self
+                   forKeyPath:NSStringFromSelector(@selector(effectiveAppearance))];
+    }
     [super dealloc];
 }
 
@@ -91,10 +103,21 @@ BOOL isPatched = NO;
     if (detach) jvm->DetachCurrentThread();
 }
 
-- (void)notificationEvent:(NSNotification *)notification {
+- (void)dispatchCallback {
     [JNFRunLoop performOnMainThreadWaiting:NO withBlock:^{
         [self runCallback];
     }];
+}
+
+- (void)notificationEvent:(NSNotification *)notification {
+    [self dispatchCallback];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context {
+    [self dispatchCallback];
 }
 
 @end
@@ -102,13 +125,17 @@ BOOL isPatched = NO;
 BOOL isDarkModeCatalina() {
     NSAppearance *appearance = NSApp.effectiveAppearance;
     NSAppearanceName appearanceName = [appearance bestMatchFromAppearancesWithNames:@[NSAppearanceNameAqua,
-                                                                                          NSAppearanceNameDarkAqua]];
+                                                                                      NSAppearanceNameDarkAqua]];
     return [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
 }
 
 BOOL isDarkModeMojave() {
     NSString *interfaceStyle = [[NSUserDefaults standardUserDefaults] stringForKey:KEY_APPLE_INTERFACE_STYLE];
     return [VALUE_DARK caseInsensitiveCompare:interfaceStyle] == NSOrderedSame;
+}
+
+BOOL isAutoMode() {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:KEY_SWITCHES_AUTOMATICALLY];
 }
 
 JNIEXPORT jboolean JNICALL
@@ -168,17 +195,16 @@ Java_com_github_weisj_darkmode_platform_macos_MacOSNative_patchAppBundle(JNIEnv 
 JNF_COCOA_ENTER(env);
     if (@available(macOS 10.15, *)) {
         NSString *name = [[NSBundle mainBundle] bundleIdentifier];
-        if ([name containsString:@"jetbrains"]) {
-            CFStringRef bundleName = (__bridge CFStringRef)name;
+        CFStringRef bundleName = (__bridge CFStringRef)name;
 
-            Boolean exists = false;
-            CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
-            isPatched = exists ? YES : NO;
+        Boolean exists = false;
+        Boolean value = CFPreferencesGetAppBooleanValue(NSRequiresAquaSystemAppearance, bundleName, &exists);
+        isPatched = value ? YES : NO;
 
-            if (!isPatched) {
-                CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
-                CFPreferencesAppSynchronize(bundleName);
-            }
+        if (!exists && [name containsString:@"jetbrains"]) {
+            CFPreferencesSetAppValue(NSRequiresAquaSystemAppearance, kCFBooleanFalse, bundleName);
+            CFPreferencesAppSynchronize(bundleName);
+            manuallyPatched = YES;
         }
     } else {
         isPatched = false;
@@ -189,6 +215,7 @@ JNF_COCOA_EXIT(env);
 JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_macos_MacOSNative_unpatchAppBundle(JNIEnv *env, jclass obj) {
 JNF_COCOA_ENTER(env);
+    if (!manuallyPatched) return;
     if (@available(macOS 10.15, *)) {
         NSString *name = [[NSBundle mainBundle] bundleIdentifier];
         if ([name containsString:@"jetbrains"]) {
