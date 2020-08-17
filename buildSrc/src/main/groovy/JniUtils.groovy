@@ -1,8 +1,10 @@
 import dev.nokee.platform.nativebase.TargetMachine
 import dev.nokee.platform.nativebase.OperatingSystemFamily
+import groovy.transform.CompileStatic
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 
+@CompileStatic
 class JniUtils {
     static String asVariantName(TargetMachine targetMachine) {
         String operatingSystemFamily = 'macos'
