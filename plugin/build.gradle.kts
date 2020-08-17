@@ -22,8 +22,14 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes(
         """
+        v1.5.1
         <ul>
-            <li>1.5.0 Added option to individualy choose whether the IDE/editor theme gets changed.
+            <li>Made dark mode detection more reliable.</li>
+            <li>Improved compatibility with third party tools such as NightOwl.</li>
+        </ul>
+        v1.5.0
+        <ul>
+            <li>Added option to individually choose whether the IDE/editor theme gets changed.</li>
         </ul>
         """
     )
