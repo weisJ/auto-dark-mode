@@ -27,6 +27,9 @@ package com.github.weisj.darkmode.platform.settings
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty0
 
+@DslMarker
+annotation class PropertyMarker
+
 interface SettingsContainerProvider {
     val enabled: Boolean
     fun create(): SettingsContainer
@@ -83,7 +86,7 @@ abstract class DefaultSettingsContainer private constructor(
 
     override val subgroups: MutableList<NamedSettingsGroup> = mutableListOf()
 
-    override fun onSettingsLoaded() {}
+    override fun onSettingsLoaded() { /* default : do nothing */ }
     override fun allProperties(): List<ValueProperty<Any>> {
         return super<SettingsContainer>.allProperties()
     }
@@ -134,6 +137,7 @@ class DefaultNamedSettingsGroup internal constructor(
  * Wrapper for properties that provides a description and parser/writer used
  * for persistent storage.
  */
+@PropertyMarker
 interface ValueProperty<T> : Observable<ValueProperty<T>> {
     val description: String
     val name: String
@@ -163,15 +167,9 @@ fun ValueProperty<*>.toTransformer(): TransformingValueProperty<Any, Any>? =
     castSafelyTo<TransformingValueProperty<Any, Any>>()
 
 inline fun <reified T : Any> ValueProperty<T>.asPersistent(): PersistentValueProperty<T>? =
-    castSafelyTo<PersistentValueProperty<T>>()
-
-/**
- * The effective value of the property. If the property is a transforming property the
- * backing field is chosen. Because of this for a reference to a simple ValueProperty<T>
- * the most general value that can be returned is Any.
- */
-val <T : Any> ValueProperty<T>.effectiveProperty: KMutableProperty0<Any>
-    get() = effective<Any>()::value
+    castSafelyTo<TransformingValueProperty<T, Any>>()?.let {
+        if (it.value is String) it.castSafelyTo<PersistentValueProperty<T>>() else null
+    }
 
 inline fun <reified K : Any> ValueProperty<*>.effective(): ValueProperty<K> = effective(K::class)
 
