@@ -73,10 +73,10 @@ object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
     private val guessingMechanismLogAction = OneTimeAction {
         Notifications.dispatchNotification(
             """
-                Auto Dark Mode is currently guessing whether the current Gnome theme
-                is dark or light. You can explicitly specify your light, dark and high-contrast
-                theme in <nobr>"File | Settings | Auto Dark Mode"</nobr> for better results.
-                """.trimIndent(),
+            Auto Dark Mode is currently guessing whether the current Gnome theme
+            is dark or light. You can explicitly specify your light, dark and high-contrast
+            theme in <nobr>"File | Settings | Auto Dark Mode"</nobr> for better results.
+            """.trimIndent(),
             showSettingsLink = true
         )
     }
