@@ -48,10 +48,10 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> = HashMap()
     val containers: List<SettingsContainer> =
         ServiceUtil.load(SettingsContainerProvider::class.java)
+            .asSequence()
             .filter { it.enabled }
             .map { it.create() }
             .onEach { it.init() }
-            .asSequence()
             .toList()
 
     init {
