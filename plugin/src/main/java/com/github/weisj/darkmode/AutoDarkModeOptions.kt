@@ -42,7 +42,7 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     companion object {
         private const val ROOT_GROUP_NAME = "__root__group__"
         private const val SETTING_VERSION_NAME = "__settings__version__"
-        private const val SETTINGS_VERSION = 1
+        private const val SETTINGS_VERSION = 1.1
     }
 
     private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> = HashMap()
