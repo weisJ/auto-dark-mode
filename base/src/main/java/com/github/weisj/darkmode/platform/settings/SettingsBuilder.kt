@@ -43,7 +43,7 @@ private val SettingsGroup.unnamedGroupCounter
     get() = UnnamedGroupCounter.get(this)
 
 class SettingsGroupBuilder(group: SettingsGroup) : SettingsGroup by group {
-    internal var activeCondition: Condition? = null
+    internal var activeCondition: Condition? = (group.parent as? SettingsGroupBuilder)?.activeCondition
 
     fun KMutableProperty0<Boolean>.isTrue() = isTrue(getWithProperty(this))
     fun KMutableProperty0<Boolean>.isFalse() = isFalse(getWithProperty(this))
@@ -53,8 +53,6 @@ class SettingsGroupBuilder(group: SettingsGroup) : SettingsGroup by group {
 fun SettingsGroupBuilder.activeIf(condition: Condition) {
     activeCondition = condition
 }
-
-// fun SettingsGroupBuilder.isTrue(prop: KMutableProperty0<Boolean>) = isTrue(getWithProperty(prop))
 
 private fun initGroup(group: SettingsGroup, init: SettingsGroupBuilder.() -> Unit): SettingsGroup {
     val builder = SettingsGroupBuilder(group)
