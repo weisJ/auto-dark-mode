@@ -31,12 +31,12 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
 import com.intellij.ui.components.JBCheckBox
-import com.intellij.ui.layout.Row
-import com.intellij.ui.layout.RowBuilder
-import com.intellij.ui.layout.panel
+import com.intellij.ui.layout.*
 import com.intellij.util.castSafelyTo
 import javax.swing.JComboBox
 import javax.swing.JComponent
+import javax.swing.event.DocumentEvent
+import javax.swing.event.DocumentListener
 
 class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
@@ -71,30 +71,64 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     private fun Row.addProperty(valueProp: ValueProperty<Any>) {
         val choiceProperty = valueProp.castSafelyTo<ChoiceProperty<Any, Any>>()
-        val property = valueProp.effectiveProperty
-        val rowName = if (property.get() is Boolean) "" else valueProp.description
+        val effectiveProp = valueProp.effective<Any>()
+        val prop = effectiveProp.value
+        val rowName = when (prop) {
+            is Boolean -> ""
+            else -> valueProp.description
+        }
         maybeNamedRow(rowName) {
-            val comp: JComponent = when {
-                choiceProperty != null -> comboBox(
-                    CollectionComboBoxModel(choiceProperty.choices),
-                    choiceProperty::choiceValue,
-                    renderer = SimpleListCellRenderer.create<Any>("", choiceProperty.renderer)
-                ).component
-                property.get() is Boolean -> {
-                    checkBox(valueProp.description, property.withType()!!).component
-                }
-                property.get() is String -> {
-                    textField(property.withType()!!).component
-                }
+            when {
+                choiceProperty != null -> addChoiceProperty(choiceProperty)
+                prop is Boolean ->
+                    checkBox(valueProp.description, effectiveProp::value.withType()!!)
+                        .applyToComponent {
+                            addActionListener { effectiveProp.preview = isSelected }
+                        }
+                prop is String ->
+                    textField(effectiveProp::value.withType()!!)
+                        .applyToComponent {
+                            document.addDocumentListener(
+                                DocumentChangeListener {
+                                    effectiveProp.preview = text
+                                }
+                            )
+                        }
+                prop is Int ->
+                    spinner(effectiveProp::value.withType()!!, Int.MIN_VALUE, Int.MAX_VALUE)
+                        .applyToComponent {
+                            addChangeListener { effectiveProp.preview = value }
+                        }
                 else -> throw IllegalArgumentException("Not yet implemented!")
             }
-            comp.addPreviewListener { valueProp.effective<Any>().preview = it }
-        }.also {
-            it.enabled = valueProp.activeCondition()
-            valueProp.activeCondition.registerListener(Condition::value) { _, _ ->
-                it.enabled = valueProp.activeCondition.value
+            enableIf(effectiveProp.activeCondition)
+        }
+    }
+
+    private fun Row.addChoiceProperty(choiceProperty: ChoiceProperty<Any, Any>) {
+        if (choiceProperty.choices.size > 3) {
+            comboBox(
+                CollectionComboBoxModel(choiceProperty.choices),
+                choiceProperty::choiceValue,
+                renderer = SimpleListCellRenderer.create<Any>("") { choiceProperty.renderer(it) }
+            )
+        } else {
+            buttonGroup {
+                choiceProperty.choices.forEach { item ->
+                    row {
+                        radioButton(choiceProperty.renderer(item)).applyToComponent {
+                            isSelected = choiceProperty.value == item
+                            addActionListener { if (isSelected) choiceProperty.preview = item }
+                        }
+                        enableIf(choiceProperty.activeCondition)
+                    }
+                }
             }
         }
+    }
+
+    private fun Row.enableIf(condition: Condition) {
+        enableIf(ConditionComponentPredicate(condition))
     }
 
     private fun JComponent.addPreviewListener(listener: (Any) -> Unit) {
@@ -121,4 +155,21 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
         const val SETTINGS_TITLE: String = "Auto Dark Mode"
         val UNNAMED_GROUP_TITLE: String? = null
     }
+}
+
+internal class DocumentChangeListener(val onChange: () -> Unit) : DocumentListener {
+
+    override fun insertUpdate(e: DocumentEvent?) = onChange()
+
+    override fun removeUpdate(e: DocumentEvent?) = onChange()
+
+    override fun changedUpdate(e: DocumentEvent?) = onChange()
+}
+
+internal class ConditionComponentPredicate(private val condition: Condition) : ComponentPredicate() {
+    override fun addListener(listener: (Boolean) -> Unit) {
+        condition.registerListener(Condition::value) { _, new -> listener(new) }
+    }
+
+    override fun invoke() = condition()
 }
