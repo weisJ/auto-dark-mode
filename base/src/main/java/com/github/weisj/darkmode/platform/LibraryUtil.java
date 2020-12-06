@@ -37,6 +37,7 @@ public final class LibraryUtil {
     public static final String X86 = "32";
     public static final String X64 = "64";
     public static final boolean isWin10OrNewer = SystemInfo.isWin10OrNewer;
+    public static final boolean isMac = SystemInfo.isMac;
     public static final boolean isMacOSMojave = SystemInfo.isMacOSMojave;
     public static final boolean isMacOSCatalina = SystemInfo.isMacOSCatalina;
     public static final boolean isGnome = SystemInfo.isGNOME;
