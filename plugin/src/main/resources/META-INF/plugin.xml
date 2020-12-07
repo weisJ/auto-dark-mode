@@ -41,6 +41,8 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <resource-bundle>messages.AutoDarkModeBundle</resource-bundle>
+
     <applicationListeners>
         <listener class="com.github.weisj.darkmode.AutoDarkModeStartupListener"
                   topic="com.intellij.ide.AppLifecycleListener"
@@ -64,5 +66,7 @@
         <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"/>
         <applicationConfigurable instance="com.github.weisj.darkmode.DarkModeConfigurable"
                                  dynamic="true"/>
+        <notificationGroup id="com.github.weisj.darkmode" displayType="STICKY_BALLOON" isLogByDefault="true"
+                           key="NotificationTitle"/>
     </extensions>
 </idea-plugin>
