@@ -22,6 +22,10 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes(
         """
+        v1.5.2
+        <ul>
+            <li>Notify macOS users to restart IDEA on installation</li>
+        </ul>
         v1.5.1
         <ul>
             <li>Made dark mode detection more reliable.</li>
