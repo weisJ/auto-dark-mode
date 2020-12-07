@@ -30,8 +30,7 @@ import com.google.auto.service.AutoService
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
-import com.intellij.notification.NotificationDisplayType
-import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationGroupManager
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.util.IconLoader
 import java.util.*
@@ -47,13 +46,10 @@ class IntellijNotificationServiceProxy : NotificationsService by IntellijNotific
 
 object IntellijNotificationService : NotificationsService {
 
-    private val ICON = IconLoader.getIcon("/META-INF/pluginIcon.svg")
+    private val ICON = IconLoader.getIcon("/META-INF/pluginIcon.svg", AutoDarkMode::class.java)
 
-    private val NOTIFICATION_GROUP = NotificationGroup(
-        displayId = "Auto Dark Mode",
-        displayType = NotificationDisplayType.STICKY_BALLOON,
-        isLogByDefault = true
-    )
+    private val NOTIFICATION_GROUP = NotificationGroupManager.getInstance()
+        .getNotificationGroup("com.github.weisj.darkmode")
 
     /*
      * Notifications may not be displayed of they are dispatched before the application frame has been
