@@ -27,10 +27,10 @@ package com.github.weisj.darkmode.platform;
 public class NullMonitor implements ThemeMonitor {
 
     @Override
-    public void requestUpdate() {}
+    public void requestUpdate() { /* default: do nothing */ }
 
     @Override
-    public void setRunning(boolean running) {}
+    public void setRunning(final boolean running) { /* default: do nothing */}
 
     @Override
     public boolean isRunning() {

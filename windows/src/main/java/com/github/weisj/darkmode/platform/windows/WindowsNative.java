@@ -26,6 +26,10 @@ package com.github.weisj.darkmode.platform.windows;
 
 public final class WindowsNative {
 
+    private WindowsNative() {
+        throw new IllegalStateException("Native methods holder");
+    }
+
     static native boolean isDarkThemeEnabled();
 
     static native boolean isHighContrastEnabled();

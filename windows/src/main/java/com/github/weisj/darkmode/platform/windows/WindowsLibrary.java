@@ -28,6 +28,7 @@ import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
 import com.github.weisj.darkmode.platform.LibraryUtil;
 import com.github.weisj.darkmode.platform.PluginLogger;
 
+@SuppressWarnings({"java:S115", "java:S1075"})
 public class WindowsLibrary extends AbstractPluginLibrary {
 
     private static final String PROJECT_NAME = "auto-dark-mode-windows";

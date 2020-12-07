@@ -45,12 +45,12 @@ public class NullThemeMonitorService implements ThemeMonitorService {
     }
 
     @Override
-    public long createEventHandler(Runnable callback) {
+    public long createEventHandler(final Runnable callback) {
         return 0;
     }
 
     @Override
-    public void deleteEventHandler(long eventHandle) {}
+    public void deleteEventHandler(final long eventHandle) { /* default: do nothing */ }
 
     @Override
     public boolean isSupported() {
