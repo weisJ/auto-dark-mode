@@ -62,6 +62,7 @@ object GtkVariants {
      * @return a map containing three keys: [Variant.Original] (the provided themeName), [Variant.Day] (the guessed day
      * variant), and [Variant.Night] (the guessed night variant)
      */
+    @Suppress("kotlin:S1192")
     @JvmStatic
     fun guessFrom(themeName: String): Map<Variant, String> {
         val variants: MutableMap<Variant, String> = EnumMap(Variant::class.java)
