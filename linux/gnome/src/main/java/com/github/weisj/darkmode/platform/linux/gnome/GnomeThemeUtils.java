@@ -27,6 +27,11 @@ package com.github.weisj.darkmode.platform.linux.gnome;
 import java.util.ArrayList;
 
 public class GnomeThemeUtils {
+
+    private GnomeThemeUtils() {
+        throw new IllegalStateException("Native methods holder");
+    }
+
     /**
      * @return a list of the currently installed GTK themes.
      */

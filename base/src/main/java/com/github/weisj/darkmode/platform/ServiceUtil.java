@@ -29,6 +29,10 @@ import java.util.ServiceLoader;
 
 public class ServiceUtil {
 
+    private ServiceUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * Creates a new service loader for the given service type, using the
      * current appropriate Classloader. This method should be used instal of

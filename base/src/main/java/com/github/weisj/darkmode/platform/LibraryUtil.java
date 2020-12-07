@@ -27,7 +27,12 @@ package com.github.weisj.darkmode.platform;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.util.SystemProperties;
 
+@SuppressWarnings("java:S115")
 public final class LibraryUtil {
+
+    private LibraryUtil() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static final String jreArchitecture = System.getProperty("sun.arch.data.model");
     public static final String userHomeDirectory = SystemProperties.getUserHome();

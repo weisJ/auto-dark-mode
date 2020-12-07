@@ -37,6 +37,7 @@ import javax.swing.UIManager
 @AutoService(SettingsContainerProvider::class)
 class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ GeneralThemeSettings })
 
+@Suppress("kotlin:S1192")
 object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_settings") {
 
     private const val EDITABLE_COPY_PREFIX = "_@user_"
@@ -193,7 +194,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      */
     private fun searchLaf(name: String, className: String = ""): UIManager.LookAndFeelInfo? {
         return LafManager.getInstance().installedLookAndFeels.firstOrNull {
-            it.name.toLowerCase() == name.toLowerCase() && (className.isEmpty() || it.className == className)
+            it.name.equals(name, ignoreCase = true) && (className.isEmpty() || it.className == className)
         }
     }
 }

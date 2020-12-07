@@ -28,25 +28,25 @@ import com.github.weisj.darklaf.platform.AbstractLibrary;
 
 public abstract class AbstractPluginLibrary extends AbstractLibrary {
 
-    protected final PluginLogger logger;
+    protected final PluginLogger pluginLogger;
 
-    public AbstractPluginLibrary(final String path, final String libraryName, final PluginLogger logger) {
+    protected AbstractPluginLibrary(final String path, final String libraryName, final PluginLogger logger) {
         super(path, libraryName, null);
-        this.logger = logger;
+        this.pluginLogger = logger;
     }
 
     @Override
     protected void info(String message) {
-        logger.info(message);
+        pluginLogger.info(message);
     }
 
     @Override
     protected void warning(String message) {
-        logger.warn(message);
+        pluginLogger.warn(message);
     }
 
     @Override
     protected void error(String message, Throwable e) {
-        logger.error(message, e);
+        pluginLogger.error(message, e);
     }
 }

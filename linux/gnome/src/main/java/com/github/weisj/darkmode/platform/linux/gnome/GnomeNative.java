@@ -26,6 +26,10 @@ package com.github.weisj.darkmode.platform.linux.gnome;
 
 public class GnomeNative {
 
+    private GnomeNative() {
+        throw new IllegalStateException("Native methods holder");
+    }
+
     static native String getCurrentTheme();
 
     static native long createEventHandler(final Runnable callback);
