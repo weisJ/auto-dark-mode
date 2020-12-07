@@ -26,7 +26,7 @@ package com.github.weisj.darkmode.platform
 
 object Notifications : NotificationsService by ServiceUtil.load(
         NotificationsService::class.java
-    ).asSequence().firstOrNull() ?: LogNotificationsService()
+    ).firstOrNull() ?: LogNotificationsService()
 
 interface NotificationsService {
 
