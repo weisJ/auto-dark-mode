@@ -69,7 +69,7 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
             }
     }
 
-    override fun getState(): State? {
+    override fun getState(): State {
         return State(properties.map { (k, v) -> Entry(k.groupIdentifier, k.name, v.value) }.toMutableList().also {
             it.add(Entry(ROOT_GROUP_NAME, SETTING_VERSION_NAME, SETTINGS_VERSION.toString()))
         })
@@ -78,7 +78,7 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     override fun loadState(toLoad: State) {
         val keepUnused =
             toLoad.entries.find { it.groupIdentifier == ROOT_GROUP_NAME && it.name == SETTING_VERSION_NAME }?.let {
-                it.value.toInt() >= SETTINGS_VERSION
+                it.value.toFloat() >= SETTINGS_VERSION
             } ?: false
         toLoad.entries.forEach {
             val identifier = PropertyIdentifier(it.groupIdentifier, it.name)
