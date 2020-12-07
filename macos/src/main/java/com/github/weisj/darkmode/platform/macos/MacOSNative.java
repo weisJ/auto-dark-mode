@@ -26,6 +26,10 @@ package com.github.weisj.darkmode.platform.macos;
 
 public class MacOSNative {
 
+    private MacOSNative() {
+        throw new IllegalStateException("Native methods holder");
+    }
+
     static native boolean isDarkThemeEnabled();
 
     static native boolean isHighContrastEnabled();
