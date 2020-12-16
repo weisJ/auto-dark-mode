@@ -14,12 +14,7 @@ library {
 
     dependencies {
         jvmImplementation(project(":auto-dark-mode-base"))
-        nativeImplementation("dev.nokee.framework:JavaVM:$frameworkVersion")
-        nativeImplementation("dev.nokee.framework:JavaVM:$frameworkVersion") {
-            capabilities {
-                requireCapability("JavaVM:JavaNativeFoundation:$frameworkVersion")
-            }
-        }
+        nativeImplementation("dev.nokee.framework:JavaNativeFoundation:$frameworkVersion")
         nativeImplementation("dev.nokee.framework:AppKit:$frameworkVersion")
     }
 
