@@ -2,6 +2,7 @@ name: Build Native Libraries
 
 on:
   push:
+    branches: [master]
     paths:
       - '**.cpp'
       - '**.mm'
