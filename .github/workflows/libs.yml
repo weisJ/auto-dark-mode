@@ -54,10 +54,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Setup XCode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '12.1'
       - name: Build
         run: ./gradlew :auto-dark-mode-macos:build --full-stacktrace
       - name: Upload artifact
