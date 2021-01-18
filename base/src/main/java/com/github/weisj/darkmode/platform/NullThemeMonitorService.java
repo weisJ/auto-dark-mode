@@ -22,38 +22,23 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform;
+package com.github.weisj.darkmode.platform
 
 /**
- * This class is a no-op {@link ThemeMonitorService}. This class
+ * This class is a no-op [ThemeMonitorService]. This class
  * is used when a ThemeMonitorService needs to be created for a given environment but no
  * ThemeMonitorService has been created to suit that environment yet.
- * <p>
- * By returning {@code false} from {@link #isSupported()}, this class signals to {@link ThemeMonitorImpl} that
+ *
+ *
+ * By returning `false` from [.isSupported], this class signals to [ThemeMonitorImpl] that
  * delegation failed and no suitable
  * ThemeMonitorService could be found for the current environment.
  */
-public class NullThemeMonitorService implements ThemeMonitorService {
-    @Override
-    public boolean isDarkThemeEnabled() {
-        return false;
-    }
+class NullThemeMonitorService : ThemeMonitorService {
+    override val isDarkThemeEnabled: Boolean = false
+    override val isHighContrastEnabled: Boolean = false
+    override val isSupported: Boolean = false
 
-    @Override
-    public boolean isHighContrastEnabled() {
-        return false;
-    }
-
-    @Override
-    public long createEventHandler(final Runnable callback) {
-        return 0;
-    }
-
-    @Override
-    public void deleteEventHandler(final long eventHandle) { /* default: do nothing */ }
-
-    @Override
-    public boolean isSupported() {
-        return false;
-    }
+    override fun createEventHandler(callback: () -> Unit): NativePointer? = null
+    override fun deleteEventHandler(eventHandle: NativePointer) {}
 }

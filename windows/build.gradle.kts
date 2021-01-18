@@ -6,6 +6,7 @@ plugins {
     id("dev.nokee.cpp-language")
     `uber-jni-jar`
     `use-prebuilt-binaries`
+    kotlin("jvm")
 }
 
 library {
@@ -45,4 +46,8 @@ library {
             }
         }
     }
+}
+
+dependencies {
+    compileOnly(kotlin("stdlib-jdk8"))
 }
