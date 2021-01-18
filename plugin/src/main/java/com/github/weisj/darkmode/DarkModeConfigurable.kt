@@ -30,11 +30,8 @@ import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
-import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.layout.*
 import com.intellij.util.castSafelyTo
-import javax.swing.JComboBox
-import javax.swing.JComponent
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -106,7 +103,7 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
     }
 
     private fun Row.addChoiceProperty(choiceProperty: ChoiceProperty<Any, Any>) {
-        if (choiceProperty.choices.size > 3) {
+        if (choiceProperty.choices.size >= CHOICE_PROPERTY_GROUPING_THRESHOLD) {
             comboBox(
                 CollectionComboBoxModel(choiceProperty.choices),
                 choiceProperty::choiceValue,
@@ -131,13 +128,6 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
         enableIf(ConditionComponentPredicate(condition))
     }
 
-    private fun JComponent.addPreviewListener(listener: (Any) -> Unit) {
-        when (this) {
-            is JComboBox<*> -> addItemListener { listener(it.itemSelectable.selectedObjects[0]) }
-            is JBCheckBox -> addItemListener { listener(isSelected) }
-        }
-    }
-
     private fun RowBuilder.maybeTitledRow(name: String?, init: Row.() -> Unit): Row {
         return if (!name.isNullOrEmpty()) titledRow(name, init) else row { init() }
     }
@@ -153,6 +143,7 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     companion object {
         const val SETTINGS_TITLE: String = "Auto Dark Mode"
+        const val CHOICE_PROPERTY_GROUPING_THRESHOLD = 3
         val UNNAMED_GROUP_TITLE: String? = null
     }
 }
