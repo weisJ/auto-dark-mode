@@ -75,7 +75,7 @@ object IntellijNotificationService : NotificationsService {
         ).also {
             it.icon = ICON
             if (showSettingsLink) {
-                it.addAction(NotificationAction.create("View Settings") { _, _ ->
+                it.addAction(NotificationAction.create("View settings") { _, _ ->
                     ShowSettingsUtil.getInstance().showSettingsDialog(null, DarkModeConfigurable::class.java)
                 })
             }
@@ -86,10 +86,10 @@ object IntellijNotificationService : NotificationsService {
             notification.notify(ProjectUtil.getOpenProjects().firstOrNull())
         }
     }
-}
 
-fun NotificationType.toIntelliJType(): IntelliJNotificationType = when (this) {
-    NotificationType.INFO -> IntelliJNotificationType.INFORMATION
-    NotificationType.WARNING -> IntelliJNotificationType.WARNING
-    NotificationType.ERROR -> IntelliJNotificationType.ERROR
+    private fun NotificationType.toIntelliJType(): IntelliJNotificationType = when (this) {
+        NotificationType.INFO -> IntelliJNotificationType.INFORMATION
+        NotificationType.WARNING -> IntelliJNotificationType.WARNING
+        NotificationType.ERROR -> IntelliJNotificationType.ERROR
+    }
 }
