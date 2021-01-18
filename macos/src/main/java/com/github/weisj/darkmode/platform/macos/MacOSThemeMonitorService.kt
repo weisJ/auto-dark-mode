@@ -22,24 +22,31 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.linux;
+package com.github.weisj.darkmode.platform.macos
 
-import com.github.weisj.darkmode.platform.DelegatingThemeMonitorService;
-import com.github.weisj.darkmode.platform.LibraryUtil;
-import com.github.weisj.darkmode.platform.NullThemeMonitorService;
-import com.github.weisj.darkmode.platform.ThemeMonitorService;
-import com.github.weisj.darkmode.platform.linux.gnome.GnomeThemeMonitorService;
+import com.github.weisj.darkmode.platform.LibraryUtil
+import com.github.weisj.darkmode.platform.NativePointer
+import com.github.weisj.darkmode.platform.ThemeMonitorService
 
-public class LinuxThemeMonitorService extends DelegatingThemeMonitorService {
-    public LinuxThemeMonitorService() {
-        super(getDelegate());
+class MacOSThemeMonitorService : ThemeMonitorService {
+    override val isDarkThemeEnabled: Boolean
+        get() = MacOSNative.isDarkThemeEnabled()
+    override val isHighContrastEnabled: Boolean
+        get() = MacOSNative.isHighContrastEnabled()
+    override val isSupported: Boolean
+        get() = MacOSLibrary.get().isLoaded
+
+    override fun createEventHandler(callback: () -> Unit): NativePointer? {
+        return NativePointer(MacOSNative.createPreferenceChangeListener(callback))
     }
 
-    private static ThemeMonitorService getDelegate() {
-        if (LibraryUtil.isGnome) {
-            return new GnomeThemeMonitorService();
-        } else {
-            return new NullThemeMonitorService();
+    override fun deleteEventHandler(eventHandle: NativePointer) {
+        MacOSNative.deletePreferenceChangeListener(eventHandle.pointer)
+    }
+
+    override fun install() {
+        if (LibraryUtil.isMacOSCatalina) {
+            MacOSNative.patchAppBundle()
         }
     }
 }

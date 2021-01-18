@@ -24,16 +24,23 @@
  */
 package com.github.weisj.darkmode.platform
 
-import com.github.weisj.darkmode.platform.PluginLogger.Companion.getLogger
-
 class ThemeMonitorImpl(
     private val monitorService: ThemeMonitorService,
     private val onThemeChange: ThemeCallback
 ) : ThemeMonitor {
 
     private var state: MonitorState = MonitorState()
-    private var listenerHandle: Long = 0
-    private var running = false
+    private var listenerHandle: NativePointer? = null
+    override var running: Boolean = false
+        set(value) {
+            if (field == value) return
+            field = value
+            if (value) {
+                start()
+            } else {
+                stop()
+            }
+        }
 
     init {
         check(monitorService.isSupported) { "Monitoring is not supported." }
@@ -57,37 +64,21 @@ class ThemeMonitorImpl(
     private fun start() {
         state = monitorService.getState()
         listenerHandle = monitorService.createEventHandler { onNotification() }
-        if (listenerHandle == 0L) {
+        if (listenerHandle == null) {
             LOGGER.error("Could not create notification listener. Monitoring will not be started")
             return
         }
-        running = true
         onThemeChange.themeChanged(state.dark, state.highContrast)
         LOGGER.info("Started theme monitoring.")
     }
 
     private fun stop() {
-        if (!running) return
         LOGGER.info("Stopped theme monitoring.")
-        running = false
-        monitorService.deleteEventHandler(listenerHandle)
-    }
-
-    override fun setRunning(running: Boolean) {
-        if (running == isRunning) return
-        if (running) {
-            start()
-        } else {
-            stop()
-        }
-    }
-
-    override fun isRunning(): Boolean {
-        return running
+        listenerHandle?.let { monitorService.deleteEventHandler(it) }
     }
 
     companion object {
-        private val LOGGER = getLogger(ThemeMonitorImpl::class.java)
+        private val LOGGER = PluginLogger<ThemeMonitorImpl>()
     }
 
     private fun ThemeMonitorService.getState(): MonitorState = MonitorState(isDarkThemeEnabled, isHighContrastEnabled)

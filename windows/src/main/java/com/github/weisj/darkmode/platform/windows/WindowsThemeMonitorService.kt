@@ -22,47 +22,24 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform;
+package com.github.weisj.darkmode.platform.windows
 
-public class DelegatingThemeMonitorService implements ThemeMonitorService {
-    private final ThemeMonitorService delegate;
+import com.github.weisj.darkmode.platform.NativePointer
+import com.github.weisj.darkmode.platform.ThemeMonitorService
 
-    public DelegatingThemeMonitorService(ThemeMonitorService delegate) {
-        this.delegate = delegate;
+class WindowsThemeMonitorService : ThemeMonitorService {
+    override val isDarkThemeEnabled: Boolean
+        get() = WindowsNative.isDarkThemeEnabled()
+    override val isHighContrastEnabled: Boolean
+        get() = WindowsNative.isHighContrastEnabled()
+    override val isSupported: Boolean
+        get() = WindowsLibrary.get().isLoaded
+
+    override fun createEventHandler(callback: () -> Unit): NativePointer? {
+        return NativePointer(WindowsNative.createEventHandler(callback))
     }
 
-    @Override
-    public boolean isDarkThemeEnabled() {
-        return delegate.isDarkThemeEnabled();
-    }
-
-    @Override
-    public boolean isHighContrastEnabled() {
-        return delegate.isHighContrastEnabled();
-    }
-
-    @Override
-    public long createEventHandler(Runnable callback) {
-        return delegate.createEventHandler(callback);
-    }
-
-    @Override
-    public void deleteEventHandler(long eventHandle) {
-        delegate.deleteEventHandler(eventHandle);
-    }
-
-    @Override
-    public boolean isSupported() {
-        return delegate.isSupported();
-    }
-
-    @Override
-    public void uninstall() {
-        delegate.uninstall();
-    }
-
-    @Override
-    public void install() {
-        delegate.install();
+    override fun deleteEventHandler(eventHandle: NativePointer) {
+        WindowsNative.deleteEventHandler(eventHandle.pointer)
     }
 }
