@@ -22,13 +22,9 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform;
+package com.github.weisj.darkmode.platform
 
-public interface ThemeMonitor {
-
-    void requestUpdate();
-
-    void setRunning(final boolean running);
-
-    boolean isRunning();
+@FunctionalInterface
+interface ThemeCallback {
+    fun themeChanged(isDark: Boolean, isHighContrast: Boolean)
 }
