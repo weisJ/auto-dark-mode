@@ -50,7 +50,7 @@ class ThemeMonitorImpl(
     private fun onNotification(forceChange: Boolean = false) {
         val newState = monitorService.getState()
         val hasChanged = state != newState
-        LOGGER.info("Received notification")
+        LOGGER.info("Received notification. changed=$hasChanged, oldState=$state, newState=$newState")
         if (hasChanged || forceChange) {
             state = newState
             onThemeChange.themeChanged(state.dark, state.highContrast)
