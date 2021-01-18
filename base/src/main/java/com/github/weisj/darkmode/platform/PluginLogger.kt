@@ -22,39 +22,41 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform;
+package com.github.weisj.darkmode.platform
 
-import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.diagnostic.Logger
 
-public class PluginLogger {
+class PluginLogger(private val logger: Logger) {
 
-    public static PluginLogger getLogger(final Class<?> type) {
-        return new PluginLogger(Logger.getInstance(type));
+    fun info(msg: String?) {
+        logger.info(msg)
     }
 
-    private final Logger logger;
-
-    public PluginLogger(final Logger logger) {
-        this.logger = logger;
+    fun warn(msg: String?) {
+        logger.warn(msg)
     }
 
-    public void info(final String msg) {
-        logger.info(msg);
+    fun error(msg: String?) {
+        logger.error(msg)
     }
 
-    public void warn(final String msg) {
-        logger.warn(msg);
+    fun error(e: Throwable?) {
+        logger.error(e)
     }
 
-    public void error(final String msg) {
-        logger.error(msg);
+    fun error(msg: String?, e: Throwable?) {
+        logger.error(msg, e)
     }
 
-    public void error(final Throwable e) {
-        logger.error(e);
-    }
+    companion object {
 
-    public void error(final String msg, final Throwable e) {
-        logger.error(msg, e);
+        @JvmStatic
+        fun getLogger(type: Class<*>?): PluginLogger {
+            return PluginLogger(Logger.getInstance(type!!))
+        }
+
+        inline fun <reified T> getLogger(): PluginLogger = getLogger(T::class.java)
+
+        inline operator fun <reified T> invoke(): PluginLogger = getLogger<T>()
     }
 }
