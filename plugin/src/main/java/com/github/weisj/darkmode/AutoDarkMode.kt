@@ -53,11 +53,11 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun start() {
-        monitor.letValue { it.isRunning = true }
+        monitor.letValue { it.running = true }
     }
 
     fun stop() {
-        monitor.ifPresent { it.isRunning = false }
+        monitor.ifPresent { it.running = false }
     }
 
     fun onSettingsChange() {
