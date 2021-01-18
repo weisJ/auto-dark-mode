@@ -44,14 +44,12 @@ class AutoDarkMode : Disposable, ThemeCallback {
     private val alarm = Alarm(Alarm.ThreadToUse.SWING_THREAD, this)
     private val monitor = lazy { createMonitor() }
 
-    private fun createMonitor(): ThemeMonitor {
-        return try {
-            val service = ServiceManager.getService(ThemeMonitorService::class.java)
-            AbstractThemeMonitor(service, this)
-        } catch (e: IllegalStateException) {
-            LOGGER.error(e)
-            NullMonitor()
-        }
+    private fun createMonitor(): ThemeMonitor = try {
+        val service = ServiceManager.getService(ThemeMonitorService::class.java)
+        ThemeMonitorImpl(service, this)
+    } catch (e: IllegalStateException) {
+        LOGGER.error(e)
+        NullMonitor()
     }
 
     fun start() {
@@ -125,7 +123,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
 
     companion object {
         private const val INSTANT_DELAY_KEY = "ide.instant.theme.switch.delay"
-        private val LOGGER = PluginLogger.getLogger(AutoDarkMode::class.java)
+        private val LOGGER = PluginLogger<AutoDarkMode>()
         private val OPTIONS = ServiceManager.getService(AutoDarkModeOptions::class.java)
 
         init {

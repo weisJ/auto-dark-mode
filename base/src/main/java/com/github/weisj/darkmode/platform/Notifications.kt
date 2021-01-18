@@ -59,6 +59,6 @@ private class LogNotificationsService : NotificationsService {
     }
 
     companion object {
-        private val LOGGER = PluginLogger.getLogger(Notifications::class.java)
+        private val LOGGER = PluginLogger<Notifications>()
     }
 }
