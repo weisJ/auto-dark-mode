@@ -26,6 +26,7 @@ package com.github.weisj.darkmode
 
 import com.github.weisj.darkmode.platform.NotificationType
 import com.github.weisj.darkmode.platform.NotificationsService
+import com.github.weisj.darkmode.platform.PluginLogger
 import com.google.auto.service.AutoService
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.notification.Notification
@@ -46,6 +47,7 @@ class IntellijNotificationServiceProxy : NotificationsService by IntellijNotific
 
 object IntellijNotificationService : NotificationsService {
 
+    private val LOGGER = PluginLogger<IntellijNotificationService>()
     private val ICON = IconLoader.getIcon("/META-INF/pluginIcon.svg", AutoDarkMode::class.java)
 
     private val NOTIFICATION_GROUP = NotificationGroupManager.getInstance()
@@ -60,6 +62,7 @@ object IntellijNotificationService : NotificationsService {
 
     fun initialize() {
         started = true
+        LOGGER.info("Initializing notification service")
         val project = ProjectUtil.getOpenProjects().firstOrNull()
         while (messageQueue.isNotEmpty()) {
             messageQueue.poll().notify(project)
