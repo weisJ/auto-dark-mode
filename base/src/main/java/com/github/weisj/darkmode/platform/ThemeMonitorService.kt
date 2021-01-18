@@ -28,8 +28,22 @@ interface ThemeMonitorService {
     val isDarkThemeEnabled: Boolean
     val isHighContrastEnabled: Boolean
     val isSupported: Boolean
-    fun createEventHandler(callback: Runnable?): Long
-    fun deleteEventHandler(eventHandle: Long)
-    fun uninstall() {}
-    fun install() {}
+    fun createEventHandler(callback: () -> Unit): NativePointer?
+    fun deleteEventHandler(eventHandle: NativePointer)
+
+    @JvmDefault
+    fun uninstall() {
+    }
+
+    @JvmDefault
+    fun install() {
+    }
+}
+
+data class NativePointer internal constructor(val pointer: Long) {
+    companion object {
+        operator fun invoke(pointer: Long): NativePointer? {
+            return if (pointer == 0L) null else NativePointer(pointer)
+        }
+    }
 }

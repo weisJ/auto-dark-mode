@@ -22,18 +22,12 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform;
+package com.github.weisj.darkmode.platform
 
-public class NullMonitor implements ThemeMonitor {
-
-    @Override
-    public void requestUpdate() { /* default: do nothing */ }
-
-    @Override
-    public void setRunning(final boolean running) { /* default: do nothing */}
-
-    @Override
-    public boolean isRunning() {
-        return false;
+class NullMonitor : ThemeMonitor {
+    override fun requestUpdate() {
+        /* default: do nothing */
     }
+
+    override var running: Boolean = false
 }

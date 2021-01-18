@@ -22,34 +22,15 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.windows;
+package com.github.weisj.darkmode.platform.linux
 
-import com.github.weisj.darkmode.platform.ThemeMonitorService;
+import com.github.weisj.darkmode.platform.LibraryUtil
+import com.github.weisj.darkmode.platform.NullThemeMonitorService
+import com.github.weisj.darkmode.platform.ThemeMonitorService
+import com.github.weisj.darkmode.platform.linux.gnome.GnomeThemeMonitorService
 
-public class WindowsThemeMonitorService implements ThemeMonitorService {
-
-    @Override
-    public boolean isDarkThemeEnabled() {
-        return WindowsNative.isDarkThemeEnabled();
-    }
-
-    @Override
-    public boolean isHighContrastEnabled() {
-        return WindowsNative.isHighContrastEnabled();
-    }
-
-    @Override
-    public long createEventHandler(Runnable callback) {
-        return WindowsNative.createEventHandler(callback);
-    }
-
-    @Override
-    public void deleteEventHandler(long eventHandle) {
-        WindowsNative.deleteEventHandler(eventHandle);
-    }
-
-    @Override
-    public boolean isSupported() {
-        return WindowsLibrary.get().isLoaded();
-    }
+class LinuxThemeMonitorService : ThemeMonitorService by if (LibraryUtil.isGnome) {
+    GnomeThemeMonitorService()
+} else {
+    NullThemeMonitorService()
 }
