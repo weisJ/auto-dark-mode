@@ -22,21 +22,14 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform;
+package com.github.weisj.darkmode.platform
 
-public interface ThemeMonitorService {
-
-    boolean isDarkThemeEnabled();
-
-    boolean isHighContrastEnabled();
-
-    long createEventHandler(final Runnable callback);
-
-    void deleteEventHandler(final long eventHandle);
-
-    boolean isSupported();
-
-    default void uninstall() {}
-
-    default void install() {}
+interface ThemeMonitorService {
+    val isDarkThemeEnabled: Boolean
+    val isHighContrastEnabled: Boolean
+    val isSupported: Boolean
+    fun createEventHandler(callback: Runnable?): Long
+    fun deleteEventHandler(eventHandle: Long)
+    fun uninstall() {}
+    fun install() {}
 }
