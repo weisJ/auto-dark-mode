@@ -45,41 +45,90 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
         private const val SETTINGS_VERSION = 1.1
     }
 
-    private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> = HashMap()
-    val containers: List<SettingsContainer> =
+    /*
+     * Because out state immediately gets initialized with default values we need to be careful when
+     * to return a complete copy of the state.
+     */
+    private enum class LoadState {
+        // If no state has been requested we return the bare minimum of state data.
+        INVALID,
+
+        // After the state has been loaded it will be requested once more to determine the
+        // state after loading. Here we simply return the state provided by the loadState method.
+        STATE_AFTER_LOAD,
+
+        // After the state has been fully loaded we can return the complete state without it being ignored
+        // on save
+        LOADED
+    }
+
+    private var storageSettingsVersion: Double = SETTINGS_VERSION
+    val containers: List<SettingsContainer> by lazy {
         ServiceUtil.load(SettingsContainerProvider::class.java)
             .asSequence()
             .filter { it.enabled }
             .map { it.create() }
             .onEach { it.init() }
             .toList()
+    }
+    private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> by lazy {
+        initState(containers, mutableMapOf())
+    }
+    private var stateAfterLoad: State? = null
+    private var loadState = LoadState.INVALID
 
-    init {
-        containers
-            .flatMap { it.allProperties() }
+    private fun initState(
+        cont: List<SettingsContainer>,
+        props: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>>
+    ): MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> {
+        cont.flatMap { it.allProperties() }
             .mapNotNull { it.asPersistent() }
             .forEach {
                 val identifier = it.propertyIdentifier
-                properties[identifier]?.let { other ->
+                props[identifier]?.let { other ->
                     throw IllegalStateException(
                         "$it clashes with $other. Property with identifier $identifier already defined."
                     )
                 }
-                properties[it.propertyIdentifier] = it
+                props[it.propertyIdentifier] = it
             }
+        return props
+    }
+
+    private fun createVersionEntry(): Entry = Entry(ROOT_GROUP_NAME, SETTING_VERSION_NAME, SETTINGS_VERSION.toString())
+
+    private fun computeStateEntries(): Set<Entry> {
+        val props = when (loadState) {
+            LoadState.LOADED -> properties.map { (k, v) -> Entry(k.groupIdentifier, k.name, v.value) }
+            LoadState.STATE_AFTER_LOAD -> {
+                val entries = stateAfterLoad?.entries ?: emptySet()
+                stateAfterLoad = null
+                entries
+            }
+            else -> emptySet()
+        }
+        val versionEntry = createVersionEntry()
+        return (props + versionEntry).toSet()
     }
 
     override fun getState(): State {
-        return State(properties.map { (k, v) -> Entry(k.groupIdentifier, k.name, v.value) }.toMutableList().also {
-            it.add(Entry(ROOT_GROUP_NAME, SETTING_VERSION_NAME, SETTINGS_VERSION.toString()))
-        })
+        val state = State(computeStateEntries())
+        if (loadState == LoadState.STATE_AFTER_LOAD) {
+            loadState = LoadState.LOADED
+        }
+        return state
     }
 
     override fun loadState(toLoad: State) {
-        val keepUnused =
-            toLoad.entries.find { it.groupIdentifier == ROOT_GROUP_NAME && it.name == SETTING_VERSION_NAME }?.let {
-                it.value.toFloat() >= SETTINGS_VERSION
-            } ?: false
+        if (loadState == LoadState.INVALID) {
+            stateAfterLoad = toLoad
+            loadState = LoadState.STATE_AFTER_LOAD
+        }
+        storageSettingsVersion = toLoad.entries.find {
+            it.groupIdentifier == ROOT_GROUP_NAME && it.name == SETTING_VERSION_NAME
+        }?.value?.toDouble() ?: SETTINGS_VERSION
+
+        val keepUnused = storageSettingsVersion >= SETTINGS_VERSION
         toLoad.entries.forEach {
             val identifier = PropertyIdentifier(it.groupIdentifier, it.name)
             if (keepUnused) {
@@ -103,7 +152,7 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     private val <T> ValueProperty<T>.propertyIdentifier
         get() = PropertyIdentifier(group.getIdentifierPath(), name)
 
-    data class State(var entries: MutableList<Entry> = mutableListOf())
+    data class State(var entries: Set<Entry> = emptySet())
 
     data class Entry(var groupIdentifier: String = "", var name: String = "", var value: String = "")
 
