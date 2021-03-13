@@ -97,18 +97,18 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
 
     private fun createVersionEntry(): Entry = Entry(ROOT_GROUP_NAME, SETTING_VERSION_NAME, SETTINGS_VERSION.toString())
 
-    private fun computeStateEntries(): Set<Entry> {
+    private fun computeStateEntries(): List<Entry> {
         val props = when (loadState) {
             LoadState.LOADED -> properties.map { (k, v) -> Entry(k.groupIdentifier, k.name, v.value) }
             LoadState.STATE_AFTER_LOAD -> {
-                val entries = stateAfterLoad?.entries ?: emptySet()
+                val entries = stateAfterLoad?.entries ?: emptyList()
                 stateAfterLoad = null
                 entries
             }
-            else -> emptySet()
+            else -> emptyList()
         }
         val versionEntry = createVersionEntry()
-        return (props + versionEntry).toSet()
+        return (props + versionEntry)
     }
 
     override fun getState(): State {
@@ -152,7 +152,7 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     private val <T> ValueProperty<T>.propertyIdentifier
         get() = PropertyIdentifier(group.getIdentifierPath(), name)
 
-    data class State(var entries: Set<Entry> = emptySet())
+    data class State(var entries: List<Entry> = emptyList())
 
     data class Entry(var groupIdentifier: String = "", var name: String = "", var value: String = "")
 
