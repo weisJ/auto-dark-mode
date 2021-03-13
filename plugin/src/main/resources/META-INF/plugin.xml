@@ -41,8 +41,6 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <resource-bundle>messages.AutoDarkModeBundle</resource-bundle>
-
     <applicationListeners>
         <listener class="com.github.weisj.darkmode.AutoDarkModeStartupListener"
                   topic="com.intellij.ide.AppLifecycleListener"
