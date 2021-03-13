@@ -31,7 +31,8 @@ import com.google.auto.service.AutoService
 import com.intellij.ide.impl.ProjectUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
-import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationDisplayType
+import com.intellij.notification.NotificationGroup
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.util.IconLoader
 import java.util.*
@@ -50,8 +51,11 @@ object IntellijNotificationService : NotificationsService {
     private val LOGGER = PluginLogger<IntellijNotificationService>()
     private val ICON = IconLoader.getIcon("/META-INF/pluginIcon.svg", AutoDarkMode::class.java)
 
-    private val NOTIFICATION_GROUP = NotificationGroupManager.getInstance()
-        .getNotificationGroup("com.github.weisj.darkmode")
+    private val NOTIFICATION_GROUP = NotificationGroup(
+        /*displayId*/"Auto Dark Mode",
+        /*defaultDisplayType*/ NotificationDisplayType.STICKY_BALLOON,
+        /*logByDefault*/ true
+    )
 
     /*
      * Notifications may not be displayed of they are dispatched before the application frame has been
@@ -71,10 +75,10 @@ object IntellijNotificationService : NotificationsService {
 
     override fun dispatchNotification(message: String, type: NotificationType, showSettingsLink: Boolean) {
         val notification = NOTIFICATION_GROUP.createNotification(
-            title = "Auto Dark Mode",
-            subtitle = null,
-            content = message,
-            type = type.toIntelliJType()
+            /*title */"Auto Dark Mode",
+            /*subtitle*/ null,
+            /*content*/message,
+            /*type*/ type.toIntelliJType()
         ).also {
             it.icon = ICON
             if (showSettingsLink) {
