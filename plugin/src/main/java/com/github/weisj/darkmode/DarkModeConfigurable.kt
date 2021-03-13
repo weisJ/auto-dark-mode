@@ -32,6 +32,7 @@ import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
 import com.intellij.ui.layout.*
 import com.intellij.util.castSafelyTo
+import javax.swing.JComponent
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 
@@ -64,6 +65,10 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
                 }
             }
         }
+    }
+
+    private fun <T : JComponent> CellBuilder<T>.applyToComponent(action: T.() -> Unit) {
+        component.apply(action)
     }
 
     private fun Row.addProperty(valueProp: ValueProperty<Any>) {
