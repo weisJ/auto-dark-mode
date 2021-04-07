@@ -62,12 +62,12 @@ class ThemeMonitorImpl(
     }
 
     private fun start() {
-        state = monitorService.getState()
         listenerHandle = monitorService.createEventHandler { onNotification() }
         if (listenerHandle == null) {
             LOGGER.error("Could not create notification listener. Monitoring will not be started")
             return
         }
+        state = monitorService.getState()
         onThemeChange.themeChanged(state.dark, state.highContrast)
         LOGGER.info("Started theme monitoring.")
     }
