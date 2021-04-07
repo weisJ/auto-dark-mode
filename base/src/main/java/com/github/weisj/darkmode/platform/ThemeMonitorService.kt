@@ -31,13 +31,9 @@ interface ThemeMonitorService {
     fun createEventHandler(callback: () -> Unit): NativePointer?
     fun deleteEventHandler(eventHandle: NativePointer)
 
-    @JvmDefault
-    fun uninstall() {
-    }
+    fun uninstall() {}
 
-    @JvmDefault
-    fun install() {
-    }
+    fun install() {}
 }
 
 data class NativePointer internal constructor(val pointer: Long) {
