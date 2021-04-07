@@ -25,7 +25,6 @@
 package com.github.weisj.darkmode.platform;
 
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.util.SystemProperties;
 
 @SuppressWarnings("java:S115")
 public final class LibraryUtil {
@@ -35,7 +34,6 @@ public final class LibraryUtil {
     }
 
     public static final String jreArchitecture = System.getProperty("sun.arch.data.model");
-    public static final String userHomeDirectory = SystemProperties.getUserHome();
     public static final boolean isX86;
     public static final boolean isX64;
     public static final boolean undefinedArchitecture;
