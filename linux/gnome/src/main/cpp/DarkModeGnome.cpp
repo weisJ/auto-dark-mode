@@ -26,16 +26,19 @@
 #include "GioUtils.hpp"
 
 #include <string>
+#include <thread>
 #include <glibmm-2.4/glibmm.h>
 #include <giomm-2.4/giomm.h>
 
-constexpr auto SETTINGS_SCHEMA_NAME = "org.gnome.desktop.interface";
-constexpr auto THEME_NAME_KEY = "gtk-theme";
+#define SETTINGS_SCHEMA_NAME "org.gnome.desktop.interface"
+#define THEME_NAME_KEY "gtk-theme"
 Glib::RefPtr<Gio::Settings> settings;
+Glib::RefPtr<Glib::MainContext> mainContext;
 
 JNIEXPORT jstring JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_getCurrentTheme(JNIEnv *env, jclass) {
-    return env->NewStringUTF(settings->get_string(THEME_NAME_KEY).c_str());
+    auto themeStr = settings->get_string(THEME_NAME_KEY);
+    return env->NewStringUTF(themeStr.c_str());
 }
 
 struct EventHandler {
@@ -43,6 +46,9 @@ struct EventHandler {
     JNIEnv *env;
     jobject callback;
     sigc::connection settingsChangedSignalConnection;
+
+    Glib::RefPtr<Glib::MainLoop> mainLoop;
+    std::thread loopThread;
 
     void settingChanged(const Glib::ustring &name) {
         runCallBack();
@@ -70,14 +76,29 @@ struct EventHandler {
     }
 
     void stop() {
+        mainLoop->quit();
+        loopThread.join();
         settingsChangedSignalConnection.disconnect();
+    }
+
+    void run() {
+        mainLoop->run();
     }
 
     EventHandler(JavaVM *jvm_, jobject callback_) {
         jvm = jvm_;
         callback = callback_;
+
+        mainContext->push_thread_default();
+        mainLoop = Glib::MainLoop::create(mainContext);
+
         settingsChangedSignalConnection = settings->signal_changed(THEME_NAME_KEY).connect(
                 sigc::mem_fun(this, &EventHandler::settingChanged));
+        // Request key to ensure updates are send to the signal handler.
+        auto currentTheme = settings->get_string(THEME_NAME_KEY);
+        loopThread = std::thread(&EventHandler::run, this);
+
+        mainContext->pop_thread_default();
     }
 };
 
@@ -106,5 +127,8 @@ Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_deleteEventHandl
 JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_init(JNIEnv *env, jclass obj) {
     ensure_gio_init();
+    mainContext = Glib::MainContext::create();
+    mainContext->push_thread_default();
     settings = Gio::Settings::create(SETTINGS_SCHEMA_NAME);
+    mainContext->pop_thread_default();
 }

@@ -50,6 +50,18 @@ dependencies {
     kapt(platform(project(":auto-dark-mode-dependencies-bom")))
     kapt("com.google.auto.service:auto-service")
     compileOnly("com.google.auto.service:auto-service-annotations")
+
+    testImplementation(project(":auto-dark-mode-linux-gnome"))
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.4.2")
+}
+
+tasks.test {
+    testLogging {
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showStandardStreams = true
+    }
+    useJUnitPlatform()
 }
 
 tasks.withType<PublishTask> {
