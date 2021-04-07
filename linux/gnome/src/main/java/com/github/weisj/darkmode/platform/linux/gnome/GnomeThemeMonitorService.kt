@@ -29,9 +29,14 @@ import com.github.weisj.darkmode.platform.ThemeMonitorService
 import com.github.weisj.darkmode.platform.linux.gnome.GtkVariants.guessFrom
 
 class GnomeThemeMonitorService : ThemeMonitorService {
+
+    init {
+        GnomeLibrary.get()
+    }
+
     override val isDarkThemeEnabled: Boolean
         get() {
-            val currentTheme = GnomeNative.getCurrentTheme()
+            val currentTheme = currentGtkTheme
             return if (GnomeSettings.guessLightAndDarkThemes) {
                 currentTheme == guessFrom(currentTheme)[GtkVariants.Variant.Night]
             } else {
@@ -41,11 +46,13 @@ class GnomeThemeMonitorService : ThemeMonitorService {
     override val isHighContrastEnabled: Boolean
         get() {
             if (GnomeSettings.guessLightAndDarkThemes) return false
-            val currentTheme = GnomeNative.getCurrentTheme()
+            val currentTheme = currentGtkTheme
             return GnomeSettings.highContrastGtkTheme.name == currentTheme
         }
     override val isSupported: Boolean
         get() = GnomeLibrary.get().isLoaded
+    val currentGtkTheme: String
+        get() = GnomeNative.getCurrentTheme()
 
     override fun createEventHandler(callback: () -> Unit): NativePointer? {
         return NativePointer(GnomeNative.createEventHandler(callback))
