@@ -22,6 +22,11 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes(
         """
+        v1.5.4
+        <ul>
+            <li>Fix segmentation fault on GNOME.</li>
+            <li>Fix theme not updating with OS theme on GNOME.</li>
+        </ul>
         v1.5.2
         <ul>
             <li>Notify macOS users to restart IDEA on installation</li>
