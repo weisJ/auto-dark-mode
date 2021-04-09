@@ -2,15 +2,16 @@ name: Build Native Libraries
 
 on:
   push:
-    branches: [master]
     paths:
       - '**.cpp'
+      - '**.h'
       - '**.mm'
       - '**.yml'
       - '**gradle.*'
   pull_request:
     paths:
       - '**.cpp'
+      - '**.h'
       - '**.mm'
       - '**.yml'
       - '**gradle.*'
