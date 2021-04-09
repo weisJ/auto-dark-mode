@@ -153,7 +153,7 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
             return cachedFile
         }
         Optional<File> downloadedFile = downloadInfo.map {
-            getBinaryFromUrl(variant, it.url).orElse(null)
+            getBinaryFromUrl(variant, it.url)
         }
 
         if (downloadedFile.isPresent()) {
@@ -167,10 +167,12 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         return getCachedFile(variant)
     }
 
-    private Optional<File> getBinaryFromUrl(String variant, String url) {
+    private File getBinaryFromUrl(String variant, String url) {
         File directory = createDirectory(preBuildPath(variant))
         info("Downloading binary for variant '$variant' from $url")
-        Optional<File> file = downloadZipFile(url, variant).map { unzip(it, directory).findFirst() }.orElse(Optional.empty())
+        ZipFile zipFile = downloadZipFile(url, variant)
+        if (zipFile == null) return null
+        File file = unzip(zipFile, directory).findFirst().orElse(null)
         info("Finished download for variant '$variant'")
         return file
     }
@@ -179,8 +181,8 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         return "${project.buildDir}${File.separator}$PRE_BUILD_PATH${File.separator}$variant"
     }
 
-    private Optional<ZipFile> downloadZipFile(String url, String variant) {
-        return fetch(url) {
+    private ZipFile downloadZipFile(String url, String variant) {
+        return (ZipFile) fetch(url) {
             File file = createFile(zipPath(variant))
             Path response = file.toPath()
             Files.copy(it.getInputStream(), response, StandardCopyOption.REPLACE_EXISTING)
@@ -266,28 +268,40 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
 
     private Map getLatestRun(Map json) {
         Map[] runs = json.get("workflow_runs") as Map[]
-        return Optional.ofNullable(runs?.find { run ->
+        Collection<Map> candidateRuns = runs?.findAll { run ->
             boolean completed = "completed" == run.get("status")
             boolean success = "success" == run.get("conclusion")
-            boolean isCorrectBranch = branches.isEmpty() || branches.contains(run.get("head_branch")?.toString())
-            completed && success && isCorrectBranch
-        }).orElseGet {
-            log("No suitable workflow run found.")
-            return Collections.emptyMap()
+            completed && success
         }
+        Map run = null
+        if (branches.isEmpty()) {
+            // Accept all runs
+            run = candidateRuns.find()
+        } else {
+            // Search through branches
+            for (branch in branches) {
+                run = candidateRuns.find {
+                    branch == it.get("head_branch")?.toString()
+                }
+                if (run != null) break
+            }
+        }
+        if (run != null) return run
+        log("No suitable workflow run found.")
+        return Collections.emptyMap()
     }
 
     private Map getJson(String url) {
-        return fetch(url) {
+        return (Map) fetch(url) {
             JsonSlurper jsonParser = new JsonSlurper()
             Map parsedJson = jsonParser.parseText(it.getInputStream().getText()) as Map
             return parsedJson
-        }.orElse(Collections.emptyMap())
+        } ?: Collections.emptyMap()
     }
 
-    private <T> Optional<T> fetch(String url, Transformer<T, HttpURLConnection> transformer) {
+    private <T> T fetch(String url, Transformer<T, HttpURLConnection> transformer) {
         info("Fetching $url")
-        if (isOffline()) return Optional.empty()
+        if (isOffline()) return null
         HttpURLConnection get = new URL(url).openConnection() as HttpURLConnection
         get.setRequestMethod("GET")
         githubAccessToken?.with {
@@ -296,13 +310,13 @@ class DownloadPrebuiltBinaryFromGitHubAction extends DefaultTask {
         try {
             def responseCode = get.getResponseCode()
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                return Optional.ofNullable(transformer.transform(get))
+                return transformer.transform(get)
             } else {
                 log("Could not fetch $url. Response code '$responseCode'.")
             }
         } catch (IOException ignored) {
         }
-        return Optional.empty()
+        return null
     }
 
     private static File createFile(String fileName) {
