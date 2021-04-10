@@ -1,3 +1,6 @@
+### Note for Windows and macOS users: 
+In IDEA versions >= 2020.3 the functionality of this plugin already exist out of the box.
+
 # Auto Dark Mode IDEA Plugin
 
 Plugin that automatically switches the IDEA theme based on
