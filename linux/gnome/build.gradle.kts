@@ -1,5 +1,3 @@
-import JniUtils.asVariantName
-
 plugins {
     java
     id("dev.nokee.jni-library")
@@ -10,14 +8,18 @@ plugins {
     kotlin("kapt")
 }
 
+dependencies {
+    implementation(projects.autoDarkModeBase)
+    implementation(libs.darklaf.nativeUtils)
+
+    kapt(libs.autoservice.processor)
+    compileOnly(libs.autoservice.annotations)
+}
+
 library {
-    dependencies {
-        jvmImplementation(project(":auto-dark-mode-base"))
-        jvmImplementation("com.github.weisj:darklaf-native-utils")
-    }
     targetMachines.addAll(machines.linux.x86_64)
     variants.configureEach {
-        resourcePath.set("com/github/weisj/darkmode/${project.name}/${asVariantName(targetMachine)}")
+        resourcePath.set("com/github/weisj/darkmode/${project.name}/${targetMachine.variantName}")
         sharedLibrary {
             compileTasks.configureEach {
                 compilerArgs.add("--std=c++11")
@@ -56,13 +58,6 @@ library {
             }
         }
     }
-}
-
-dependencies {
-    compileOnly(kotlin("stdlib-jdk8"))
-    kapt(platform(project(":auto-dark-mode-dependencies-bom")))
-    kapt("com.google.auto.service:auto-service")
-    compileOnly("com.google.auto.service:auto-service-annotations")
 }
 
 fun compilerFlagsFor(vararg packages: String): List<String> =

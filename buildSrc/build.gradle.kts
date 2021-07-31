@@ -1,17 +1,22 @@
+apply(from= "../gradle/loadProps.gradle.kts")
+
 plugins {
+    `kotlin-dsl`
     `java-gradle-plugin`
-    groovy
 }
 
+val nokeeVersion = extra["nokee.version"]
+
 dependencies {
-    implementation(platform("dev.nokee:nokee-gradle-plugins:0.4.0"))
+    implementation(platform("dev.nokee:nokee-gradle-plugins:$nokeeVersion"))
+    implementation(gradleApi())
 }
 
 repositories {
     mavenCentral()
     gradlePluginPortal()
-    maven { url = uri("https://dl.bintray.com/nokeedev/distributions") }
-    maven { url = uri("https://dl.bintray.com/nokeedev/distributions-snapshots") }
+    maven { url = uri("https://repo.nokee.dev/release") }
+    maven { url = uri("https://repo.nokee.dev/snapshot") }
 }
 
 gradlePlugin {
@@ -23,6 +28,10 @@ gradlePlugin {
         create("use-prebuilt-binaries") {
             id = "use-prebuilt-binaries"
             implementationClass = "UsePrebuiltBinariesWhenUnbuildablePlugin"
+        }
+        create("apple-m1-toolchain") {
+            id = "apple-m1-toolchain"
+            implementationClass = "AppleM1ToolChainRule"
         }
     }
 }
