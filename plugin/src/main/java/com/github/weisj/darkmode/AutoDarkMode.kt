@@ -30,7 +30,8 @@ import com.github.weisj.darkmode.platform.settings.letValue
 import com.intellij.ide.actions.QuickChangeLookAndFeel
 import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.ServiceManager.getService
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.util.registry.Registry
@@ -45,7 +46,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     private val monitor = lazy { createMonitor() }
 
     private fun createMonitor(): ThemeMonitor = try {
-        val service = ServiceManager.getService(ThemeMonitorService::class.java)
+        val service = ApplicationManager.getApplication().getService(ThemeMonitorService::class.java)
         ThemeMonitorImpl(service, this)
     } catch (e: IllegalStateException) {
         LOGGER.error(e)
@@ -124,7 +125,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     companion object {
         private const val INSTANT_DELAY_KEY = "ide.instant.theme.switch.delay"
         private val LOGGER = PluginLogger<AutoDarkMode>()
-        private val OPTIONS = ServiceManager.getService(AutoDarkModeOptions::class.java)
+        private val OPTIONS = ApplicationManager.getApplication().getService(AutoDarkModeOptions::class.java)
 
         init {
             OPTIONS.settingsLoaded()

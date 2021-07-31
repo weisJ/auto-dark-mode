@@ -25,7 +25,7 @@
 package com.github.weisj.darkmode
 
 import com.github.weisj.darkmode.platform.settings.*
-import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.CollectionComboBoxModel
@@ -38,7 +38,7 @@ import javax.swing.event.DocumentListener
 class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     override fun createPanel(): DialogPanel {
-        val options = ServiceManager.getService(AutoDarkModeOptions::class.java)
+        val options = ApplicationManager.getApplication().getService(AutoDarkModeOptions::class.java)
 
         return panel {
             options.containers.forEach { container ->
@@ -138,7 +138,7 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     override fun apply() {
         super.apply()
-        ServiceManager.getService(AutoDarkMode::class.java).onSettingsChange()
+        ApplicationManager.getApplication().getService(AutoDarkMode::class.java).onSettingsChange()
     }
 
     companion object {
