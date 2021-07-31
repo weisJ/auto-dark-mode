@@ -2,7 +2,6 @@ import com.github.vlsi.gradle.properties.dsl.props
 import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.PublishTask
 
 plugins {
     id("org.jetbrains.intellij")
@@ -16,11 +15,11 @@ val isPublished by props(true)
 val intellijPublishToken: String by props("")
 
 intellij {
-    version = "ideaPlugin".v
+    version.set("ideaPlugin".v)
 }
 
 tasks.withType<PatchPluginXmlTask> {
-    changeNotes(
+    changeNotes.set(
         """
         v1.5.4
         <ul>
@@ -42,8 +41,8 @@ tasks.withType<PatchPluginXmlTask> {
         </ul>
         """
     )
-    sinceBuild("ideaPlugin.since".v)
-    untilBuild("ideaPlugin.until".v)
+    sinceBuild.set("ideaPlugin.since".v)
+    untilBuild.set("ideaPlugin.until".v)
 }
 
 dependencies {
@@ -51,6 +50,7 @@ dependencies {
     implementation(projects.autoDarkModeWindows)
     implementation(projects.autoDarkModeMacos)
     implementation(projects.autoDarkModeLinux)
+    implementation(kotlin("reflect"))
 
     kapt(libs.autoservice.processor)
     compileOnly(libs.autoservice.annotations)
@@ -60,18 +60,20 @@ dependencies {
     testRuntimeOnly(libs.test.junit.engine)
 }
 
-tasks.test {
-    testLogging {
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-        showStandardStreams = true
+tasks {
+    test {
+        testLogging {
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            showStandardStreams = true
+        }
+        useJUnitPlatform()
     }
-    useJUnitPlatform()
-}
 
-tasks.withType<PublishTask> {
-    token(intellijPublishToken)
-    if (version.toString().contains("pre")) {
-        channels("pre-release")
+    publishPlugin {
+        token.set(intellijPublishToken)
+        if (version.toString().contains("pre")) {
+            channels.add("pre-release")
+        }
     }
 }
 

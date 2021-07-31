@@ -68,6 +68,7 @@ allprojects {
                 repository = "auto-dark-mode",
                 workflow = "libs.yml"
             ) {
+                failIfLibraryIsMissing = false
                 val currentBranch = System.getenv("GITHUB_HEAD_REF") ?: grgit.branch.current()?.name
                 branches = listOfNotNull(currentBranch, "master", "v$buildVersion", buildVersion)
                 accessToken = githubAccessToken
