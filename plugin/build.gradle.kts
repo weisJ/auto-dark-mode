@@ -21,6 +21,10 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
+        v1.6.0
+        <ul>
+            <li>M1 support for macOS.</li>
+        </ul>
         v1.5.4
         <ul>
             <li>Fix segmentation fault on GNOME.</li>

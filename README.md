@@ -25,11 +25,11 @@ By default, the following themes are used:
 ````
 
 ### Architecture support
-| Operating System | x86 Support        | x86_64 Support     |
-|------------------|--------------------|--------------------|
-| Windows          | :heavy_check_mark: | :heavy_check_mark: |
-| macOS           | :x:                | :heavy_check_mark: |
-| Linux            | :x:                | :heavy_check_mark: |
+| Operating System | x86 Support        | x86_64 Support     | arm64 Support          |
+|------------------|--------------------|--------------------|------------------------|
+| Windows          | :heavy_check_mark: | :heavy_check_mark: | :x:                    |
+| macOS            | :x:                | :heavy_check_mark: | :heavy_check_mark:(M1) |
+| Linux            | :x:                | :heavy_check_mark: | :x:                    |
 
 ### OS-dependent build components
 When Gradle builds the plugin, it will only be able to compile 
