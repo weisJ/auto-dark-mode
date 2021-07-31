@@ -50,10 +50,11 @@ dependencies {
     implementation(projects.autoDarkModeWindows)
     implementation(projects.autoDarkModeMacos)
     implementation(projects.autoDarkModeLinux)
-    implementation(kotlin("reflect"))
 
     kapt(libs.autoservice.processor)
     compileOnly(libs.autoservice.annotations)
+    compileOnly(kotlin("stdlib-jdk8"))
+    compileOnly(kotlin("reflect"))
 
     testImplementation(projects.autoDarkModeLinuxGnome)
     testImplementation(libs.test.junit.api)
