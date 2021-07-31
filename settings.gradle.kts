@@ -1,3 +1,6 @@
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+enableFeaturePreview("VERSION_CATALOGS")
+
 pluginManagement {
     plugins {
         fun String.v() = extra["$this.version"].toString()
@@ -10,12 +13,12 @@ pluginManagement {
         idv("com.github.vlsi.license-gather", "com.github.vlsi.vlsi-release-plugins")
         idv("com.github.vlsi.stage-vote-release", "com.github.vlsi.vlsi-release-plugins")
         idv("org.jetbrains.intellij", "org.jetbrains.intellij")
+        idv("org.ajoberstar.grgit", "org.ajoberstar.grgit")
         idv("org.jetbrains.kotlin.jvm", "kotlin")
     }
 }
 
 include(
-    "dependencies-bom",
     "base",
     "plugin",
     "windows",

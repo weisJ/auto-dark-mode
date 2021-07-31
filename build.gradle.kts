@@ -1,4 +1,3 @@
-import GitUtils.currentGitBranch
 import com.github.autostyle.generic.DefaultCopyrightStyle
 import com.github.autostyle.gradle.BaseFormatExtension
 import com.github.vlsi.gradle.crlf.CrLfSpec
@@ -10,6 +9,7 @@ plugins {
     id("com.github.autostyle")
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.gradle-extensions")
+    id("org.ajoberstar.grgit")
     kotlin("jvm") apply false
 }
 
@@ -53,23 +53,27 @@ allprojects {
             mavenLocal()
         }
         mavenCentral()
+        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
         maven { url = uri("https://www.jetbrains.com/intellij-repository/releases") }
-        maven { url = uri("https://www.jetbrains.bintray.com/intellij-third-party-dependencies") }
+        maven { url = uri("https://cache-redirector.jetbrains.com/intellij-dependencies") }
     }
 
     val githubAccessToken by props("")
 
     plugins.withType<UsePrebuiltBinariesWhenUnbuildablePlugin> {
-        prebuildBinaries {
-            prebuildLibrariesFolder = "pre-build-libraries"
-            github {
-                user = "weisj"
-                repository = "auto-dark-mode"
+        prebuiltBinaries {
+            prebuiltLibrariesFolder = "pre-build-libraries"
+            github(
+                user = "weisj",
+                repository = "auto-dark-mode",
                 workflow = "libs.yml"
+            ) {
+                val currentBranch = System.getenv("GITHUB_HEAD_REF") ?: grgit.branch.current()?.name
+                branches = listOfNotNull(currentBranch, "master", "v$buildVersion", buildVersion)
                 accessToken = githubAccessToken
-                branches = listOf(currentGitBranch(), "master").distinct()
                 manualDownloadUrl =
                     "https://github.com/weisJ/auto-dark-mode/actions?query=workflow%3A%22Build+Native+Libraries%22+is%3Asuccess"
+                timeout = 50000
             }
         }
     }
@@ -139,12 +143,6 @@ allprojects {
         isReproducibleFileOrder = true
         dirMode = "775".toInt(8)
         fileMode = "664".toInt(8)
-    }
-
-    plugins.withType<JavaLibraryPlugin> {
-        dependencies {
-            "api"(platform(project(":auto-dark-mode-dependencies-bom")))
-        }
     }
 
     if (!enableGradleMetadata) {
