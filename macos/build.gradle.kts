@@ -15,10 +15,6 @@ val jnfConfig: Configuration by configurations.creating {
     }
 }
 
-dependencies {
-    jnfConfig(libs.macos.javaNativeFoundation)
-}
-
 val nativeResourcePath = "com/github/weisj/darkmode/${project.name}"
 
 tasks.jar {
@@ -32,8 +28,10 @@ tasks.jar {
 }
 
 dependencies {
+    jnfConfig(libs.macos.javaNativeFoundation)
     kapt(libs.autoservice.processor)
     compileOnly(libs.autoservice.annotations)
+    compileOnly(kotlin("stdlib-jdk8"))
 }
 
 library {

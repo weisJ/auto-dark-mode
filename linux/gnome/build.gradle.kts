@@ -14,6 +14,7 @@ dependencies {
 
     kapt(libs.autoservice.processor)
     compileOnly(libs.autoservice.annotations)
+    compileOnly(kotlin("stdlib-jdk8"))
 }
 
 library {
