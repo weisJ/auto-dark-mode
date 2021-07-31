@@ -47,7 +47,7 @@ void ModifyFlags(DWORD &flags) {
 #endif
 }
 
-DWORD RegGetDword(HKEY hKey, const LPCSTR subKey, const LPCSTR value) {
+static DWORD RegGetDword(HKEY hKey, const LPCSTR subKey, const LPCSTR value) {
     DWORD data {};
     DWORD dataSize = sizeof(data);
     DWORD flags = RRF_RT_REG_DWORD;
@@ -58,7 +58,7 @@ DWORD RegGetDword(HKEY hKey, const LPCSTR subKey, const LPCSTR value) {
     return data;
 }
 
-bool IsHighContrastMode() {
+static bool IsHighContrastMode() {
     HIGHCONTRAST info = { 0 };
     info.cbSize = sizeof(HIGHCONTRAST);
     BOOL ok = SystemParametersInfo(SPI_GETHIGHCONTRAST, 0, &info, 0);
@@ -68,15 +68,15 @@ bool IsHighContrastMode() {
     return HIGH_CONTRAST_DEFAULT_VALUE;
 }
 
-bool IsDarkMode() {
+static bool IsDarkMode() {
     try {
         return (0 == RegGetDword(HKEY_CURRENT_USER, DARK_MODE_PATH, DARK_MODE_KEY));
-    } catch (LONG e) {
+    } catch (LONG) {
         return DARK_MODE_DEFAULT_VALUE;
     }
 }
 
-bool RegisterRegistryEvent(const LPCSTR subKey, HANDLE event) {
+static bool RegisterRegistryEvent(const LPCSTR subKey, HANDLE event) {
     HKEY hKey;
     REGSAM flags = KEY_NOTIFY;
     ModifyFlags(flags);
@@ -90,12 +90,12 @@ bool RegisterRegistryEvent(const LPCSTR subKey, HANDLE event) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_github_weisj_darkmode_platform_windows_WindowsNative_isDarkThemeEnabled(JNIEnv *env, jclass obj) {
+Java_com_github_weisj_darkmode_platform_windows_WindowsNative_isDarkThemeEnabled(JNIEnv *, jclass) {
     return static_cast<jboolean>(IsDarkMode());
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_github_weisj_darkmode_platform_windows_WindowsNative_isHighContrastEnabled(JNIEnv *env, jclass obj) {
+Java_com_github_weisj_darkmode_platform_windows_WindowsNative_isHighContrastEnabled(JNIEnv *, jclass) {
     return static_cast<jboolean>(IsHighContrastMode());
 }
 
@@ -156,7 +156,7 @@ struct EventHandler {
 };
 
 JNIEXPORT jlong JNICALL
-Java_com_github_weisj_darkmode_platform_windows_WindowsNative_createEventHandler(JNIEnv *env, jclass obj, jobject callback) {
+Java_com_github_weisj_darkmode_platform_windows_WindowsNative_createEventHandler(JNIEnv *env, jclass, jobject callback) {
     JavaVM *jvm;
     if (env->GetJavaVM(&jvm) == JNI_OK) {
         jobject callbackRef = env->NewGlobalRef(callback);
@@ -168,7 +168,7 @@ Java_com_github_weisj_darkmode_platform_windows_WindowsNative_createEventHandler
 }
 
 JNIEXPORT void JNICALL
-Java_com_github_weisj_darkmode_platform_windows_WindowsNative_deleteEventHandler(JNIEnv *env, jclass obj, jlong eventHandler) {
+Java_com_github_weisj_darkmode_platform_windows_WindowsNative_deleteEventHandler(JNIEnv *env, jclass, jlong eventHandler) {
     EventHandler *handler = reinterpret_cast<EventHandler *>(eventHandler);
     if (handler) {
         env->DeleteGlobalRef(handler->callback);
