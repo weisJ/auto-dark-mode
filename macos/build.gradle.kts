@@ -1,50 +1,81 @@
-import JniUtils.asVariantName
-
 plugins {
     java
+    kotlin("jvm")
+    kotlin("kapt")
     id("dev.nokee.jni-library")
     id("dev.nokee.objective-cpp-language")
     `uber-jni-jar`
     `use-prebuilt-binaries`
-    kotlin("jvm")
-    kotlin("kapt")
+    `apple-m1-toolchain`
 }
 
-library {
-    val minOs = "10.14"
-    val frameworkVersion = "[10.15,)"
-
-    dependencies {
-        jvmImplementation(project(":auto-dark-mode-base"))
-        nativeImplementation("dev.nokee.framework:JavaNativeFoundation:$frameworkVersion")
-        nativeImplementation("dev.nokee.framework:AppKit:$frameworkVersion")
+val jnfConfig: Configuration by configurations.creating {
+    attributes {
+        attribute(Attribute.of("dev.nokee.architecture", String::class.java), "arm64")
     }
+}
 
-    targetMachines.addAll(machines.macOS.x86_64)
-    variants.configureEach {
-        resourcePath.set("com/github/weisj/darkmode/${project.name}/${asVariantName(targetMachine)}")
-        sharedLibrary {
-            compileTasks.configureEach {
-                compilerArgs.addAll("-mmacosx-version-min=$minOs")
-                // Build type not modeled yet, assuming release
-                compilerArgs.addAll(toolChain.map {
-                    when (it) {
-                        is Gcc, is Clang -> listOf("-O2")
-                        is VisualCpp -> listOf("/O2")
-                        else -> emptyList()
-                    }
-                })
-            }
-            linkTask.configure {
-                linkerArgs.addAll("-lobjc", "-mmacosx-version-min=$minOs")
-            }
+dependencies {
+    jnfConfig(libs.macos.javaNativeFoundation)
+}
+
+val nativeResourcePath = "com/github/weisj/darkmode/${project.name}"
+
+tasks.jar {
+    jnfConfig.asFileTree.forEach {
+        from(zipTree(it)) {
+            into("$nativeResourcePath/JavaNativeFoundation.framework")
+            include("JavaNativeFoundation*")
+            exclude("**/*.tbd")
         }
     }
 }
 
 dependencies {
-    compileOnly(kotlin("stdlib-jdk8"))
-    kapt(platform(project(":auto-dark-mode-dependencies-bom")))
-    kapt("com.google.auto.service:auto-service")
-    compileOnly("com.google.auto.service:auto-service-annotations")
+    kapt(libs.autoservice.processor)
+    compileOnly(libs.autoservice.annotations)
+}
+
+library {
+    dependencies {
+        jvmImplementation(projects.autoDarkModeBase)
+        jvmLibImplementation(libs.darklaf.nativeUtils)
+        nativeLibImplementation(libs.macos.javaNativeFoundation)
+        nativeLibImplementation(libs.macos.appKit)
+    }
+    targetMachines.addAll(machines.macOS.x86_64, machines.macOS.architecture("arm64"))
+    variants.configureEach {
+        resourcePath.set("$nativeResourcePath/${targetMachine.variantName}")
+        sharedLibrary {
+            val isArm = targetMachine.architectureString == "arm64"
+            val minOs = if (isArm) "11" else "10.10"
+            compileTasks.configureEach {
+                compilerArgs.addAll("-mmacosx-version-min=$minOs")
+                // Build type not modeled yet, assuming release
+                optimizedBinary()
+            }
+            linkTask.configure {
+                val systemFrameworks = "/System/Library/Frameworks"
+                val current = "Versions/Current"
+                val jnfName = "JavaNativeFoundation.framework"
+                linkerArgs.addAll(
+                    "-lobjc", "-mmacosx-version-min=$minOs",
+                    // "-framework", "AppKit",
+                    // "-framework", "Cocoa",
+                    // The custom JNF framework specified @rpath for searching. As we aren't actually linking
+                    // with the dynamic library of the framework we specifically have to add the system framework
+                    // search paths accordingly.
+                    // First try any system provided framework (this will fail on arm64):
+                    "-rpath", "$systemFrameworks/$jnfName/$current",
+                    "-rpath", "$systemFrameworks/JavaVM.framework/$current/Frameworks/$jnfName/$current",
+                    // Then try the jdk provided framework (folder layout may vary. We check multiple possibilities):
+                    "-rpath", "@executable_path/../lib/$jnfName",
+                    "-rpath", "@executable_path/../lib/$jnfName/$current/",
+                    "-rpath", "@executable_path/../lib/$jnfName/Versions/A/",
+                    // Lastly use our bundled drop-in replacement:
+                    "-rpath", "@loader_path/$jnfName"
+                )
+            }
+        }
+    }
 }

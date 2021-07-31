@@ -60,6 +60,6 @@ public class WindowsLibrary extends AbstractPluginLibrary {
 
     @Override
     protected boolean canLoad() {
-        return LibraryUtil.isWin10OrNewer && !LibraryUtil.undefinedArchitecture;
+        return LibraryUtil.isWin10OrNewer && LibraryUtil.isX86Compatible;
     }
 }

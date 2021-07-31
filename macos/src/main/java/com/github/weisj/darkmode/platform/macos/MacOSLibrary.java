@@ -24,15 +24,23 @@
  */
 package com.github.weisj.darkmode.platform.macos;
 
+import java.util.Collections;
+import java.util.List;
+
+import com.github.weisj.darklaf.platform.NativeUtil;
 import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
 import com.github.weisj.darkmode.platform.LibraryUtil;
 import com.github.weisj.darkmode.platform.PluginLogger;
 
 public class MacOSLibrary extends AbstractPluginLibrary {
 
-    private static final String PROJECT_NAME = "auto-dark-mode-macos";
-    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/macos-x86-64/";
-    private static final String DLL_NAME = "lib" + PROJECT_NAME + ".dylib";
+    private static final String PATH = "/com/github/weisj/darkmode/auto-dark-mode-macos/";
+    private static final String x86_64_PATH = "macos-x86-64/";
+    private static final String arm64_PATH = "macos-arm64/";
+    private static final String DLL_NAME = "libdarklaf-macos.dylib";
+
+    private static final String FRAMEWORK_TARGET_PATH = "JavaNativeFoundation.framework/";
+    private static final String FRAMEWORK_PATH = PATH + FRAMEWORK_TARGET_PATH + "JavaNativeFoundation";
     private static final MacOSLibrary instance = new MacOSLibrary();
 
     static MacOSLibrary get() {
@@ -44,8 +52,33 @@ public class MacOSLibrary extends AbstractPluginLibrary {
         super(PATH, DLL_NAME, PluginLogger.getLogger(MacOSLibrary.class));
     }
 
+    private String getArm64Path() {
+        return super.getPath() + arm64_PATH;
+    }
+
+    private String getX64Path() {
+        return super.getPath() + x86_64_PATH;
+    }
+
+    @Override
+    protected String getPath() {
+        if (LibraryUtil.isX86Compatible && LibraryUtil.isX64) {
+            return getX64Path();
+        } else if (LibraryUtil.isM1) {
+            return getArm64Path();
+        } else {
+            throw new IllegalStateException("Unsupported arch");
+        }
+    }
+
+    @Override
+    protected List<NativeUtil.Resource> getResourcePaths() {
+        return Collections.singletonList(
+                new NativeUtil.Resource(FRAMEWORK_PATH, FRAMEWORK_TARGET_PATH));
+    }
+
     @Override
     protected boolean canLoad() {
-        return LibraryUtil.isX64 && LibraryUtil.isMacOSMojave;
+        return ((LibraryUtil.isX86Compatible && LibraryUtil.isX64) || LibraryUtil.isM1) && LibraryUtil.isMacOSMojave;
     }
 }

@@ -47,18 +47,17 @@ tasks.withType<PatchPluginXmlTask> {
 }
 
 dependencies {
-    implementation(project(":auto-dark-mode-base"))
-    implementation(project(":auto-dark-mode-windows"))
-    implementation(project(":auto-dark-mode-macos"))
-    implementation(project(":auto-dark-mode-linux"))
+    implementation(projects.autoDarkModeBase)
+    implementation(projects.autoDarkModeWindows)
+    implementation(projects.autoDarkModeMacos)
+    implementation(projects.autoDarkModeLinux)
 
-    kapt(platform(project(":auto-dark-mode-dependencies-bom")))
-    kapt("com.google.auto.service:auto-service")
-    compileOnly("com.google.auto.service:auto-service-annotations")
+    kapt(libs.autoservice.processor)
+    compileOnly(libs.autoservice.annotations)
 
-    testImplementation(project(":auto-dark-mode-linux-gnome"))
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.4.2")
+    testImplementation(projects.autoDarkModeLinuxGnome)
+    testImplementation(libs.test.junit.api)
+    testRuntimeOnly(libs.test.junit.engine)
 }
 
 tasks.test {
