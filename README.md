@@ -37,7 +37,7 @@ native components for the operating system running the build.
 For example, macOS toolchains won't be available to someone 
 who is compiling on Windows. For this reason, this plugin depends on 
 artifacts built by a [custom GitHub Actions workflow](.github/workflows/libs.yml) for the platforms which cannot be compiled 
-in the given environment. [A custom Gradle plugin](buildSrc/src/main/groovy/UsePrebuiltBinariesWhenUnbuildablePlugin.groovy) 
+in the given environment. [A custom Gradle plugin](buildSrc/src/main/kotlin/UsePrebuiltBinariesWhenUnbuildablePlugin.kt) 
 downloads these artifacts during the build if necessary.
 
 ##### This step requires a GitHub access token
