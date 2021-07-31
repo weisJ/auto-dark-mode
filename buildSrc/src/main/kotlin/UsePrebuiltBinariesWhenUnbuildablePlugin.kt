@@ -45,6 +45,8 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin : Plugin<Project> {
             variantName,
             prebuiltExtension
         )
+        library.sharedLibrary.compileTasks.configureEach { enabled = false }
+        library.sharedLibrary.linkTask.configure { enabled = false }
         library.nativeRuntimeFiles.setFrom(prebuiltBinariesTask.map { it.getPrebuiltBinaryFile() })
         library.nativeRuntimeFiles.from(CallableAction {
             project.logger.warn(
@@ -54,6 +56,8 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin : Plugin<Project> {
     }
 
     private fun useLocalLibrary(project: Project, library: JniLibrary, libraryFile: File, variantName: String) {
+        library.sharedLibrary.compileTasks.configureEach { enabled = false }
+        library.sharedLibrary.linkTask.configure { enabled = false }
         library.nativeRuntimeFiles.setFrom(libraryFile)
         library.nativeRuntimeFiles.from(CallableAction {
             val relativePath = project.rootProject.relativePath(libraryFile)
