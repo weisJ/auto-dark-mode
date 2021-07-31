@@ -9,6 +9,7 @@ plugins {
 
 dependencies {
     implementation(projects.autoDarkModeBase)
+    compileOnly(kotlin("stdlib-jdk8"))
 }
 
 library {
