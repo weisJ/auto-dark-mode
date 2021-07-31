@@ -60,7 +60,12 @@ object IntellijNotificationService : NotificationsService {
     private val messageQueue: Queue<Notification> = LinkedList()
     private var started = false
 
-    fun initialize() {
+    fun initializeIfNeeded() {
+        if (started) return
+        initialize()
+    }
+
+    private fun initialize() {
         started = true
         LOGGER.info("Initializing notification service")
         val project = ProjectUtil.getOpenProjects().firstOrNull()
@@ -72,7 +77,6 @@ object IntellijNotificationService : NotificationsService {
     override fun dispatchNotification(message: String, type: NotificationType, showSettingsLink: Boolean) {
         val notification = NOTIFICATION_GROUP.createNotification(
             title = "Auto Dark Mode",
-            subtitle = null,
             content = message,
             type = type.toIntelliJType()
         ).also {
