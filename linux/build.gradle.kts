@@ -15,5 +15,4 @@ dependencies {
      * will be pulled into plugin/build.gradle.kts when it specifies implementation(project(":auto-dark-mode-linux")).
      */
     implementation(project(":auto-dark-mode-linux-gnome"))
-    compileOnly(kotlin("stdlib-jdk8"))
 }
