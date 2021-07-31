@@ -29,9 +29,11 @@ class UberJniJarPlugin : Plugin<Project> {
 
         logger.info("${project.name}: Merging binaries into the JVM Jar.")
         library.variants.configureEach {
-            binaries.withType(JniJarBinary::class.java).configureEach {
-                jarTask.configure { enabled = false }
-            }
+            // Somehow disabling the task fails the build.
+            // For the plugin we don't care though if there is an extra jar.
+            // binaries.withType(JniJarBinary::class.java).configureEach {
+            //      jarTask.configure { enabled = false }
+            // }
             task.dependsOn(sharedLibrary.linkTask)
         }
         task.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
