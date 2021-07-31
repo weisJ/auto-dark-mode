@@ -1,0 +1,19 @@
+[versions]
+autoservice = "1.0-rc7"
+macOSFramework = "latest.release"
+javaNativeFoundation = "1.1.1"
+junit = "5.6.2"
+darklaf = "latest.integration"
+
+[libraries]
+autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }
+autoservice-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoservice" }
+darklaf-nativeUtils = { module = "com.github.weisj:darklaf-native-utils", version.ref = "darklaf" }
+
+# MacOS frameworks
+macos-javaNativeFoundation = { module = "com.github.weisj:java-native-foundation", version.ref = "javaNativeFoundation" }
+macos-appKit = { module = "dev.nokee.framework:AppKit", version.ref = "macOSFramework" }
+
+# Test libraries
+test-junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+test-junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }

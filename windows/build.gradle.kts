@@ -1,5 +1,3 @@
-import JniUtils.asVariantName
-
 plugins {
     java
     id("dev.nokee.jni-library")
@@ -9,45 +7,42 @@ plugins {
     kotlin("jvm")
 }
 
+dependencies {
+    implementation(projects.autoDarkModeBase)
+}
+
 library {
-    dependencies {
-        jvmImplementation(project(":auto-dark-mode-base"))
-    }
     targetMachines.addAll(machines.windows.x86, machines.windows.x86_64)
     variants.configureEach {
-        resourcePath.set("com/github/weisj/darkmode/${project.name}/${asVariantName(targetMachine)}")
+        resourcePath.set("com/github/weisj/darkmode/${project.name}/${targetMachine.variantName}")
         sharedLibrary {
             compileTasks.configureEach {
-                compilerArgs.addAll(toolChain.map {
-                    when (it) {
-                        is Gcc, is Clang -> listOf("--std=c++11")
-                        is VisualCpp -> listOf("/EHsc")
-                        else -> emptyList()
+                compilerArgs.addAll(
+                    toolChain.map {
+                        when (it) {
+                            is Gcc, is Clang -> listOf(
+                                "--std=c++17",
+                                "-Wall", "-Wextra", "-pedantic",
+                                "-Wno-language-extension-token", "-Wno-ignored-attributes"
+                            )
+                            is VisualCpp -> listOf("/std:c++17", "/EHsc", "/W4", "/permissive", "/WX")
+                            else -> emptyList()
+                        }
                     }
-                })
-
-                // Build type not modeled yet, assuming release
-                compilerArgs.addAll(toolChain.map {
-                    when (it) {
-                        is Gcc, is Clang -> listOf("-O2")
-                        is VisualCpp -> listOf("/O2")
-                        else -> emptyList()
-                    }
-                })
+                )
+                optimizedBinary()
             }
             linkTask.configure {
-                linkerArgs.addAll(toolChain.map {
-                    when (it) {
-                        is Gcc, is Clang -> listOf("-luser32", "-ladvapi32")
-                        is VisualCpp -> listOf("user32.lib", "Advapi32.lib")
-                        else -> emptyList()
+                linkerArgs.addAll(
+                    toolChain.map {
+                        when (it) {
+                            is Gcc, is Clang -> listOf("-luser32", "-ladvapi32")
+                            is VisualCpp -> listOf("user32.lib", "Advapi32.lib")
+                            else -> emptyList()
+                        }
                     }
-                })
+                )
             }
         }
     }
-}
-
-dependencies {
-    compileOnly(kotlin("stdlib-jdk8"))
 }
