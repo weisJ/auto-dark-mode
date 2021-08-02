@@ -21,6 +21,10 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
+        v.1.6.1
+        <ul>
+            <li>Fixed native library loading on macOS.</li>
+        </ul>
         v1.6.0
         <ul>
             <li>M1 support for macOS.</li>
