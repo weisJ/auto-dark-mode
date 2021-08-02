@@ -37,7 +37,7 @@ public class MacOSLibrary extends AbstractPluginLibrary {
     private static final String PATH = "/com/github/weisj/darkmode/auto-dark-mode-macos/";
     private static final String x86_64_PATH = "macos-x86-64/";
     private static final String arm64_PATH = "macos-arm64/";
-    private static final String DLL_NAME = "libdarklaf-macos.dylib";
+    private static final String DLL_NAME = "libauto-dark-mode-macos.dylib";
 
     private static final String FRAMEWORK_TARGET_PATH = "JavaNativeFoundation.framework/";
     private static final String FRAMEWORK_PATH = PATH + FRAMEWORK_TARGET_PATH + "JavaNativeFoundation";
