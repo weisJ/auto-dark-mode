@@ -229,7 +229,7 @@ abstract class ChoiceProperty<R, T> internal constructor(
     delegateProperty: TransformingValueProperty<R, T>
 ) : TransformingValueProperty<R, T> by delegateProperty {
     var choiceValue: R by delegateProperty.backingProperty::value
-    var choices: List<R> = ArrayList()
+    var choicesProvider: () -> List<R> = { ArrayList() }
     var renderer: (R) -> String = { it.toString() }
 }
 

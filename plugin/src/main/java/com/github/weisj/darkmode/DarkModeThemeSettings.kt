@@ -29,6 +29,9 @@ import com.google.auto.service.AutoService
 import com.intellij.ide.ui.LafManager
 import com.intellij.ide.ui.laf.IntelliJLookAndFeelInfo
 import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo
+import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager.getApplication
+import com.intellij.openapi.editor.colors.EditorColorsListener
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
@@ -83,7 +86,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
 
     init {
         group("IDE Theme") {
-            val installedLafs = LafManager.getInstance().installedLookAndFeels.asList()
+            val installedLafsProvider = { LafManager.getInstance().installedLookAndFeels.asList() }
             val lafRenderer = UIManager.LookAndFeelInfo::getName
             val lafTransformer = transformerOf(write = ::parseLaf, read = ::readLaf.or(""))
 
@@ -99,25 +102,25 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
                     description = "Light",
                     value = ::lightTheme,
                     transformer = lafTransformer.writeFallback(DefaultLaf.LIGHT.info)
-                ) { choices = installedLafs; renderer = lafRenderer; }
+                ) { choicesProvider = installedLafsProvider; renderer = lafRenderer; }
                 persistentChoiceProperty(
                     description = "Dark",
                     value = ::darkTheme,
                     transformer = lafTransformer.writeFallback(DefaultLaf.DARK.info)
-                ) { choices = installedLafs; renderer = lafRenderer }
+                ) { choicesProvider = installedLafsProvider; renderer = lafRenderer }
                 persistentChoiceProperty(
                     description = "High Contrast",
                     value = ::highContrastTheme,
                     transformer = lafTransformer.writeFallback(DefaultLaf.HIGH_CONTRAST.info)
                 ) {
-                    choices = installedLafs; renderer = lafRenderer
+                    choicesProvider = installedLafsProvider; renderer = lafRenderer
                     activeIf(::checkHighContrast.isTrue())
                 }
             }
         }
 
         group("Editor Theme") {
-            val installedSchemes = EditorColorsManager.getInstance().allSchemes.asList()
+            val installedSchemesProvider = { EditorColorsManager.getInstance().allSchemes.asList() }
             val schemeRenderer = EditorColorsScheme::getDisplayName
             val schemeTransformer = transformerOf(write = ::parseScheme, read = ::readScheme.or(""))
 
@@ -133,18 +136,18 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
                     description = "Light",
                     value = ::lightCodeScheme,
                     transformer = schemeTransformer.writeFallback(DefaultScheme.LIGHT.scheme)
-                ) { choices = installedSchemes; renderer = schemeRenderer }
+                ) { choicesProvider = installedSchemesProvider; renderer = schemeRenderer }
                 persistentChoiceProperty(
                     description = "Dark",
                     value = ::darkCodeScheme,
                     transformer = schemeTransformer.writeFallback(DefaultScheme.DARK.scheme)
-                ) { choices = installedSchemes; renderer = schemeRenderer }
+                ) { choicesProvider = installedSchemesProvider; renderer = schemeRenderer }
                 persistentChoiceProperty(
                     description = "High Contrast",
                     value = ::highContrastCodeScheme,
                     transformer = schemeTransformer.writeFallback(DefaultScheme.HIGH_CONTRAST.scheme)
                 ) {
-                    choices = installedSchemes; renderer = schemeRenderer
+                    choicesProvider = installedSchemesProvider; renderer = schemeRenderer
                     activeIf(::checkHighContrast.isTrue())
                 }
             }
@@ -193,6 +196,24 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private fun searchLaf(name: String, className: String = ""): UIManager.LookAndFeelInfo? {
         return LafManager.getInstance().installedLookAndFeels.firstOrNull {
             it.name.equals(name, ignoreCase = true) && (className.isEmpty() || it.className == className)
+        }
+    }
+
+    private object EditorSchemeList : ArrayList<EditorColorsScheme>() {
+
+        private val listener = object : Disposable, EditorColorsListener {
+            override fun dispose() {
+            }
+
+            override fun globalSchemeChange(scheme: EditorColorsScheme?) {
+                TODO("Not yet implemented")
+            }
+        }
+
+        init {
+            getApplication().messageBus
+                .connect(listener)
+                .subscribe(EditorColorsManager.TOPIC, listener)
         }
     }
 }
