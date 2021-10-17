@@ -29,11 +29,13 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.CollectionComboBoxModel
+import com.intellij.ui.PopupMenuListenerAdapter
 import com.intellij.ui.SimpleListCellRenderer
 import com.intellij.ui.layout.*
 import com.intellij.util.castSafelyTo
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
+import javax.swing.event.PopupMenuEvent
 
 class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
@@ -103,24 +105,21 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
     }
 
     private fun Row.addChoiceProperty(choiceProperty: ChoiceProperty<Any, Any>) {
-        if (choiceProperty.choices.size >= CHOICE_PROPERTY_GROUPING_THRESHOLD) {
-            comboBox(
-                CollectionComboBoxModel(choiceProperty.choices),
-                choiceProperty::choiceValue,
-                renderer = SimpleListCellRenderer.create<Any>("") { choiceProperty.renderer(it) }
-            )
-        } else {
-            buttonGroup {
-                choiceProperty.choices.forEach { item ->
-                    row {
-                        radioButton(choiceProperty.renderer(item)).applyToComponent {
-                            isSelected = choiceProperty.value == item
-                            addActionListener { if (isSelected) choiceProperty.preview = item }
-                        }
-                        enableIf(choiceProperty.activeCondition)
-                    }
+        val choiceModel = CollectionComboBoxModel(choiceProperty.choicesProvider().toMutableList())
+        comboBox(
+            choiceModel,
+            choiceProperty::choiceValue,
+            renderer = SimpleListCellRenderer.create<Any>("<null>") { choiceProperty.renderer(it) }
+        ).applyToComponent {
+            addPopupMenuListener(object : PopupMenuListenerAdapter() {
+                override fun popupMenuWillBecomeVisible(e: PopupMenuEvent?) {
+                    val selected = choiceModel.selected
+                    choiceModel.removeAll()
+                    choiceModel.addAll(0, choiceProperty.choicesProvider())
+                    choiceModel.selectedItem =
+                        selected ?: if (choiceModel.isEmpty) null else choiceModel.getElementAt(0)
                 }
-            }
+            })
         }
     }
 
