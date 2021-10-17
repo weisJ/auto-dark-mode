@@ -68,15 +68,17 @@ class AutoDarkMode : Disposable, ThemeCallback {
     override fun themeChanged(isDark: Boolean, isHighContrast: Boolean) {
         val (lafTarget, colorSchemeTarget) = getTargetLaf(isDark, isHighContrast)
         resetRequests()
-        if (GeneralThemeSettings.changeIdeTheme &&
-            lafTarget != LafManager.getInstance().currentLookAndFeel
-        ) {
-            updateLaf(lafTarget)
-        }
-        if (GeneralThemeSettings.changeEditorTheme &&
-            colorSchemeTarget != EditorColorsManager.getInstance().globalScheme
-        ) {
-            updateEditorScheme(colorSchemeTarget)
+        scheduleRequest {
+            if (GeneralThemeSettings.changeIdeTheme &&
+                lafTarget != LafManager.getInstance().currentLookAndFeel
+            ) {
+                updateLaf(lafTarget)
+            }
+            if (GeneralThemeSettings.changeEditorTheme &&
+                colorSchemeTarget != EditorColorsManager.getInstance().globalScheme
+            ) {
+                updateEditorScheme(colorSchemeTarget)
+            }
         }
     }
 
@@ -91,15 +93,11 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     private fun updateLaf(targetLaf: LookAndFeelInfo) {
-        scheduleRequest {
-            QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, false)
-        }
+        QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, false)
     }
 
     private fun updateEditorScheme(colorsScheme: EditorColorsScheme) {
-        scheduleRequest {
-            EditorColorsManager.getInstance().globalScheme = colorsScheme
-        }
+        EditorColorsManager.getInstance().globalScheme = colorsScheme
     }
 
     private fun resetRequests() {
