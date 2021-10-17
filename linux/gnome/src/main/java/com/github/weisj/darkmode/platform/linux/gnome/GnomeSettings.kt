@@ -86,20 +86,8 @@ object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
             throw IllegalStateException("Gnome library not loaded.")
         }
         group("Gnome Theme") {
-            val installedThemes = GnomeThemeUtils.getInstalledThemes()
-            /*
-             * The default themes are added to this list. They would already be added to the list because of their
-             * presence when initializing the `themes` vector in GnomeThemeUtils.cpp but because they are not
-             * the same instance as the defaults, the dropdown list would default to random themes because
-             * the instances of the three defaults couldn't be found in ChoiceProperty#choices.
-             * For this reason, the default themes that the native code adds to this list are overwritten
-             * with the instances created inside the enum constructors of DefaultGtkTheme.
-             */
-            val installedGtkThemes =
-                mutableSetOf(DefaultGtkTheme.DARK.info, DefaultGtkTheme.LIGHT.info, DefaultGtkTheme.HIGH_CONTRAST.info)
-                    .apply { addAll(installedThemes.map { GtkTheme(it) }) }
-                    .toList()
-                    .sorted()
+            val installedGtkThemesProvider = { loadInstalledGtkThemes() }
+
             val gtkThemeRenderer = GtkTheme::name
             val gtkThemeTransformer = transformerOf(write = ::parseGtkTheme, read = ::readGtkTheme.or(""))
 
@@ -115,23 +103,39 @@ object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
                     description = "Light GTK Theme",
                     value = ::lightGtkTheme,
                     transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.LIGHT.info)
-                ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+                ) { choicesProvider = installedGtkThemesProvider; renderer = gtkThemeRenderer }
                 persistentChoiceProperty(
                     description = "Dark GTK Theme",
                     value = ::darkGtkTheme,
                     transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.DARK.info)
-                ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+                ) { choicesProvider = installedGtkThemesProvider; renderer = gtkThemeRenderer }
                 persistentChoiceProperty(
                     description = "High Contrast GTK Theme",
                     value = ::highContrastGtkTheme,
                     transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
-                ) { choices = installedGtkThemes; renderer = gtkThemeRenderer }
+                ) { choicesProvider = installedGtkThemesProvider; renderer = gtkThemeRenderer }
             }
         }
 
         hidden {
             persistentBooleanProperty(value = guessingMechanismLogAction::executed)
         }
+    }
+
+    private fun loadInstalledGtkThemes(): List<GtkTheme> {
+        val installedThemes = GnomeThemeUtils.getInstalledThemes()
+        /*
+         * The default themes are added to this list. They would already be added to the list because of their
+         * presence when initializing the `themes` vector in GnomeThemeUtils.cpp but because they are not
+         * the same instance as the defaults, the dropdown list would default to random themes because
+         * the instances of the three defaults couldn't be found in ChoiceProperty#choices.
+         * For this reason, the default themes that the native code adds to this list are overwritten
+         * with the instances created inside the enum constructors of DefaultGtkTheme.
+         */
+        return mutableSetOf(DefaultGtkTheme.DARK.info, DefaultGtkTheme.LIGHT.info, DefaultGtkTheme.HIGH_CONTRAST.info)
+            .apply { addAll(installedThemes.map { GtkTheme(it) }) }
+            .toList()
+            .sorted()
     }
 
     override fun onSettingsLoaded() {
