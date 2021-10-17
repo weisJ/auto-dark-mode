@@ -73,8 +73,9 @@ class ThemeMonitorImpl(
     }
 
     private fun stop() {
-        LOGGER.info("Stopped theme monitoring.")
+        LOGGER.info("Stopping theme monitoring.")
         listenerHandle?.let { monitorService.deleteEventHandler(it) }
+        LOGGER.info("Stopped theme monitoring successfully.")
     }
 
     companion object {

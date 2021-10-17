@@ -24,7 +24,6 @@
 #include <thread>
 #include <gtkmm.h>
 
-Glib::RefPtr<Gtk::Application> app;
 Glib::RefPtr<Gtk::Settings> settings;
 
 JNIEXPORT jstring JNICALL
@@ -37,6 +36,9 @@ struct EventHandler {
     JavaVM *jvm;
     JNIEnv *env;
     jobject callback;
+
+    Glib::RefPtr<Gtk::Application> app;
+
     sigc::connection settingsChangedSignalConnection;
 
     std::thread loopThread;
@@ -63,20 +65,23 @@ struct EventHandler {
     }
 
     void stop() {
-        app->release();
         app->quit();
-        loopThread.join();
+        app->release();
+
         settingsChangedSignalConnection.disconnect();
+        loopThread.join();
     }
 
     void run() {
-        app->hold();
         app->run();
     }
 
     EventHandler(JavaVM *jvm_, jobject callback_) {
         jvm = jvm_;
         callback = callback_;
+
+        app = Gtk::Application::create();
+        app->hold();
 
         settingsChangedSignalConnection = settings->property_gtk_theme_name().signal_changed().connect(
                 sigc::mem_fun(this, &EventHandler::runCallBack));
@@ -111,6 +116,5 @@ Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_deleteEventHandler(J
 JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_init(JNIEnv *env, jclass obj) {
     ensure_gio_init();
-    app = Gtk::Application::create("com.github.weisj.darkmode.platform.linux.gtk.GtkNative");
     settings = Gtk::Settings::get_default();
 }
