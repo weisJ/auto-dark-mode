@@ -21,7 +21,7 @@ By default, the following themes are used:
 ## Building
 ````
 ./gradlew build
-./gradlew :auto-dark-mode:buildPlugin
+./gradlew buildPlugin
 ````
 
 ### Architecture support
