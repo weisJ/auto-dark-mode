@@ -106,7 +106,13 @@ bool gtk_3_css_exists(unsigned int gtk_version, std::map<std::string, std::strin
     std::string full_gtk_version = "gtk-3." + std::to_string(gtk_version);
     Glib::RefPtr < Gio::File > css_file = Gio::File::create_for_path(
             Glib::build_filename(theme["path"], full_gtk_version, "gtk.css"));
-    return css_file->query_exists();
+    if (css_file->query_exists()) {
+        return true;
+    } else {
+        Glib::RefPtr < Gio::File > css_file = Gio::File::create_for_path(
+                Glib::build_filename(theme["path"], "gtk-3.0", "gtk.css"));
+        return css_file->query_exists();
+    }
 }
 
 void verify_css_for_theme(std::map<std::string, std::string> theme, std::vector<std::string> &out) {
