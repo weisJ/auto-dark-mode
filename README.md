@@ -1,4 +1,4 @@
-### Note for Windows and macOS users: 
+### Note for Windows and macOS users:
 In IDEA versions >= 2020.3 the functionality of this plugin already exist out of the box.
 
 # Auto Dark Mode IDEA Plugin
@@ -13,7 +13,7 @@ Linux support is both limited and experimental. At the moment, the only Linux de
 By default, the following themes are used:
 
 | Mode          | Theme         |
-|:--------------|:--------------| 
+|:--------------|:--------------|
 | Light         | IntelliJ      |
 | Dark          | Darcula       |
 | High Contrast | High Contrast |
@@ -32,12 +32,12 @@ By default, the following themes are used:
 | Linux            | :x:                | :heavy_check_mark: |
 
 ### OS-dependent build components
-When Gradle builds the plugin, it will only be able to compile 
+When Gradle builds the plugin, it will only be able to compile
 native components for the operating system running the build.
-For example, macOS toolchains won't be available to someone 
-who is compiling on Windows. For this reason, this plugin depends on 
-artifacts built by a [custom GitHub Actions workflow](.github/workflows/libs.yml) for the platforms which cannot be compiled 
-in the given environment. [A custom Gradle plugin](buildSrc/src/main/kotlin/UsePrebuiltBinariesWhenUnbuildablePlugin.kt) 
+For example, macOS toolchains won't be available to someone
+who is compiling on Windows. For this reason, this plugin depends on
+artifacts built by a [custom GitHub Actions workflow](.github/workflows/libs.yml) for the platforms which cannot be compiled
+in the given environment. [A custom Gradle plugin](buildSrc/src/main/kotlin/UsePrebuiltBinariesWhenUnbuildablePlugin.kt)
 downloads these artifacts during the build if necessary.
 
 ##### This step requires a GitHub access token
@@ -45,8 +45,8 @@ For Gradle to be able to retrieve the pre-built artifacts, you need to provide a
 
 ##### Requirements for building
 
-With exception to Linux, this plugin only requires that a standard 
-C++ toolchain be installed when building on Windows (i.e. VisualCpp) 
+With exception to Linux, this plugin only requires that a standard
+C++ toolchain be installed when building on Windows (i.e. VisualCpp)
 and an Objective-C++ toolchain when building on macOS (i.e. Gcc or Clang).
 
 At the moment, Linux requires a standard C++ toolchain like Gcc
@@ -57,7 +57,7 @@ libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev
 
 
 ## Running
-You can use the standard `runIde` task to run this plugin 
+You can use the standard `runIde` task to run this plugin
 in a sandbox IDE. If you encounter errors like `"Directory '[project-folder]/auto-dark-mode/base/build/idea-sandbox/plugins' specified for property 'pluginsDirectory' does not exist."`, you might want
 to try running the task `:auto-dark-mode-plugin:runIde` instead.
 
