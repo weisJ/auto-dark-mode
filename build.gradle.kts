@@ -1,19 +1,17 @@
-import com.github.autostyle.generic.DefaultCopyrightStyle
-import com.github.autostyle.gradle.BaseFormatExtension
 import com.github.vlsi.gradle.crlf.CrLfSpec
 import com.github.vlsi.gradle.crlf.LineEndings
 import com.github.vlsi.gradle.properties.dsl.props
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("com.github.autostyle")
+    id("com.diffplug.spotless")
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.gradle-extensions")
     id("org.ajoberstar.grgit")
     kotlin("jvm") apply false
 }
 
-val skipAutostyle by props()
+val skipSpotless by props()
 val skipJavadoc by props()
 val enableMavenLocal by props()
 val enableGradleMetadata by props()
@@ -21,28 +19,6 @@ val enableGradleMetadata by props()
 val String.v: String get() = rootProject.extra["$this.version"] as String
 
 val buildVersion = "auto-dark-mode".v
-
-fun BaseFormatExtension.license() {
-    licenseHeader(File("${project.rootDir}/LICENSE").readText()) {
-        copyrightStyle("bat", DefaultCopyrightStyle.REM)
-        copyrightStyle("cmd", DefaultCopyrightStyle.REM)
-    }
-    trimTrailingWhitespace()
-    endWithNewline()
-}
-
-fun BaseFormatExtension.configFilter(init: PatternFilterable.() -> Unit) {
-    filter {
-        // Autostyle does not support gitignore yet https://github.com/autostyle/autostyle/issues/13
-        exclude("out/**")
-        if (project == rootProject) {
-            exclude("gradlew*", "gradle/**")
-        } else {
-            exclude("bin/**")
-        }
-        init()
-    }
-}
 
 allprojects {
     group = "com.github.weisj"
@@ -79,60 +55,45 @@ allprojects {
         }
     }
 
-    if (!skipAutostyle) {
-        apply(plugin = "com.github.autostyle")
-        autostyle {
+    if (!skipSpotless) {
+        apply(plugin = "com.diffplug.spotless")
+        spotless {
+            val spotlessRatchet by props(default = true)
+            if (spotlessRatchet) {
+                ratchetFrom("origin/master")
+            }
             kotlinGradle {
-                ktlint()
-            }
-            format("properties") {
-                configFilter {
-                    include("**/*.properties")
-                    exclude("**/gradle.properties")
-                }
-                license()
-            }
-            format("configs") {
-                configFilter {
-                    include("**/*.sh", "**/*.bsh", "**/*.cmd", "**/*.bat")
-                    include("**/*.xsd", "**/*.xsl", "**/*.xml")
-                    exclude("*.eclipseformat.xml")
-                }
-                license()
+                ktlint("ktlint".v)
             }
             format("markdown") {
-                filter.include("**/*.md")
+                target("**/*.md")
                 endWithNewline()
-            }
-            cpp {
                 trimTrailingWhitespace()
+            }
+            format("svg") {
+                target("**/*.svg")
                 endWithNewline()
-                license()
-                eclipse {
-                    configFile("${project.rootDir}/cpp.eclipseformat.xml")
+                trimTrailingWhitespace()
+                eclipseWtp(com.diffplug.spotless.extra.wtp.EclipseWtpFormatterStep.XML)
+            }
+            plugins.withType<dev.nokee.platform.jni.internal.plugins.JniLibraryPlugin>().configureEach {
+                cpp {
+                    target("**/*.cpp", "**/*.h")
+                    targetExclude("**/objcpp/**")
+                    endWithNewline()
+                    trimTrailingWhitespace()
+                    eclipseCdt().configFile("${project.rootDir}/config/cpp.eclipseformat.xml")
+                    licenseHeaderFile("${project.rootDir}/config/LICENSE_HEADER_JAVA.txt")
                 }
             }
-        }
-
-        plugins.withType<JavaPlugin> {
-            autostyle {
+            plugins.withType<JavaPlugin>().configureEach {
                 java {
                     importOrder("java", "javax", "org", "com")
                     removeUnusedImports()
-                    license()
-                    eclipse {
-                        configFile("${project.rootDir}/java.eclipseformat.xml")
-                    }
-                }
-            }
-        }
-        plugins.withType<JavaBasePlugin> {
-            autostyle {
-                kotlin {
-                    ktlint {
-                        userData(mapOf("disabled_rules" to "no-wildcard-imports"))
-                    }
-                    license()
+                    endWithNewline()
+                    trimTrailingWhitespace()
+                    eclipse().configFile("${project.rootDir}/config/java.eclipseformat.xml")
+                    licenseHeaderFile("${project.rootDir}/config/LICENSE_HEADER_JAVA.txt")
                 }
             }
         }
