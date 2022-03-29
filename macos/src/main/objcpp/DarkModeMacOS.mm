@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #import "com_github_weisj_darkmode_platform_macos_MacOSNative.h"
-#import <JavaNativeFoundation/JavaNativeFoundation.h>
+#import "JNFUtils.h"
 #import <AppKit/AppKit.h>
 
 #define OBJC(jl) ((id)jlong_to_ptr(jl))
@@ -104,7 +104,7 @@ BOOL manuallyPatched = NO;
 }
 
 - (void)dispatchCallback {
-    [JNFRunLoop performOnMainThreadWaiting:NO withBlock:^{
+    [JNF_RunLoop performOnMainThreadWaiting:NO withBlock:^{
         [self runCallback];
     }];
 }
