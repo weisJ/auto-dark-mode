@@ -24,38 +24,44 @@ library {
         sharedLibrary {
             compileTasks.configureEach {
                 compilerArgs.add("--std=c++11")
-                compilerArgs.addAll(toolChain.map {
-                    when (it) {
-                        is Gcc, is Clang -> compilerFlagsFor(
-                            "glibmm-2.4",
-                            "giomm-2.4",
-                            "sigc++-2.0",
-                            "gtk+-3.0"
-                        )
-                        else -> emptyList()
+                compilerArgs.addAll(
+                    toolChain.map {
+                        when (it) {
+                            is Gcc, is Clang -> compilerFlagsFor(
+                                "glibmm-2.4",
+                                "giomm-2.4",
+                                "sigc++-2.0",
+                                "gtk+-3.0"
+                            )
+                            else -> emptyList()
+                        }
                     }
-                })
+                )
 
                 // Build type not modeled yet, assuming release
-                compilerArgs.addAll(toolChain.map {
-                    when (it) {
-                        is Gcc, is Clang -> listOf("-O2")
-                        else -> emptyList()
+                compilerArgs.addAll(
+                    toolChain.map {
+                        when (it) {
+                            is Gcc, is Clang -> listOf("-O2")
+                            else -> emptyList()
+                        }
                     }
-                })
+                )
             }
             linkTask.configure {
-                linkerArgs.addAll(toolChain.map {
-                    when (it) {
-                        is Gcc, is Clang -> linkerFlagsFor(
-                            "glibmm-2.4",
-                            "giomm-2.4",
-                            "sigc++-2.0",
-                            "gtk+-3.0"
-                        )
-                        else -> emptyList()
+                linkerArgs.addAll(
+                    toolChain.map {
+                        when (it) {
+                            is Gcc, is Clang -> linkerFlagsFor(
+                                "glibmm-2.4",
+                                "giomm-2.4",
+                                "sigc++-2.0",
+                                "gtk+-3.0"
+                            )
+                            else -> emptyList()
+                        }
                     }
-                })
+                )
             }
         }
     }
