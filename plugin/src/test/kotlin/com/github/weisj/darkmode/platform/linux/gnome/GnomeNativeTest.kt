@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 Jannis Weis
+ * Copyright (c) 2020-2022 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,10 +28,10 @@ import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.NativePointer
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import org.junit.Assume.assumeTrue
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledOnOs
 import org.junit.jupiter.api.condition.OS
@@ -46,6 +46,13 @@ class GnomeNativeTest {
         return if (theme.startsWith("'")) {
             theme.trim().drop(1).dropLast(1)
         } else theme
+    }
+
+    @Test
+    @EnabledOnOs(OS.LINUX)
+    fun testLibraryLoading() {
+        assumeTrue(LibraryUtil.isGnome && LibraryUtil.isX64)
+        assertTrue(GnomeLibrary.get().isLoaded)
     }
 
     @Test
