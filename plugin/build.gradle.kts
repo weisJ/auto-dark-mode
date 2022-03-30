@@ -57,6 +57,8 @@ dependencies {
     compileOnly(kotlin("reflect"))
 
     testImplementation(projects.autoDarkModeLinuxGnome)
+    testImplementation(projects.autoDarkModeWindows)
+    testImplementation(projects.autoDarkModeMacos)
     testImplementation(libs.test.junit.api)
     testRuntimeOnly(libs.test.junit.engine)
 }
