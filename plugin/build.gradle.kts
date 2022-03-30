@@ -21,6 +21,11 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
+        v1.6.2
+        <ul>
+            <li>Detect more GTK themes on GNOME desktops.</li>
+            <li>Stability improvements on macOS</li>
+        </ul>
         v1.5.4
         <ul>
             <li>Fix segmentation fault on GNOME.</li>
