@@ -5,11 +5,17 @@ macOSFramework = "latest.release"
 junit = "5.9.1"
 junitlauncher = "1.9.0"
 darklaf = "3.0.1"
+kotlinCoroutines = "1.6.4"
 
 [libraries]
 autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }
 autoservice-processor = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "autoserviceKsp" }
 darklaf-nativeUtils = { module = "com.github.weisj:darklaf-native-utils", version.ref = "darklaf" }
+kotlinx-coroutines-core-jvm = {module ="org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm", version.ref ="kotlinCoroutines"}
+
+# Linux frameworks
+linux-dbus-core = { module = "com.github.hypfvieh:dbus-java-core", version = "4.2.1" }
+linux-dbus-transport = { module = "com.github.hypfvieh:dbus-java-transport-native-unixsocket", version = "4.2.1" }
 
 # MacOS frameworks
 macos-appKit = { module = "dev.nokee.framework:AppKit", version.ref = "macOSFramework" }

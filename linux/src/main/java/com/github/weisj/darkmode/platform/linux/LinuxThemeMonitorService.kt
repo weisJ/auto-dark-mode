@@ -30,11 +30,14 @@ import com.github.weisj.darkmode.platform.NullThemeMonitorService
 import com.github.weisj.darkmode.platform.ThemeMonitorService
 import com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider
 import com.github.weisj.darkmode.platform.linux.gtk.GtkThemeMonitorService
+import com.github.weisj.darkmode.platform.linux.xdg.XdgThemeMonitorService
 
 class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
     override fun create(): ThemeMonitorService = createCompatibleMonitorService()
 
     private fun createCompatibleMonitorService(): ThemeMonitorService {
+        val xdgThemeMonitorService = XdgThemeMonitorService()
+        if (xdgThemeMonitorService.compatibility.isSupported) return xdgThemeMonitorService
         if (LibraryUtil.isGtk || AdvancedLinuxSettings.overrideGtkDetection) {
             return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection)
         }
