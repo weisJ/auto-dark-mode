@@ -1,17 +1,17 @@
 plugins {
     java
     kotlin("jvm")
-    kotlin("kapt")
     id("dev.nokee.jni-library")
     id("dev.nokee.objective-cpp-language")
+    id("com.google.devtools.ksp")
     `uber-jni-jar`
     `use-prebuilt-binaries`
     `apple-m1-toolchain`
 }
 
 dependencies {
-    kapt(libs.autoservice.processor)
-    compileOnly(libs.autoservice.annotations)
+    ksp(libs.autoservice.processor)
+    implementation(libs.autoservice.annotations)
     compileOnly(kotlin("stdlib-jdk8"))
 }
 
