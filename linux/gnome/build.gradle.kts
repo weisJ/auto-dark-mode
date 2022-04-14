@@ -2,18 +2,18 @@ plugins {
     java
     id("dev.nokee.jni-library")
     id("dev.nokee.cpp-language")
+    id("com.google.devtools.ksp")
     `uber-jni-jar`
     `use-prebuilt-binaries`
     kotlin("jvm")
-    kotlin("kapt")
 }
 
 dependencies {
     implementation(projects.autoDarkModeBase)
     implementation(libs.darklaf.nativeUtils)
 
-    kapt(libs.autoservice.processor)
-    compileOnly(libs.autoservice.annotations)
+    ksp(libs.autoservice.processor)
+    implementation(libs.autoservice.annotations)
     compileOnly(kotlin("stdlib-jdk8"))
 }
 

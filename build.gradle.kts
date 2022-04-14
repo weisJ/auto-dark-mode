@@ -113,17 +113,19 @@ allprojects {
         }
     }
 
+    val javaVersion = JavaVersion.VERSION_1_8
+
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions {
-            jvmTarget = "1.8"
-            freeCompilerArgs = listOf("-Xjvm-default=compatibility")
+            jvmTarget = javaVersion.toString()
+            freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
         }
     }
 
     plugins.withType<JavaPlugin> {
         configure<JavaPluginExtension> {
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
+            sourceCompatibility = javaVersion
+            targetCompatibility = javaVersion
             withSourcesJar()
         }
 
