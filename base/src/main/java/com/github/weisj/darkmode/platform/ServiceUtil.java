@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020-2022 Jannis Weis
+ * Copyright (c) 2020-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -19,6 +19,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package com.github.weisj.darkmode.platform;
+
+import static com.github.weisj.darkmode.platform.ClassLoaderKt.withContextClassLoader;
 
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -41,12 +43,6 @@ public class ServiceUtil {
      *                                   not declare that it uses {@code service}
      */
     public static <T> ServiceLoader<T> load(final Class<T> serviceClass) {
-        ClassLoader current = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(serviceClass.getClassLoader());
-            return ServiceLoader.load(serviceClass);
-        } finally {
-            Thread.currentThread().setContextClassLoader(current);
-        }
+        return withContextClassLoader(serviceClass.getClassLoader(), () -> ServiceLoader.load(serviceClass));
     }
 }
