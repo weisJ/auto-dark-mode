@@ -118,7 +118,7 @@ allprojects {
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions {
             jvmTarget = javaVersion.toString()
-            freeCompilerArgs = listOf("-Xjvm-default=compatibility")
+            freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
         }
     }
 

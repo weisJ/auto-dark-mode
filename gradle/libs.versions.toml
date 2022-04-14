@@ -1,12 +1,13 @@
 [versions]
 autoservice = "1.0-rc7"
+autoserviceKsp = "1.0.0"
 macOSFramework = "latest.release"
 junit = "5.6.2"
 darklaf = "2.7.2"
 
 [libraries]
 autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }
-autoservice-processor = { module = "com.google.auto.service:auto-service", version.ref = "autoservice" }
+autoservice-processor = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "autoserviceKsp" }
 darklaf-nativeUtils = { module = "com.github.weisj:darklaf-native-utils", version.ref = "darklaf" }
 
 # MacOS frameworks

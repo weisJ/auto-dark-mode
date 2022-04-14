@@ -6,8 +6,8 @@ import org.jetbrains.intellij.tasks.PrepareSandboxTask
 plugins {
     id("org.jetbrains.intellij")
     id("com.github.vlsi.gradle-extensions")
+    id("com.google.devtools.ksp")
     kotlin("jvm")
-    kotlin("kapt")
 }
 
 val String.v: String get() = rootProject.extra["$this.version"] as String
@@ -64,8 +64,8 @@ dependencies {
     implementation(projects.autoDarkModeMacos)
     implementation(projects.autoDarkModeLinux)
 
-    kapt(libs.autoservice.processor)
-    compileOnly(libs.autoservice.annotations)
+    ksp(libs.autoservice.processor)
+    implementation(libs.autoservice.annotations)
     compileOnly(kotlin("stdlib-jdk8"))
     compileOnly(kotlin("reflect"))
 
