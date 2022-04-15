@@ -57,7 +57,7 @@ jobs:
         with:
           java-version: 11
       - name: Build
-        run: ./gradlew :auto-dark-mode-macos:build --full-stacktrace -PskipSpotless
+        run: ./gradlew :auto-dark-mode-macos:build --full-stacktrace -PmacOSciModeFix -PskipSpotless
       - name: Upload x86-64 artifact
         uses: actions/upload-artifact@v1
         with:
