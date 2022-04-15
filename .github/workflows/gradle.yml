@@ -76,7 +76,7 @@ jobs:
       - name: Build & Test
         uses: eskatos/gradle-command-action@v1
         with:
-          arguments: build test -PskipSpotless -PgithubAccessToken=${{ secrets.GITHUB_TOKEN }} --no-daemon
+          arguments: build test -PskipSpotless -PmacOSciModeFix -PgithubAccessToken=${{ secrets.GITHUB_TOKEN }} --no-daemon
           distributions-cache-enabled: true
           dependencies-cache-enabled: true
           configuration-cache-enabled: true

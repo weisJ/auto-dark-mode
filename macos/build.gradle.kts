@@ -1,18 +1,26 @@
+import com.github.vlsi.gradle.properties.dsl.props
+
 plugins {
     java
     kotlin("jvm")
+    id("com.google.devtools.ksp") apply false
     id("dev.nokee.jni-library")
     id("dev.nokee.objective-cpp-language")
-    id("com.google.devtools.ksp")
     `uber-jni-jar`
     `use-prebuilt-binaries`
     `apple-m1-toolchain`
 }
 
 dependencies {
-    ksp(libs.autoservice.processor)
     implementation(libs.autoservice.annotations)
     compileOnly(kotlin("stdlib-jdk8"))
+}
+
+if (!props.bool("macOSciModeFix", default = false)) {
+    apply(plugin = "com.google.devtools.ksp")
+    dependencies {
+        "ksp"(libs.autoservice.processor)
+    }
 }
 
 library {
