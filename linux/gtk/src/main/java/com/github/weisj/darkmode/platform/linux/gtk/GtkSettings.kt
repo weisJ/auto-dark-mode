@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.linux.gnome
+package com.github.weisj.darkmode.platform.linux.gtk
 
 import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.Notifications
@@ -31,18 +31,19 @@ import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 
 @AutoService(SettingsContainerProvider::class)
-class GnomeSettingsProvider : SingletonSettingsContainerProvider({ GnomeSettings }, enabled = LibraryUtil.isGnome)
+class GtkSettingsProvider : SingletonSettingsContainerProvider({ GtkSettings }, enabled = LibraryUtil.isGtk)
 
 data class GtkTheme(val name: String) : Comparable<GtkTheme> {
     override fun compareTo(other: GtkTheme): Int = name.compareTo(other.name)
 }
 
-object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
+// `identifier` kept at "gnome_settings" for backwards compatibility with existing settings
+object GtkSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
 
     /**
      * This enum holds default values for the light, dark, and high contrast GTK themes.
      * The defaults are a safe bet as they are included with almost any install of GTK.
-     * Even if they're not present, the way the logic works in GnomeThemeMonitorService,
+     * Even if they're not present, the way the logic works in GtkThemeMonitorService,
      * there won't be an issue and the plugin will fall back on the light theme.
      *
      * **See:** [Arch Wiki on GTK](https://wiki.archlinux.org/index.php/GTK#Themes)
@@ -73,7 +74,7 @@ object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
     private val guessingMechanismLogAction = OneTimeAction {
         Notifications.dispatchNotification(
             """
-            Auto Dark Mode is currently guessing whether the current Gnome theme
+            Auto Dark Mode is currently guessing whether the current Gtk theme
             is dark or light. You can explicitly specify your light, dark and high-contrast
             theme in <nobr>"File | Settings | Auto Dark Mode"</nobr> for better results.
             """.trimIndent(),
@@ -82,10 +83,10 @@ object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
     }
 
     init {
-        if (!GnomeLibrary.get().isLoaded) {
-            throw IllegalStateException("Gnome library not loaded.")
+        if (!GtkLibrary.get().isLoaded) {
+            throw IllegalStateException("Gtk library not loaded.")
         }
-        group("Gnome Theme") {
+        group("Gtk Theme") {
             val installedGtkThemesProvider = { loadInstalledGtkThemes() }
 
             val gtkThemeRenderer = GtkTheme::name
@@ -123,10 +124,10 @@ object GnomeSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
     }
 
     private fun loadInstalledGtkThemes(): List<GtkTheme> {
-        val installedThemes = GnomeThemeUtils.getInstalledThemes()
+        val installedThemes = GtkThemeUtils.getInstalledThemes()
         /*
          * The default themes are added to this list. They would already be added to the list because of their
-         * presence when initializing the `themes` vector in GnomeThemeUtils.cpp but because they are not
+         * presence when initializing the `themes` vector in GtkThemeUtils.cpp but because they are not
          * the same instance as the defaults, the dropdown list would default to random themes because
          * the instances of the three defaults couldn't be found in ChoiceProperty#choices.
          * For this reason, the default themes that the native code adds to this list are overwritten
