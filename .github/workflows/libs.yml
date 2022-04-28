@@ -79,8 +79,8 @@ jobs:
           name: build_logs
           path: macos/build/tmp
 
-  linux-gnome:
-    name: Linux (Gnome) (Java 11)
+  linux-gtk:
+    name: Linux (Gtk) (Java 11)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -93,11 +93,11 @@ jobs:
       - name: Apt update
         run: sudo apt-get update
       - name: Install libsigc++ and glibmm
-        run: sudo apt-get install -y libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev --fix-missing
+        run: sudo apt-get install -y libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev libgtkmm-3.0-dev --fix-missing
       - name: Build
-        run: ./gradlew :auto-dark-mode-linux-gnome:build --full-stacktrace -PskipSpotless
+        run: ./gradlew :auto-dark-mode-linux-gtk:build --full-stacktrace -PskipSpotless
       - name: Upload artifact
         uses: actions/upload-artifact@v1
         with:
           name: linux-x86-64
-          path: linux/gnome/build/libs/main/libauto-dark-mode-linux-gnome.so
+          path: linux/gtk/build/libs/main/libauto-dark-mode-linux-gtk.so

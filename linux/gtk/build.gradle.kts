@@ -30,6 +30,7 @@ library {
                             is Gcc, is Clang -> compilerFlagsFor(
                                 "glibmm-2.4",
                                 "giomm-2.4",
+                                "gtkmm-3.0",
                                 "sigc++-2.0",
                                 "gtk+-3.0"
                             )
@@ -55,6 +56,7 @@ library {
                             is Gcc, is Clang -> linkerFlagsFor(
                                 "glibmm-2.4",
                                 "giomm-2.4",
+                                "gtkmm-3.0",
                                 "sigc++-2.0",
                                 "gtk+-3.0"
                             )

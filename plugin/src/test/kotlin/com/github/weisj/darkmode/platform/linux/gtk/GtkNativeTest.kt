@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.linux.gnome
+package com.github.weisj.darkmode.platform.linux.gtk
 
 import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.NativePointer
@@ -36,38 +36,71 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledOnOs
 import org.junit.jupiter.api.condition.OS
 
-const val settingsPath = "org.gnome.desktop.interface"
-const val settingsKey = "gtk-theme"
+const val GSETTINGS_PATH = "org.gnome.desktop.interface"
+const val GSETTINGS_KEY = "gtk-theme"
+const val XFCONF_QUERY_CHANNEL = "xsettings"
+const val XFCONF_QUERY_PROPERTY = "/Net/ThemeName"
 
-class GnomeNativeTest {
+interface ThemeChanger {
+    val currentTheme: String
 
-    private fun currentGtkTheme(): String {
-        val theme = "gsettings get $settingsPath $settingsKey".runCommand()
-        return if (theme.startsWith("'")) {
-            theme.trim().drop(1).dropLast(1)
-        } else theme
+    fun String.runCommand(): String {
+        val process = ProcessBuilder(*split(" ").toTypedArray()).start()
+        val output = process.inputStream.reader(Charsets.UTF_8).use {
+            it.readText()
+        }
+        process.waitFor(10, TimeUnit.SECONDS)
+        return output
     }
+
+    fun String.stripQuotes(): String {
+        return if (startsWith("'")) {
+            trim().drop(1).dropLast(1)
+        } else trim()
+    }
+}
+
+class GSettingsThemeChanger : ThemeChanger {
+    override var currentTheme: String
+        get() = "gsettings get $GSETTINGS_PATH $GSETTINGS_KEY".runCommand().stripQuotes()
+        set(value) {
+            "gsettings set $GSETTINGS_PATH $GSETTINGS_KEY $value".runCommand()
+        }
+}
+
+class XfConfQueryThemeChanger : ThemeChanger {
+    override var currentTheme: String
+        get() = "xfconf-query -c $XFCONF_QUERY_CHANNEL -p $XFCONF_QUERY_PROPERTY".runCommand().stripQuotes()
+        set(value) {
+            "xfconf-query -c $XFCONF_QUERY_CHANNEL -p $XFCONF_QUERY_PROPERTY -s $value".runCommand()
+        }
+}
+
+class GtkNativeTest {
+    // local dev: choose one and comment out the other
+    private val themeChanger = GSettingsThemeChanger()
+    // private val themeChanger = XfConfQueryThemeChanger()
 
     @Test
     @EnabledOnOs(OS.LINUX)
     fun testLibraryLoading() {
-        assumeTrue(LibraryUtil.isGnome && LibraryUtil.isX64)
-        assertTrue(GnomeLibrary.get().isLoaded)
+        assumeTrue(LibraryUtil.isGtk && LibraryUtil.isX64)
+        assertTrue(GtkLibrary.get().isLoaded)
     }
 
     @Test
     @EnabledOnOs(OS.LINUX)
     fun testThemeChange() {
-        assumeTrue(LibraryUtil.isGnome && LibraryUtil.isX64)
-        GnomeLibrary.get()
+        assumeTrue(LibraryUtil.isGtk && LibraryUtil.isX64)
+        GtkLibrary.get()
 
-        "gsettings set $settingsPath $settingsKey Adwaita-dark".runCommand()
+        themeChanger.currentTheme = "Adwaita-dark"
 
-        val service = GnomeThemeMonitorService()
+        val service = GtkThemeMonitorService()
         assertTrue(service.isSupported)
         service.install()
 
-        assertEquals(currentGtkTheme(), service.currentGtkTheme)
+        assertEquals(themeChanger.currentTheme, service.currentGtkTheme)
         assertTrue(service.isDarkThemeEnabled)
 
         val countDownLatch = CountDownLatch(1)
@@ -75,25 +108,15 @@ class GnomeNativeTest {
             countDownLatch.countDown()
         }!!
 
-        "gsettings set $settingsPath $settingsKey Adwaita".runCommand()
-        assertEquals("Adwaita", service.currentGtkTheme)
+        themeChanger.currentTheme = "Adwaita"
 
         countDownLatch.await(10, TimeUnit.SECONDS)
         assertTrue(countDownLatch.count == 0L)
 
-        assertEquals(currentGtkTheme(), service.currentGtkTheme)
+        assertEquals(themeChanger.currentTheme, service.currentGtkTheme)
         assertEquals("Adwaita", service.currentGtkTheme)
         assertFalse(service.isDarkThemeEnabled)
 
         service.deleteEventHandler(eventHandler)
-    }
-
-    private fun String.runCommand(): String {
-        val process = ProcessBuilder(*split(" ").toTypedArray()).start()
-        val output = process.inputStream.reader(Charsets.UTF_8).use {
-            it.readText()
-        }
-        process.waitFor(10, TimeUnit.SECONDS)
-        return output
     }
 }

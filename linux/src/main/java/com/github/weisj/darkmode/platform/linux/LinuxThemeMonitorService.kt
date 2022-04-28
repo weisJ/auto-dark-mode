@@ -28,13 +28,13 @@ import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.Notifications
 import com.github.weisj.darkmode.platform.NullThemeMonitorService
 import com.github.weisj.darkmode.platform.ThemeMonitorService
-import com.github.weisj.darkmode.platform.linux.gnome.GnomeThemeMonitorService
+import com.github.weisj.darkmode.platform.linux.gtk.GtkThemeMonitorService
 
-class LinuxThemeMonitorService : ThemeMonitorService by if (LibraryUtil.isGnome) {
-    GnomeThemeMonitorService()
+class LinuxThemeMonitorService : ThemeMonitorService by if (LibraryUtil.isGtk) {
+    GtkThemeMonitorService()
 } else {
     Notifications.dispatchNotification(
-        message = "This plugin currently only supports Gnome as a desktop environment on Linux."
+        message = "This plugin currently only supports Gtk based a desktop environment on Linux."
     )
     NullThemeMonitorService()
 }

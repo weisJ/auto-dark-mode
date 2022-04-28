@@ -22,47 +22,47 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.linux.gnome
+package com.github.weisj.darkmode.platform.linux.gtk
 
 import com.github.weisj.darkmode.platform.NativePointer
 import com.github.weisj.darkmode.platform.ThemeMonitorService
-import com.github.weisj.darkmode.platform.linux.gnome.GtkVariants.guessFrom
+import com.github.weisj.darkmode.platform.linux.gtk.GtkVariants.guessFrom
 
-class GnomeThemeMonitorService : ThemeMonitorService {
+class GtkThemeMonitorService : ThemeMonitorService {
 
     init {
-        GnomeLibrary.get()
+        GtkLibrary.get()
     }
 
     override val isDarkThemeEnabled: Boolean
         get() {
             val currentTheme = currentGtkTheme
-            return if (GnomeSettings.guessLightAndDarkThemes) {
+            return if (GtkSettings.guessLightAndDarkThemes) {
                 currentTheme == guessFrom(currentTheme)[GtkVariants.Variant.Night]
             } else {
-                GnomeSettings.darkGtkTheme.name == currentTheme
+                GtkSettings.darkGtkTheme.name == currentTheme
             }
         }
     override val isHighContrastEnabled: Boolean
         get() {
-            if (GnomeSettings.guessLightAndDarkThemes) return false
+            if (GtkSettings.guessLightAndDarkThemes) return false
             val currentTheme = currentGtkTheme
-            return GnomeSettings.highContrastGtkTheme.name == currentTheme
+            return GtkSettings.highContrastGtkTheme.name == currentTheme
         }
     override val isSupported: Boolean
-        get() = GnomeLibrary.get().isLoaded
+        get() = GtkLibrary.get().isLoaded
     val currentGtkTheme: String
-        get() = GnomeNative.getCurrentTheme()
+        get() = GtkNative.getCurrentTheme()
 
     override fun createEventHandler(callback: () -> Unit): NativePointer? {
-        return NativePointer(GnomeNative.createEventHandler(callback))
+        return NativePointer(GtkNative.createEventHandler(callback))
     }
 
     override fun deleteEventHandler(eventHandle: NativePointer) {
-        GnomeNative.deleteEventHandler(eventHandle.pointer)
+        GtkNative.deleteEventHandler(eventHandle.pointer)
     }
 
     override fun install() {
-        GnomeNative.init()
+        GtkNative.init()
     }
 }

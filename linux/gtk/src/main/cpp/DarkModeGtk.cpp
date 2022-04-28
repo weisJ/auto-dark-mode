@@ -18,22 +18,18 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "com_github_weisj_darkmode_platform_linux_gnome_GnomeNative.h"
+#include "com_github_weisj_darkmode_platform_linux_gtk_GtkNative.h"
 #include "GioUtils.hpp"
 
-#include <string>
 #include <thread>
-#include <glibmm-2.4/glibmm.h>
-#include <giomm-2.4/giomm.h>
+#include <gtkmm.h>
 
-#define SETTINGS_SCHEMA_NAME "org.gnome.desktop.interface"
-#define THEME_NAME_KEY "gtk-theme"
-Glib::RefPtr<Gio::Settings> settings;
-Glib::RefPtr<Glib::MainContext> mainContext;
+Glib::RefPtr<Gtk::Application> app;
+Glib::RefPtr<Gtk::Settings> settings;
 
 JNIEXPORT jstring JNICALL
-Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_getCurrentTheme(JNIEnv *env, jclass) {
-    auto themeStr = settings->get_string(THEME_NAME_KEY);
+Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_getCurrentTheme(JNIEnv *env, jclass) {
+    auto themeStr = settings->property_gtk_theme_name().get_value();
     return env->NewStringUTF(themeStr.c_str());
 }
 
@@ -43,12 +39,7 @@ struct EventHandler {
     jobject callback;
     sigc::connection settingsChangedSignalConnection;
 
-    Glib::RefPtr<Glib::MainLoop> mainLoop;
     std::thread loopThread;
-
-    void settingChanged(const Glib::ustring &name) {
-        runCallBack();
-    }
 
     void runCallBack() {
         bool detachNecessary = false;
@@ -72,34 +63,31 @@ struct EventHandler {
     }
 
     void stop() {
-        mainLoop->quit();
+        app->release();
+        app->quit();
         loopThread.join();
         settingsChangedSignalConnection.disconnect();
     }
 
     void run() {
-        mainLoop->run();
+        app->hold();
+        app->run();
     }
 
     EventHandler(JavaVM *jvm_, jobject callback_) {
         jvm = jvm_;
         callback = callback_;
 
-        mainContext->push_thread_default();
-        mainLoop = Glib::MainLoop::create(mainContext);
-
-        settingsChangedSignalConnection = settings->signal_changed(THEME_NAME_KEY).connect(
-                sigc::mem_fun(this, &EventHandler::settingChanged));
+        settingsChangedSignalConnection = settings->property_gtk_theme_name().signal_changed().connect(
+                sigc::mem_fun(this, &EventHandler::runCallBack));
         // Request key to ensure updates are send to the signal handler.
-        auto currentTheme = settings->get_string(THEME_NAME_KEY);
+        auto currentTheme = settings->property_gtk_theme_name().get_value();
         loopThread = std::thread(&EventHandler::run, this);
-
-        mainContext->pop_thread_default();
     }
 };
 
 JNIEXPORT jlong JNICALL
-Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_createEventHandler(JNIEnv *env, jclass obj, jobject callback) {
+Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_createEventHandler(JNIEnv *env, jclass obj, jobject callback) {
     JavaVM *jvm;
     if (env->GetJavaVM(&jvm) == JNI_OK) {
         jobject callbackRef = env->NewGlobalRef(callback);
@@ -110,7 +98,7 @@ Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_createEventHandl
 }
 
 JNIEXPORT void JNICALL
-Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_deleteEventHandler(JNIEnv *env, jclass obj, jlong eventHandler)
+Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_deleteEventHandler(JNIEnv *env, jclass obj, jlong eventHandler)
 {
     EventHandler *handler = reinterpret_cast<EventHandler *>(eventHandler);
     if (handler) {
@@ -121,10 +109,8 @@ Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_deleteEventHandl
 }
 
 JNIEXPORT void JNICALL
-Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeNative_init(JNIEnv *env, jclass obj) {
+Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_init(JNIEnv *env, jclass obj) {
     ensure_gio_init();
-    mainContext = Glib::MainContext::create();
-    mainContext->push_thread_default();
-    settings = Gio::Settings::create(SETTINGS_SCHEMA_NAME);
-    mainContext->pop_thread_default();
+    app = Gtk::Application::create("com.github.weisj.darkmode.platform.linux.gtk.GtkNative");
+    settings = Gtk::Settings::get_default();
 }
