@@ -14,6 +14,6 @@ dependencies {
      * Add additional Linux submodules below as implementations. By doing this, all submodules
      * will be pulled into plugin/build.gradle.kts when it specifies implementation(project(":auto-dark-mode-linux")).
      */
-    implementation(project(":auto-dark-mode-linux-gnome"))
+    implementation(project(":auto-dark-mode-linux-gtk"))
     compileOnly(kotlin("stdlib-jdk8"))
 }

@@ -18,30 +18,30 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.weisj.darkmode.platform.linux.gnome;
+package com.github.weisj.darkmode.platform.linux.gtk;
 
 import com.github.weisj.darkmode.platform.AbstractPluginLibrary;
 import com.github.weisj.darkmode.platform.LibraryUtil;
 import com.github.weisj.darkmode.platform.PluginLogger;
 
-public class GnomeLibrary extends AbstractPluginLibrary {
+public class GtkLibrary extends AbstractPluginLibrary {
 
-    private static final String PROJECT_NAME = "auto-dark-mode-linux-gnome";
+    private static final String PROJECT_NAME = "auto-dark-mode-linux-gtk";
     private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/linux-x86-64/";
     private static final String DLL_NAME = "lib" + PROJECT_NAME + ".so";
-    private static final GnomeLibrary instance = new GnomeLibrary();
+    private static final GtkLibrary instance = new GtkLibrary();
 
-    protected GnomeLibrary() {
-        super(PATH, DLL_NAME, PluginLogger.getLogger(GnomeLibrary.class));
+    protected GtkLibrary() {
+        super(PATH, DLL_NAME, PluginLogger.getLogger(GtkLibrary.class));
     }
 
-    static GnomeLibrary get() {
+    static GtkLibrary get() {
         instance.updateLibrary();
         return instance;
     }
 
     @Override
     protected boolean canLoad() {
-        return LibraryUtil.isX64 && LibraryUtil.isGnome;
+        return LibraryUtil.isX64 && LibraryUtil.isGtk;
     }
 }

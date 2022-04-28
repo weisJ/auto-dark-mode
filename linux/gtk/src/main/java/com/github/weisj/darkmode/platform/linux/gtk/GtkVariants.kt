@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package com.github.weisj.darkmode.platform.linux.gnome
+package com.github.weisj.darkmode.platform.linux.gtk
 
 import java.util.EnumMap
 
@@ -31,7 +31,7 @@ import java.util.EnumMap
  *
  * The logic of guessFrom will be used if the user chooses to have the plugin guess which of their themes is their
  * light and dark theme (guessing is enabled by default).
- * @see GnomeSettings.guessLightAndDarkThemes
+ * @see GtkSettings.guessLightAndDarkThemes
  */
 object GtkVariants {
     /**

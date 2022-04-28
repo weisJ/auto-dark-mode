@@ -25,7 +25,7 @@ include(
     "windows",
     "macos",
     "linux",
-    "linux/gnome"
+    "linux/gtk"
 )
 
 rootProject.name = "auto-dark-mode"

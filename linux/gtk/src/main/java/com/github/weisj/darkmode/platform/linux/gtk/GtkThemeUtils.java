@@ -18,19 +18,18 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.github.weisj.darkmode.platform.linux.gnome;
+package com.github.weisj.darkmode.platform.linux.gtk;
 
-public class GnomeNative {
+import java.util.ArrayList;
 
-    private GnomeNative() {
+public class GtkThemeUtils {
+
+    private GtkThemeUtils() {
         throw new IllegalStateException("Native methods holder");
     }
 
-    static native String getCurrentTheme();
-
-    static native long createEventHandler(final Runnable callback);
-
-    static native void deleteEventHandler(final long handle);
-
-    static native void init();
+    /**
+     * @return a list of the currently installed GTK themes.
+     */
+    static native ArrayList<String> getInstalledThemes();
 }
