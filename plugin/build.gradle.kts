@@ -69,7 +69,7 @@ dependencies {
     compileOnly(kotlin("stdlib-jdk8"))
     compileOnly(kotlin("reflect"))
 
-    testImplementation(projects.autoDarkModeLinuxGnome)
+    testImplementation(projects.autoDarkModeLinuxGtk)
     testImplementation(projects.autoDarkModeWindows)
     testImplementation(projects.autoDarkModeMacos)
     testImplementation(libs.test.junit.api)

@@ -18,7 +18,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#include "com_github_weisj_darkmode_platform_linux_gnome_GnomeThemeUtils.h"
+#include "com_github_weisj_darkmode_platform_linux_gtk_GtkThemeUtils.h"
 #include "GioUtils.hpp"
 
 #include <glibmm-2.4/glibmm.h>
@@ -136,7 +136,7 @@ std::vector<std::string> get_installed_gtk_themes() {
     return themes;
 }
 
-JNIEXPORT jobject JNICALL Java_com_github_weisj_darkmode_platform_linux_gnome_GnomeThemeUtils_getInstalledThemes(
+JNIEXPORT jobject JNICALL Java_com_github_weisj_darkmode_platform_linux_gtk_GtkThemeUtils_getInstalledThemes(
         JNIEnv *env, jclass) {
     std::vector < std::string > vector = get_installed_gtk_themes();
     jclass java_util_ArrayList = static_cast<jclass>(env->NewGlobalRef(env->FindClass("java/util/ArrayList")));

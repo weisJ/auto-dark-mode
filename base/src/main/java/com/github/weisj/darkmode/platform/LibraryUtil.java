@@ -38,5 +38,5 @@ public final class LibraryUtil {
     public static final boolean isM1 = SystemInfo.isMac && CpuArch.isArm64();
     public static final boolean isMacOSMojave = SystemInfo.isMacOSMojave;
     public static final boolean isMacOSCatalina = SystemInfo.isMacOSCatalina;
-    public static final boolean isGnome = SystemInfo.isGNOME;
+    public static final boolean isGtk = SystemInfo.isGNOME || SystemInfo.isXfce || SystemInfo.isI3;
 }
