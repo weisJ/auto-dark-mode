@@ -109,6 +109,14 @@ interface SettingsGroup : MutableList<ValueProperty<Any>> {
     fun getIdentifierPath(): String = "${parent?.let { it.getIdentifierPath() + ":" } ?: ""}$identifier"
 }
 
+fun SettingsGroup.isTotallyEmpty() : Boolean {
+    if (size != 0) return false
+    for (subgroup in subgroups) {
+        if (subgroup.isEmpty()) return false
+    }
+    return true
+}
+
 interface NamedSettingsGroup : SettingsGroup {
     val name: String
 }

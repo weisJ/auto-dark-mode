@@ -24,14 +24,30 @@
  */
 package com.github.weisj.darkmode
 
-import com.github.weisj.darkmode.platform.settings.*
+import com.github.weisj.darkmode.platform.settings.ChoiceProperty
+import com.github.weisj.darkmode.platform.settings.Condition
+import com.github.weisj.darkmode.platform.settings.NamedSettingsGroup
+import com.github.weisj.darkmode.platform.settings.SettingsGroup
+import com.github.weisj.darkmode.platform.settings.ValueProperty
+import com.github.weisj.darkmode.platform.settings.effective
+import com.github.weisj.darkmode.platform.settings.isTotallyEmpty
+import com.github.weisj.darkmode.platform.settings.registerListener
+import com.github.weisj.darkmode.platform.settings.withType
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.PopupMenuListenerAdapter
 import com.intellij.ui.SimpleListCellRenderer
-import com.intellij.ui.layout.*
+import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.Row
+import com.intellij.ui.dsl.builder.RowsRange
+import com.intellij.ui.dsl.builder.bindIntValue
+import com.intellij.ui.dsl.builder.bindItem
+import com.intellij.ui.dsl.builder.bindSelected
+import com.intellij.ui.dsl.builder.bindText
+import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.util.castSafelyTo
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
@@ -50,12 +66,13 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
         }
     }
 
-    private fun RowBuilder.addGroup(group: NamedSettingsGroup) = addGroup(group, group.name)
+    private fun Panel.addGroup(group: NamedSettingsGroup) = addGroup(group, group.name)
 
-    private fun RowBuilder.addGroup(
+    private fun Panel.addGroup(
         properties: SettingsGroup,
         name: String?
     ) {
+        if (properties.isTotallyEmpty()) return
         maybeTitledRow(name) {
             properties.forEach { addProperty(it) }
             properties.subgroups.forEach { group ->
@@ -68,7 +85,7 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
         }
     }
 
-    private fun Row.addProperty(valueProp: ValueProperty<Any>) {
+    private fun Panel.addProperty(valueProp: ValueProperty<Any>) {
         val choiceProperty = valueProp.castSafelyTo<ChoiceProperty<Any, Any>>()
         val effectiveProp = valueProp.effective<Any>()
         val prop = effectiveProp.value
@@ -80,12 +97,14 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
             when {
                 choiceProperty != null -> addChoiceProperty(choiceProperty)
                 prop is Boolean ->
-                    checkBox(valueProp.description, effectiveProp::value.withType()!!)
+                    checkBox(valueProp.description)
+                        .bindSelected(effectiveProp::value.withType()!!)
                         .applyToComponent {
                             addActionListener { effectiveProp.preview = isSelected }
                         }
                 prop is String ->
-                    textField(effectiveProp::value.withType()!!)
+                    textField()
+                        .bindText(effectiveProp::value.withType()!!)
                         .applyToComponent {
                             document.addDocumentListener(
                                 DocumentChangeListener {
@@ -94,7 +113,8 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
                             )
                         }
                 prop is Int ->
-                    spinner(effectiveProp::value.withType()!!, Int.MIN_VALUE, Int.MAX_VALUE)
+                    spinner(Int.MIN_VALUE .. Int.MAX_VALUE)
+                        .bindIntValue(effectiveProp::value.withType()!!)
                         .applyToComponent {
                             addChangeListener { effectiveProp.preview = value }
                         }
@@ -108,9 +128,9 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
         val choiceModel = CollectionComboBoxModel(choiceProperty.choicesProvider().toMutableList())
         comboBox(
             choiceModel,
-            choiceProperty::choiceValue,
-            renderer = SimpleListCellRenderer.create<Any>("<null>") { choiceProperty.renderer(it) }
-        ).applyToComponent {
+            renderer = SimpleListCellRenderer.create("<null>") { choiceProperty.renderer(it) }
+        ).bindItem({ choiceProperty.choiceValue }, { if (it != null) choiceProperty.choiceValue = it })
+            .applyToComponent {
             addPopupMenuListener(object : PopupMenuListenerAdapter() {
                 override fun popupMenuWillBecomeVisible(e: PopupMenuEvent?) {
                     val selected = choiceModel.selected
@@ -124,15 +144,15 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
     }
 
     private fun Row.enableIf(condition: Condition) {
-        enableIf(ConditionComponentPredicate(condition))
+        enabledIf(ConditionComponentPredicate(condition))
     }
 
-    private fun RowBuilder.maybeTitledRow(name: String?, init: Row.() -> Unit): Row {
-        return if (!name.isNullOrEmpty()) titledRow(name, init) else row { init() }
+    private fun Panel.maybeTitledRow(name: String?, init: Panel.() -> Unit): RowsRange {
+        return if (!name.isNullOrEmpty()) groupRowsRange(name, init = init) else groupRowsRange { init() }
     }
 
-    private fun RowBuilder.maybeNamedRow(name: String?, init: Row.() -> Unit): Row {
-        return if (!name.isNullOrEmpty()) row(name) { init() } else row { init() }
+    private fun Panel.maybeNamedRow(name: String?, init: Row.() -> Unit) {
+        if (!name.isNullOrEmpty()) row(name, init = init) else row { init() }
     }
 
     override fun apply() {
@@ -142,7 +162,6 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     companion object {
         const val SETTINGS_TITLE: String = "Auto Dark Mode"
-        const val CHOICE_PROPERTY_GROUPING_THRESHOLD = 3
         val UNNAMED_GROUP_TITLE: String? = null
     }
 }
