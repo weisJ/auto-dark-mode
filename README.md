@@ -8,7 +8,8 @@ operating system settings. The plugin distinguishes between `Light`, `Dark` and 
 the theme used for each mode can be customized.
 This plugin currently works for Windows and macOS.
 
-Linux support is both limited and experimental. At the moment, the only Linux desktop environment supported by this plugin is Gnome.
+Linux support is both limited and experimental. At the moment, Linux desktop environments that have an [XSettings](https://www.freedesktop.org/wiki/Specifications/xsettings-spec/) daemon running are supported.
+Gtk based desktop environments such as Gnome and Xfce ship with such a daemon out of the box. Users of minimalist window managers (such as i3) can choose to run a daemon shipped with Gnome (`gsd-xsettings`) or Xfce (`xfsettingsd`), among many choices.
 
 By default, the following themes are used:
 
@@ -52,7 +53,7 @@ and an Objective-C++ toolchain when building on macOS (i.e. Gcc or Clang).
 At the moment, Linux requires a standard C++ toolchain like Gcc
 as well as the following packages.
 ```
-libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev
+libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev libgtkmm-3.0-dev
 ```
 
 
