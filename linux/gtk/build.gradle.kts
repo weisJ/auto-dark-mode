@@ -22,18 +22,19 @@ library {
     variants.configureEach {
         resourcePath.set("com/github/weisj/darkmode/${project.name}/${targetMachine.variantName}")
         sharedLibrary {
+            val libraryDependencies = listOf(
+                "glibmm-2.4",
+                "giomm-2.4",
+                "gtkmm-3.0",
+                "sigc++-2.0",
+                "gtk+-3.0"
+            )
             compileTasks.configureEach {
                 compilerArgs.add("--std=c++11")
                 compilerArgs.addAll(
                     toolChain.map {
                         when (it) {
-                            is Gcc, is Clang -> compilerFlagsFor(
-                                "glibmm-2.4",
-                                "giomm-2.4",
-                                "gtkmm-3.0",
-                                "sigc++-2.0",
-                                "gtk+-3.0"
-                            )
+                            is Gcc, is Clang -> compilerFlagsFor(libraryDependencies)
                             else -> emptyList()
                         }
                     }
@@ -53,13 +54,7 @@ library {
                 linkerArgs.addAll(
                     toolChain.map {
                         when (it) {
-                            is Gcc, is Clang -> linkerFlagsFor(
-                                "glibmm-2.4",
-                                "giomm-2.4",
-                                "gtkmm-3.0",
-                                "sigc++-2.0",
-                                "gtk+-3.0"
-                            )
+                            is Gcc, is Clang -> linkerFlagsFor(libraryDependencies)
                             else -> emptyList()
                         }
                     }
@@ -69,10 +64,10 @@ library {
     }
 }
 
-fun compilerFlagsFor(vararg packages: String): List<String> =
+fun compilerFlagsFor(packages: Iterable<String>): List<String> =
     "pkg-config --cflags ${packages.joinToString(separator = " ")}".runCommand().split(" ").distinct()
 
-fun linkerFlagsFor(vararg packages: String): List<String> =
+fun linkerFlagsFor(vararg packages: Iterable<String>): List<String> =
     "pkg-config --libs ${packages.joinToString(separator = " ")}".runCommand().split(" ").distinct()
 
 fun String.runCommand(): String {
