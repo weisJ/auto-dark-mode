@@ -27,7 +27,7 @@
     <name>Auto Dark Mode</name>
     <description>
         Automatically change IDEA theme according to OS settings (dark/light/high contrast).
-        Currently works on Windows, macOS and Linux (Gnome only).
+        Currently works on Windows, macOS and Linux (Gtk only).
 
         You can change the default theme used in the plugin settings under "Other Settings"->"Auto Dark Mode".
 
