@@ -76,7 +76,7 @@ class CompoundCondition(
     private val first: Condition,
     private val second: Condition,
     private val combinator: (Boolean, Boolean) -> Boolean
-) : Condition, Observable<Condition> by first {
+) : Condition, Observable<Condition> by DefaultObservable() {
     override var value by observable(combinator(first.value, second.value))
 
     override fun invoke(): Boolean {
