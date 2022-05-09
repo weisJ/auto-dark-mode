@@ -29,9 +29,6 @@ import com.google.auto.service.AutoService
 import com.intellij.ide.ui.LafManager
 import com.intellij.ide.ui.laf.IntelliJLookAndFeelInfo
 import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo
-import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager.getApplication
-import com.intellij.openapi.editor.colors.EditorColorsListener
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
@@ -182,10 +179,10 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      */
     private fun searchScheme(vararg names: String): EditorColorsScheme {
         return EditorColorsManager.getInstance().run {
-            names.mapNotNull { name ->
+            names.firstNotNullOfOrNull { name ->
                 allSchemes.firstOrNull { it.name == name }
                     ?: allSchemes.firstOrNull { it.name == "${Scheme.EDITABLE_COPY_PREFIX}$name" }
-            }.firstOrNull() ?: globalScheme
+            } ?: globalScheme
         }
     }
 
@@ -196,24 +193,6 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private fun searchLaf(name: String, className: String = ""): UIManager.LookAndFeelInfo? {
         return LafManager.getInstance().installedLookAndFeels.firstOrNull {
             it.name.equals(name, ignoreCase = true) && (className.isEmpty() || it.className == className)
-        }
-    }
-
-    private object EditorSchemeList : ArrayList<EditorColorsScheme>() {
-
-        private val listener = object : Disposable, EditorColorsListener {
-            override fun dispose() {
-            }
-
-            override fun globalSchemeChange(scheme: EditorColorsScheme?) {
-                TODO("Not yet implemented")
-            }
-        }
-
-        init {
-            getApplication().messageBus
-                .connect(listener)
-                .subscribe(EditorColorsManager.TOPIC, listener)
         }
     }
 }
