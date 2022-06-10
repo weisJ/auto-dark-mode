@@ -100,13 +100,13 @@ class GtkNativeTest {
         assertTrue(service.isSupported)
         service.install()
 
-        assertEquals(themeChanger.currentTheme, service.currentGtkTheme)
-        assertTrue(service.isDarkThemeEnabled)
-
         val countDownLatch = CountDownLatch(1)
         val eventHandler: NativePointer = service.createEventHandler {
             countDownLatch.countDown()
         }!!
+
+        assertEquals(themeChanger.currentTheme, service.currentGtkTheme)
+        assertTrue(service.isDarkThemeEnabled)
 
         themeChanger.currentTheme = "Adwaita"
 
