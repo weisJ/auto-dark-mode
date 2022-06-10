@@ -21,14 +21,28 @@
 #include "com_github_weisj_darkmode_platform_linux_gtk_GtkNative.h"
 #include "GioUtils.hpp"
 
+#include <chrono>
+#include <condition_variable>
 #include <thread>
+
+#include <iostream>
+#include <fstream>
+
 #include <gtkmm.h>
 
-Glib::RefPtr<Gtk::Application> app;
 Glib::RefPtr<Gtk::Settings> settings;
+
+// to sync the intialization of `settings`
+std::condition_variable cv;
+std::mutex cv_mutex;
 
 JNIEXPORT jstring JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_getCurrentTheme(JNIEnv *env, jclass) {
+    std::unique_lock<std::mutex> lock(cv_mutex);
+    if (!cv.wait_for(lock, std::chrono::seconds(3), [] {return bool(settings);})) {
+        return env->NewStringUTF("");
+    }
+
     auto themeStr = settings->property_gtk_theme_name().get_value();
     return env->NewStringUTF(themeStr.c_str());
 }
@@ -37,8 +51,10 @@ struct EventHandler {
     JavaVM *jvm;
     JNIEnv *env;
     jobject callback;
-    sigc::connection settingsChangedSignalConnection;
 
+    Glib::RefPtr<Gtk::Application> app;
+    std::shared_ptr<Glib::Dispatcher> quitDispatcher;
+    sigc::connection settingsChangedSignalConnection;
     std::thread loopThread;
 
     void runCallBack() {
@@ -63,13 +79,42 @@ struct EventHandler {
     }
 
     void stop() {
-        app->release();
-        app->quit();
-        loopThread.join();
         settingsChangedSignalConnection.disconnect();
+        quitDispatcher->emit();
+        loopThread.join();
     }
 
-    void run() {
+    /*
+     * quit the Gtk application `app`
+     * MUST be called from the Gtk thread
+     */
+    void quit() {
+        app->release();
+        app->quit();
+
+        // let the Glib::Dispatcher destruct in the app thread
+        // makes the assertion in Glib::DispatchNotifier::unreference_instance happy
+        quitDispatcher.reset();
+    }
+
+    /*
+     * creates and runs the event loop (app->run()) of a mini Gtk application
+     * the event loop is needed to receive signals when the theme changes
+     */
+    void runGtkApp() {
+        {
+            std::lock_guard < std::mutex > lock(cv_mutex);
+
+            app = Gtk::Application::create();
+            settings = Gtk::Settings::get_default();
+            settingsChangedSignalConnection = settings->property_gtk_theme_name().signal_changed().connect(
+                    sigc::mem_fun(this, &EventHandler::runCallBack));
+        }
+        cv.notify_all();
+
+        // Glib::Dispatcher runs the callback in the thread where it was instantiated
+        quitDispatcher = std::make_shared<Glib::Dispatcher>();
+        quitDispatcher->connect(sigc::mem_fun(*this, &EventHandler::quit));
         app->hold();
         app->run();
     }
@@ -78,11 +123,7 @@ struct EventHandler {
         jvm = jvm_;
         callback = callback_;
 
-        settingsChangedSignalConnection = settings->property_gtk_theme_name().signal_changed().connect(
-                sigc::mem_fun(this, &EventHandler::runCallBack));
-        // Request key to ensure updates are send to the signal handler.
-        auto currentTheme = settings->property_gtk_theme_name().get_value();
-        loopThread = std::thread(&EventHandler::run, this);
+        loopThread = std::thread(&EventHandler::runGtkApp, this);
     }
 };
 
@@ -111,6 +152,4 @@ Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_deleteEventHandler(J
 JNIEXPORT void JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_init(JNIEnv *env, jclass obj) {
     ensure_gio_init();
-    app = Gtk::Application::create("com.github.weisj.darkmode.platform.linux.gtk.GtkNative");
-    settings = Gtk::Settings::get_default();
 }
