@@ -31,7 +31,7 @@ library {
     }
     targetMachines.addAll(machines.macOS.x86_64, machines.macOS.architecture("arm64"))
     variants.configureEach {
-        resourcePath.set("com/github/weisj/darkmode/${project.name}/${targetMachine.variantName}")
+        resourcePath.set("com/github/weisj/darkmode/${project.name}")
         sharedLibrary {
             val isArm = targetMachine.architectureString == "arm64"
             val minOs = if (isArm) "11" else "10.10"

@@ -1,7 +1,9 @@
 import dev.nokee.platform.jni.JniJarBinary
 import dev.nokee.platform.jni.JavaNativeInterfaceLibrary
+import dev.nokee.runtime.nativebase.TargetMachine
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileTree
 import org.gradle.api.provider.Provider
@@ -50,8 +52,15 @@ class UberJniJarPlugin : Plugin<Project> {
             } else {
                 task.from(targetVariant.map { it.sharedLibrary.linkTask.map { linkTask -> linkTask.linkedFile } }) {
                     into(targetVariant.map { it.resourcePath })
+                    renameLibrary(project, target)
                 }
             }
+        }
+    }
+
+    private fun CopySpec.renameLibrary(project: Project, target: dev.nokee.runtime.nativebase.TargetMachine) {
+        rename {
+            libraryFileNameFor("${project.name}-${target.architectureString}", target.operatingSystemFamily)
         }
     }
 
