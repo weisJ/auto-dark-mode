@@ -20,7 +20,7 @@ dependencies {
 library {
     targetMachines.addAll(machines.linux.x86_64)
     variants.configureEach {
-        resourcePath.set("com/github/weisj/darkmode/${project.name}/${targetMachine.variantName}")
+        resourcePath.set("com/github/weisj/darkmode/${project.name}")
         sharedLibrary {
             compileTasks.configureEach {
                 compilerArgs.add("--std=c++11")
