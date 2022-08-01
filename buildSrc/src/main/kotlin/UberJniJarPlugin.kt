@@ -48,9 +48,13 @@ class UberJniJarPlugin : Plugin<Project> {
                 // nativeRuntimeFiles will be populated in this case due to using pre-build binaries.
                 task.from(targetVariant.map { it.nativeRuntimeFiles }) {
                     into(targetVariant.map { it.resourcePath })
+                    renameLibrary(project, target)
                 }
             } else {
-                task.from(targetVariant.map { it.sharedLibrary.linkTask.map { linkTask -> linkTask.linkedFile } }) {
+                val linkFile = targetVariant.flatMap {
+                    it.sharedLibrary.linkTask.flatMap { linkTask -> linkTask.linkedFile }
+                }
+                task.from(linkFile) {
                     into(targetVariant.map { it.resourcePath })
                     renameLibrary(project, target)
                 }
