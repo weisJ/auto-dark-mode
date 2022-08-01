@@ -21,7 +21,7 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
-        v1.7.0
+        v1.7.1
         <ul>
             <li>Generic GTK desktops support. (XSettings based)</li>
         </ul>
