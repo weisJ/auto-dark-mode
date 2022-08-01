@@ -26,18 +26,27 @@ import com.github.weisj.darkmode.platform.PluginLogger;
 
 public class GtkLibrary extends AbstractPluginLibrary {
 
-    private static final String PROJECT_NAME = "auto-dark-mode-linux-gtk";
-    private static final String PATH = "/com/github/weisj/darkmode/" + PROJECT_NAME + "/linux-x86-64/";
-    private static final String DLL_NAME = "lib" + PROJECT_NAME + ".so";
+    private static final String PATH = "/com/github/weisj/darkmode/auto-dark-mode-linux-gtk";
+    private static final String x86_64_PATH = PATH + "/libauto-dark-mode-linux-gtk-x86-64.so";
     private static final GtkLibrary instance = new GtkLibrary();
 
     protected GtkLibrary() {
-        super(PATH, DLL_NAME, PluginLogger.getLogger(GtkLibrary.class));
+        super("auto-dark-mode-linux-gtk", PluginLogger.getLogger(GtkLibrary.class));
     }
 
     static GtkLibrary get() {
         instance.updateLibrary();
         return instance;
+    }
+
+    @Override
+    protected Class<?> getLoaderClass() {
+        return GtkLibrary.class;
+    }
+
+    @Override
+    public String getLibraryPath() {
+        return x86_64_PATH;
     }
 
     @Override

@@ -20,14 +20,14 @@
  */
 package com.github.weisj.darkmode.platform;
 
-import com.github.weisj.darklaf.platform.AbstractLibrary;
+import com.github.weisj.darklaf.nativeutil.AbstractLibrary;
 
 public abstract class AbstractPluginLibrary extends AbstractLibrary {
 
     protected final PluginLogger pluginLogger;
 
-    protected AbstractPluginLibrary(final String path, final String libraryName, final PluginLogger logger) {
-        super(path, libraryName, null);
+    protected AbstractPluginLibrary(final String name, final PluginLogger logger) {
+        super(name, null);
         this.pluginLogger = logger;
     }
 

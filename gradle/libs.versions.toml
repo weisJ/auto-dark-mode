@@ -3,7 +3,7 @@ autoservice = "1.0-rc7"
 autoserviceKsp = "1.0.0"
 macOSFramework = "latest.release"
 junit = "5.6.2"
-darklaf = "2.7.2"
+darklaf = "3.0.1"
 
 [libraries]
 autoservice-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }

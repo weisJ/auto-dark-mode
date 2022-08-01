@@ -26,10 +26,9 @@ import com.github.weisj.darkmode.platform.PluginLogger;
 
 public class MacOSLibrary extends AbstractPluginLibrary {
 
-    private static final String PATH = "/com/github/weisj/darkmode/auto-dark-mode-macos/";
-    private static final String x86_64_PATH = "macos-x86-64/";
-    private static final String arm64_PATH = "macos-arm64/";
-    private static final String DLL_NAME = "libauto-dark-mode-macos.dylib";
+    private static final String PATH = "/com/github/weisj/darkmode/auto-dark-mode-macos";
+    private static final String x86_64_PATH = PATH + "/libauto-dark-mode-macos-x86-64.dylib";
+    private static final String arm64_PATH = PATH + "/libauto-dark-mode-macos-arm64.dylib";
 
     private static final MacOSLibrary instance = new MacOSLibrary();
 
@@ -39,19 +38,24 @@ public class MacOSLibrary extends AbstractPluginLibrary {
     }
 
     protected MacOSLibrary() {
-        super(PATH, DLL_NAME, PluginLogger.getLogger(MacOSLibrary.class));
-    }
-
-    private String getArm64Path() {
-        return super.getPath() + arm64_PATH;
-    }
-
-    private String getX64Path() {
-        return super.getPath() + x86_64_PATH;
+        super("auto-dark-mode-macos", PluginLogger.getLogger(MacOSLibrary.class));
     }
 
     @Override
-    protected String getPath() {
+    final protected Class<?> getLoaderClass() {
+        return MacOSLibrary.class;
+    }
+
+    protected String getArm64Path() {
+        return arm64_PATH;
+    }
+
+    protected String getX64Path() {
+        return x86_64_PATH;
+    }
+
+    @Override
+    public String getLibraryPath() {
         if (LibraryUtil.isX86Compatible && LibraryUtil.isX64) {
             return getX64Path();
         } else if (LibraryUtil.isM1) {
