@@ -31,7 +31,6 @@ import com.intellij.ide.actions.QuickChangeLookAndFeel
 import com.intellij.ide.ui.LafManager
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.components.ServiceManager.getService
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.util.registry.Registry
@@ -43,7 +42,7 @@ import javax.swing.UIManager.LookAndFeelInfo
  */
 class AutoDarkMode : Disposable, ThemeCallback {
     private val alarm = Alarm(Alarm.ThreadToUse.SWING_THREAD, this)
-    private val monitor = lazy { createMonitor() }
+    private var monitor = lazy { createMonitor() }
 
     private fun createMonitor(): ThemeMonitor = try {
         val serviceProvider = ApplicationManager.getApplication().getService(ThemeMonitorServiceProvider::class.java)
@@ -63,6 +62,9 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun onSettingsChange() {
+        if (monitor.value is NullMonitor) {
+            monitor = lazyOf(createMonitor())
+        }
         monitor.letValue { it.requestUpdate() }
     }
 
