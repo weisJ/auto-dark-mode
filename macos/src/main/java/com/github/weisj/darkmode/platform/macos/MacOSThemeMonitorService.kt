@@ -27,6 +27,12 @@ package com.github.weisj.darkmode.platform.macos
 import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.NativePointer
 import com.github.weisj.darkmode.platform.ThemeMonitorService
+import com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider
+
+class MacOSThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
+    override fun create(): ThemeMonitorService = MacOSThemeMonitorService()
+}
+
 
 class MacOSThemeMonitorService : ThemeMonitorService {
     override val isDarkThemeEnabled: Boolean
