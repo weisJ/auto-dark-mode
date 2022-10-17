@@ -53,14 +53,14 @@
     </applicationListeners>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorService"
-                            serviceImplementation="com.github.weisj.darkmode.platform.windows.WindowsThemeMonitorService"
+        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider"
+                            serviceImplementation="com.github.weisj.darkmode.platform.windows.WindowsThemeMonitorServiceProvider"
                             os="windows"/>
-        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorService"
-                            serviceImplementation="com.github.weisj.darkmode.platform.macos.MacOSThemeMonitorService"
+        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider"
+                            serviceImplementation="com.github.weisj.darkmode.platform.macos.MacOSThemeMonitorServiceProvider"
                             os="mac"/>
-        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorService"
-                            serviceImplementation="com.github.weisj.darkmode.platform.linux.LinuxThemeMonitorService"
+        <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider"
+                            serviceImplementation="com.github.weisj.darkmode.platform.linux.LinuxThemeMonitorServiceProvider"
                             os="linux"/>
         <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkMode"/>
         <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"/>

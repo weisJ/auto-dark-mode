@@ -24,6 +24,11 @@
  */
 package com.github.weisj.darkmode.platform
 
+
+interface ThemeMonitorServiceProvider {
+    fun create() : ThemeMonitorService
+}
+
 interface ThemeMonitorService {
     val isDarkThemeEnabled: Boolean
     val isHighContrastEnabled: Boolean
