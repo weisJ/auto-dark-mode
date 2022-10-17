@@ -46,7 +46,8 @@ class AutoDarkMode : Disposable, ThemeCallback {
     private val monitor = lazy { createMonitor() }
 
     private fun createMonitor(): ThemeMonitor = try {
-        val service = ApplicationManager.getApplication().getService(ThemeMonitorService::class.java)
+        val serviceProvider = ApplicationManager.getApplication().getService(ThemeMonitorServiceProvider::class.java)
+        val service = serviceProvider.create()
         ThemeMonitorImpl(service, this)
     } catch (e: IllegalStateException) {
         LOGGER.error(e)

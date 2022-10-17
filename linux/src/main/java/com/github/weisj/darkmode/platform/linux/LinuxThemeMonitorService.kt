@@ -28,14 +28,18 @@ import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.Notifications
 import com.github.weisj.darkmode.platform.NullThemeMonitorService
 import com.github.weisj.darkmode.platform.ThemeMonitorService
+import com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider
 import com.github.weisj.darkmode.platform.linux.gtk.GtkThemeMonitorService
 
-class LinuxThemeMonitorService : ThemeMonitorService by createCompatibleMonitorService()
+class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
+    override fun create(): ThemeMonitorService = createCompatibleMonitorService()
 
-private fun createCompatibleMonitorService() : ThemeMonitorService {
-    if (LibraryUtil.isGtk) return GtkThemeMonitorService()
-    Notifications.dispatchNotification(
-        message = "This plugin currently only supports Gtk based desktop environment on Linux."
-    )
-    return NullThemeMonitorService()
+    private fun createCompatibleMonitorService(): ThemeMonitorService {
+        if (LibraryUtil.isGtk) return GtkThemeMonitorService()
+        Notifications.dispatchNotification(
+            message = "This plugin currently only supports Gtk based desktop environment on Linux."
+        )
+        return NullThemeMonitorService()
+    }
 }
+

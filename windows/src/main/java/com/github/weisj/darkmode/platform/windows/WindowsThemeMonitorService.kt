@@ -26,6 +26,11 @@ package com.github.weisj.darkmode.platform.windows
 
 import com.github.weisj.darkmode.platform.NativePointer
 import com.github.weisj.darkmode.platform.ThemeMonitorService
+import com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider
+
+class WindowsThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
+    override fun create(): ThemeMonitorService = WindowsThemeMonitorService()
+}
 
 class WindowsThemeMonitorService : ThemeMonitorService {
     override val isDarkThemeEnabled: Boolean
