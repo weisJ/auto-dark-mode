@@ -1,6 +1,7 @@
 plugins {
     `java-library`
     kotlin("jvm")
+    id("com.google.devtools.ksp")
 }
 
 dependencies {
@@ -16,4 +17,7 @@ dependencies {
      */
     implementation(project(":auto-dark-mode-linux-gtk"))
     compileOnly(kotlin("stdlib-jdk8"))
+
+    ksp(libs.autoservice.processor)
+    implementation(libs.autoservice.annotations)
 }
