@@ -34,7 +34,7 @@ class AppleM1ToolChainRule : RuleSource() {
             "xcrun --sdk macosx --show-sdk-path".runCommand()
         }
 
-        fun get(): String? = sdkPath.value
+        fun get(): String = sdkPath.value ?: ""
     }
 
     private class CompilerMetadataProvider(
