@@ -3,7 +3,19 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import dev.nokee.platform.jni.JniLibrary
+import org.gradle.nativeplatform.TargetMachine
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 import java.io.File
+
+fun JniLibrary.canBuildSharedLibrary(): Boolean {
+    // FIXME: This shouldn't be encessary
+    if (!DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX
+        && targetMachine.variantName == "macos-arm64"
+    ) {
+        return false
+    }
+    return sharedLibrary.isBuildable
+}
 
 class UsePrebuiltBinariesWhenUnbuildablePlugin : Plugin<Project> {
 
@@ -17,7 +29,7 @@ class UsePrebuiltBinariesWhenUnbuildablePlugin : Plugin<Project> {
         prebuiltExtension = target.extensions.create("prebuiltBinaries", PrebuiltBinariesExtension::class.java)
         val library = target.extensions.getByType(JavaNativeInterfaceLibrary::class.java)
         library.variants.configureEach {
-            if (prebuiltExtension.alwaysUsePrebuiltArtifact || !sharedLibrary.isBuildable) {
+            if (prebuiltExtension.alwaysUsePrebuiltArtifact || !canBuildSharedLibrary()) {
                 configure(target, this)
             }
         }

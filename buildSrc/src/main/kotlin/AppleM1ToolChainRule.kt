@@ -77,8 +77,7 @@ class AppleM1ToolChainRule : RuleSource() {
         }
     }
 
-    private
-    class ConfigureCompilerArgumentsAction(
+    private class ConfigureCompilerArgumentsAction(
         private val compilerMetadata: CompilerMetadataProvider,
         private val sdkPath: SdkPathProvider
     ) : Action<MutableList<String>> {
