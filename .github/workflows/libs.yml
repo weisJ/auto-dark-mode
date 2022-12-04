@@ -22,7 +22,7 @@ on:
     - cron: '0 0 1 * *'
 jobs:
   windows:
-    name: Windows (Java 11)
+    name: Windows (Java 17)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -46,7 +46,7 @@ jobs:
           path: windows/build/libs/main/x86-64/auto-dark-mode-windows.dll
 
   macOS:
-    name: macOS (Java 11)
+    name: macOS (Java 17)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -80,7 +80,7 @@ jobs:
           path: macos/build/tmp
 
   linux-gtk:
-    name: Linux (Gtk) (Java 11)
+    name: Linux (Gtk) (Java 17)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
