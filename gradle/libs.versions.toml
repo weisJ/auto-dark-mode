@@ -2,7 +2,8 @@
 autoservice = "1.0-rc7"
 autoserviceKsp = "1.0.0"
 macOSFramework = "latest.release"
-junit = "5.6.2"
+junit = "5.9.1"
+junitlauncher = "1.9.0"
 darklaf = "3.0.1"
 
 [libraries]
@@ -16,3 +17,4 @@ macos-appKit = { module = "dev.nokee.framework:AppKit", version.ref = "macOSFram
 # Test libraries
 test-junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 test-junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+test-junit-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitlauncher" }

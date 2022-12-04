@@ -81,6 +81,7 @@ dependencies {
     testImplementation(projects.autoDarkModeWindows)
     testImplementation(projects.autoDarkModeMacos)
     testImplementation(libs.test.junit.api)
+    testRuntimeOnly(libs.test.junit.launcher)
     testRuntimeOnly(libs.test.junit.engine)
 }
 
