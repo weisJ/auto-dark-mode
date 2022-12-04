@@ -123,6 +123,8 @@ class AppleM1ToolChainRule : RuleSource() {
         private lateinit var metadataProvider: GccMetadataProvider
 
         override fun execute(platform: GccPlatformToolChain) {
+            platform.platform.operatingSystem("macos")
+            platform.platform.architecture("arm64")
             metadataProvider = GccMetadataProvider.forClang(execActionFactory)
             platform.getcCompiler().withArguments(forCCompiler(platform.getcCompiler()))
             listOf(
