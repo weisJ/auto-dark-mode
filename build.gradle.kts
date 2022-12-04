@@ -113,7 +113,7 @@ allprojects {
         }
     }
 
-    val javaVersion = JavaVersion.VERSION_11
+    val javaVersion = JavaVersion.VERSION_17
 
     tasks.withType<KotlinCompile>().configureEach {
         kotlinOptions {
