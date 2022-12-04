@@ -29,6 +29,7 @@ import com.github.weisj.darkmode.platform.settings.Condition
 import com.github.weisj.darkmode.platform.settings.NamedSettingsGroup
 import com.github.weisj.darkmode.platform.settings.SettingsGroup
 import com.github.weisj.darkmode.platform.settings.ValueProperty
+import com.github.weisj.darkmode.platform.settings.castSafelyTo
 import com.github.weisj.darkmode.platform.settings.effective
 import com.github.weisj.darkmode.platform.settings.isTotallyEmpty
 import com.github.weisj.darkmode.platform.settings.registerListener
@@ -48,7 +49,6 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ComponentPredicate
-import com.intellij.util.castSafelyTo
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import javax.swing.event.PopupMenuEvent

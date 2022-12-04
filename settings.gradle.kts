@@ -15,6 +15,7 @@ pluginManagement {
         idv("org.jetbrains.intellij", "org.jetbrains.intellij")
         idv("org.ajoberstar.grgit", "org.ajoberstar.grgit")
         idv("org.jetbrains.kotlin.jvm", "kotlin")
+        idv("org.gradle.kotlin.kotlin-gradle-plugin", "kotlin")
         idv("com.google.devtools.ksp")
     }
 }
