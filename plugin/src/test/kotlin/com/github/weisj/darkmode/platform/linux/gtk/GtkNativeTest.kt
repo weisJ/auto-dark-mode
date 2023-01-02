@@ -26,6 +26,7 @@ package com.github.weisj.darkmode.platform.linux.gtk
 
 import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.NativePointer
+import com.github.weisj.darkmode.platform.linux.GSettingsThemeChanger
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -36,50 +37,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledOnOs
 import org.junit.jupiter.api.condition.OS
 
-const val GSETTINGS_PATH = "org.gnome.desktop.interface"
-const val GSETTINGS_KEY = "gtk-theme"
-const val XFCONF_QUERY_CHANNEL = "xsettings"
-const val XFCONF_QUERY_PROPERTY = "/Net/ThemeName"
-
-interface ThemeChanger {
-    val currentTheme: String
-
-    fun String.runCommand(): String {
-        val process = ProcessBuilder(*split(" ").toTypedArray()).start()
-        val output = process.inputStream.reader(Charsets.UTF_8).use {
-            it.readText()
-        }
-        process.waitFor(10, TimeUnit.SECONDS)
-        return output
-    }
-
-    fun String.stripQuotes(): String {
-        return if (startsWith("'")) {
-            trim().drop(1).dropLast(1)
-        } else trim()
-    }
-}
-
-class GSettingsThemeChanger : ThemeChanger {
-    override var currentTheme: String
-        get() = "gsettings get $GSETTINGS_PATH $GSETTINGS_KEY".runCommand().stripQuotes()
-        set(value) {
-            "gsettings set $GSETTINGS_PATH $GSETTINGS_KEY $value".runCommand()
-        }
-}
-
-class XfConfQueryThemeChanger : ThemeChanger {
-    override var currentTheme: String
-        get() = "xfconf-query -c $XFCONF_QUERY_CHANNEL -p $XFCONF_QUERY_PROPERTY".runCommand().stripQuotes()
-        set(value) {
-            "xfconf-query -c $XFCONF_QUERY_CHANNEL -p $XFCONF_QUERY_PROPERTY -s $value".runCommand()
-        }
-}
-
 class GtkNativeTest {
     // local dev: choose one and comment out the other
+    // also change the light and dark themes accordingly
     private val themeChanger = GSettingsThemeChanger()
     // private val themeChanger = XfConfQueryThemeChanger()
+    // private val themeChanger = KdeThemeChanger()
 
     @Test
     @EnabledOnOs(OS.LINUX)
