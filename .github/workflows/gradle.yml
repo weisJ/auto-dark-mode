@@ -50,14 +50,10 @@ jobs:
       - name: Install libsigc++ and glibmm
         run: sudo apt-get install -y libsigc++-2.0-dev libglibmm-2.4-dev libgtk-3-dev libgtkmm-3.0-dev --fix-missing
       - name: Build & Test
-        uses: eskatos/gradle-command-action@v1
-        with:
-          arguments: build test -PskipSpotless -PgithubAccessToken=${{ secrets.GITHUB_TOKEN }} --no-daemon
-          distributions-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: xvfb-run -a -server-num=1 --server-args="-screen 0 2000x3000x16"
+          ./gradlew build test -PskipSpotless -PgithubAccessToken=${{ secrets.GITHUB_TOKEN }} --no-daemon
 
   macos:
     name: macOS (Java 17)
