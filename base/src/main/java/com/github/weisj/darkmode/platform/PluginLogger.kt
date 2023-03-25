@@ -41,7 +41,7 @@ class PluginLogger(private val logger: Logger) {
     }
 
     fun error(e: Throwable?) {
-        logger.error(e)
+        error(e?.message ?: "", e)
     }
 
     fun error(msg: String?, e: Throwable?) {
