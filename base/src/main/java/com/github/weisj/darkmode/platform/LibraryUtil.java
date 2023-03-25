@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020-2022 Jannis Weis
+ * Copyright (c) 2020-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -36,7 +36,8 @@ public final class LibraryUtil {
     public static final boolean isMac = SystemInfo.isMac;
     public static final boolean isX86Compatible = isX86 || isX64;
     public static final boolean isM1 = SystemInfo.isMac && CpuArch.isArm64();
-    public static final boolean isMacOSMojave = SystemInfo.isMacOSMojave;
+    // Note: Idea >=231 uses Java 17, which requires Mojave to be installed
+    public static final boolean isMacOSMojave = isMac;
     public static final boolean isMacOSCatalina = SystemInfo.isMacOSCatalina;
     public static final boolean isLinux = SystemInfo.isLinux;
     public static final boolean isGtk = SystemInfo.isGNOME || SystemInfo.isXfce || SystemInfo.isI3;
