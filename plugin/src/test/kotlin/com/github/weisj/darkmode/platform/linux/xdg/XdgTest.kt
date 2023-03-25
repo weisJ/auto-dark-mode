@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.condition.EnabledOnOs
@@ -62,6 +63,7 @@ class XdgTest {
     }
 
     @Test
+    @Disabled("Github actions isn't currently set-up with the suitable dbus connection")
     fun testAvailable() {
         assertTrue(instance.compatibility.isSupported)
     }
