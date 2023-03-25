@@ -21,7 +21,11 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
-         v1.7.1
+        v1.7.2
+        <ul>
+            <li>Allowed forced usage of GTK implementation on Linux.</li>
+        </ul>
+        v1.7.1
         <ul>
             <li>Fix UI freeze when closing IDEA on Linux.</li>
         </ul>
