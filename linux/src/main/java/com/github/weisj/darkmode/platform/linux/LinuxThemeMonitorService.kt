@@ -35,7 +35,10 @@ class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
     override fun create(): ThemeMonitorService = createCompatibleMonitorService()
 
     private fun createCompatibleMonitorService(): ThemeMonitorService {
-        if (LibraryUtil.isGtk || AdvancedLinuxSettings.overrideGtkDetection) return GtkThemeMonitorService()
+        if (LibraryUtil.isGtk || AdvancedLinuxSettings.overrideGtkDetection) {
+            return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection)
+        }
+
         Notifications.dispatchNotification(
             message = "This plugin currently only supports Gtk based desktop environment on Linux."
         )
