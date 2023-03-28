@@ -31,7 +31,17 @@ import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 
 @AutoService(SettingsContainerProvider::class)
-class GtkSettingsProvider : SingletonSettingsContainerProvider({ GtkSettings }, enabled = LibraryUtil.isGtk)
+class GtkSettingsProvider : SingletonSettingsContainerProvider({ GtkSettings }, enabled = LibraryUtil.isLinux) {
+    override fun isEnabled(state: SettingsState): Boolean {
+        if (!super.isEnabled(state)) return false
+        if (LibraryUtil.isGtk) return true
+        return Entry(
+            groupIdentifier = "advanced_linux_settings:Advanced",
+            name = "overrideGtkDetection",
+            value = "true"
+        ) in state.entries
+    }
+}
 
 data class GtkTheme(val name: String) : Comparable<GtkTheme> {
     override fun compareTo(other: GtkTheme): Int = name.compareTo(other.name)

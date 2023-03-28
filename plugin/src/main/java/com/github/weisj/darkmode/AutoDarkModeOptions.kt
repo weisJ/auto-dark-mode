@@ -37,7 +37,7 @@ import com.intellij.openapi.components.Storage
  * Settings can be declared by registering a {@link SettingsContainerProvider} service.
  */
 @State(name = "AutoDarkMode", storages = [Storage("autoDarkMode.xml", roamingType = RoamingType.PER_OS)])
-class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> {
+class AutoDarkModeOptions : PersistentStateComponent<SettingsState> {
 
     companion object {
         private const val ROOT_GROUP_NAME = "__root__group__"
@@ -63,19 +63,21 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
     }
 
     private var storageSettingsVersion: Double = SETTINGS_VERSION
-    val containers: List<SettingsContainer> by lazy {
-        ServiceUtil.load(SettingsContainerProvider::class.java)
+    var containers: List<SettingsContainer> = listOf()
+    private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> by lazy {
+        initState(containers, mutableMapOf())
+    }
+    private var stateAfterLoad: SettingsState? = null
+    private var loadState = LoadState.INVALID
+
+    private fun initContainers(state: SettingsState) {
+        containers = ServiceUtil.load(SettingsContainerProvider::class.java)
             .asSequence()
-            .filter { it.enabled }
+            .filter { it.isEnabled(state) }
             .map { it.create() }
             .onEach { it.init() }
             .toList()
     }
-    private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> by lazy {
-        initState(containers, mutableMapOf())
-    }
-    private var stateAfterLoad: State? = null
-    private var loadState = LoadState.INVALID
 
     private fun initState(
         cont: List<SettingsContainer>,
@@ -105,25 +107,27 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
                 stateAfterLoad = null
                 entries
             }
+
             else -> emptyList()
         }
         val versionEntry = createVersionEntry()
         return (props + versionEntry)
     }
 
-    override fun getState(): State {
-        val state = State(computeStateEntries())
+    override fun getState(): SettingsState {
+        val state = SettingsState(computeStateEntries())
         if (loadState == LoadState.STATE_AFTER_LOAD) {
             loadState = LoadState.LOADED
         }
         return state
     }
 
-    override fun loadState(toLoad: State) {
+    override fun loadState(toLoad: SettingsState) {
         if (loadState == LoadState.INVALID) {
             stateAfterLoad = toLoad
             loadState = LoadState.STATE_AFTER_LOAD
         }
+        if (containers.isEmpty()) initContainers(toLoad)
         storageSettingsVersion = toLoad.entries.find {
             it.groupIdentifier == ROOT_GROUP_NAME && it.name == SETTING_VERSION_NAME
         }?.value?.toDouble() ?: SETTINGS_VERSION
@@ -151,10 +155,6 @@ class AutoDarkModeOptions : PersistentStateComponent<AutoDarkModeOptions.State> 
 
     private val <T> ValueProperty<T>.propertyIdentifier
         get() = PropertyIdentifier(group.getIdentifierPath(), name)
-
-    data class State(var entries: List<Entry> = emptyList())
-
-    data class Entry(var groupIdentifier: String = "", var name: String = "", var value: String = "")
 
     private class PersistentValuePropertyStub(
         override val name: String,
