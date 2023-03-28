@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020-2022 Jannis Weis
+ * Copyright (c) 2020-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -29,9 +29,14 @@ public class GtkLibrary extends AbstractPluginLibrary {
     private static final String PATH = "/com/github/weisj/darkmode/auto-dark-mode-linux-gtk";
     private static final String x86_64_PATH = PATH + "/libauto-dark-mode-linux-gtk-x86-64.so";
     private static final GtkLibrary instance = new GtkLibrary();
+    private boolean laxLoadingModeEnabled = false;
 
     protected GtkLibrary() {
         super("auto-dark-mode-linux-gtk", PluginLogger.getLogger(GtkLibrary.class));
+    }
+
+    static void setLaxLoadingMode(boolean useLaxLoadingMode) {
+        instance.laxLoadingModeEnabled = useLaxLoadingMode;
     }
 
     static GtkLibrary get() {
@@ -51,6 +56,6 @@ public class GtkLibrary extends AbstractPluginLibrary {
 
     @Override
     protected boolean canLoad() {
-        return LibraryUtil.isX64 && LibraryUtil.isGtk;
+        return LibraryUtil.isX64 && (LibraryUtil.isGtk || laxLoadingModeEnabled);
     }
 }

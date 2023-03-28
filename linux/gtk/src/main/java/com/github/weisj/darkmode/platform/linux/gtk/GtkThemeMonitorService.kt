@@ -31,12 +31,13 @@ import com.github.weisj.darkmode.platform.PluginLogger
 import com.github.weisj.darkmode.platform.ThemeMonitorService
 import com.github.weisj.darkmode.platform.linux.gtk.GtkVariants.guessFrom
 
-class GtkThemeMonitorService(useLaxLoadingMode: Boolean) : ThemeMonitorService {
+class GtkThemeMonitorService(useLaxLoadingMode: Boolean = false) : ThemeMonitorService {
     companion object {
         val LOGGER = PluginLogger<GtkThemeMonitorService>()
     }
 
     init {
+        GtkLibrary.setLaxLoadingMode(useLaxLoadingMode)
         GtkLibrary.get()
     }
 
