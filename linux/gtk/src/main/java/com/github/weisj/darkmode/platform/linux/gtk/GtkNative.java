@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020-2022 Jannis Weis
+ * Copyright (c) 2020-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -22,15 +22,17 @@ package com.github.weisj.darkmode.platform.linux.gtk;
 
 public class GtkNative {
 
+    public interface EventHandlerCallback { void settingChanged(int signalType); }
+
     private GtkNative() {
         throw new IllegalStateException("Native methods holder");
     }
 
     static native String getCurrentTheme();
 
-    static native long createEventHandler(final Runnable callback);
+    static native long createEventHandler(final EventHandlerCallback callback);
 
     static native void deleteEventHandler(final long handle);
 
-    static native void init();
+    static native void init(boolean isGnomeHint);
 }
