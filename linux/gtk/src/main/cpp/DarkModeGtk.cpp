@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020-2022 Jannis Weis
+ * Copyright (c) 2020-2023 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -30,21 +30,37 @@
 
 #include <gtkmm.h>
 
-Glib::RefPtr<Gtk::Settings> settings;
+static constexpr auto SETTINGS_SCHEMA_NAME = "org.gnome.desktop.interface";
+static constexpr auto THEME_NAME_KEY = "gtk-theme";
 
-// to sync the intialization of `settings`
+enum SignalType {
+    GTK = 0, GIO = 1
+};
+
+Glib::RefPtr<Gtk::Settings> gtk_settings;
+Glib::RefPtr<Gio::Settings> gio_settings;
+
+volatile SignalType g_last_signal_type = SignalType::GTK;
+
+// to sync the intialization of `gtk_settings` and `gio_settings`
 std::condition_variable cv;
 std::mutex cv_mutex;
 
 JNIEXPORT jstring JNICALL
 Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_getCurrentTheme(JNIEnv *env, jclass) {
     std::unique_lock<std::mutex> lock(cv_mutex);
-    if (!cv.wait_for(lock, std::chrono::seconds(3), [] {return bool(settings);})) {
+    if (!cv.wait_for(lock, std::chrono::seconds(3), [] {return bool(gtk_settings);})) {
         return env->NewStringUTF("");
     }
 
-    auto themeStr = settings->property_gtk_theme_name().get_value();
-    return env->NewStringUTF(themeStr.c_str());
+    if (g_last_signal_type == SignalType::GTK) {
+        auto themeStr = gtk_settings->property_gtk_theme_name().get_value();
+        return env->NewStringUTF(themeStr.c_str());
+    } else {
+        auto themeStr = gio_settings->get_string(THEME_NAME_KEY);
+        return env->NewStringUTF(themeStr.c_str());
+    }
+
 }
 
 struct EventHandler {
@@ -54,10 +70,23 @@ struct EventHandler {
 
     Glib::RefPtr<Gtk::Application> app;
     std::shared_ptr<Glib::Dispatcher> quitDispatcher;
-    sigc::connection settingsChangedSignalConnection;
+    sigc::connection gtk_settingsChangedSignalConnection;
+    sigc::connection gio_settingsChangedSignalConnection;
     std::thread loopThread;
 
-    void runCallBack() {
+    SignalType last_signal_type;
+
+    void gtk_runCallBack() {
+        runCallBack(SignalType::GTK);
+    }
+
+    void gio_runCallBack(Glib::ustring const &name) {
+        runCallBack(SignalType::GIO);
+    }
+
+    void runCallBack(SignalType type) {
+        g_last_signal_type = type;
+
         bool detachNecessary = false;
         int getEnvStat = jvm->GetEnv((void**) &env, JNI_VERSION_1_6);
         if (getEnvStat == JNI_EDETACHED) {
@@ -68,9 +97,9 @@ struct EventHandler {
         }
 
         jclass runnableClass = env->GetObjectClass(callback);
-        jmethodID runMethodId = env->GetMethodID(runnableClass, "run", "()V");
+        jmethodID runMethodId = env->GetMethodID(runnableClass, "settingChanged", "(I)V");
         if (runMethodId) {
-            env->CallVoidMethod(callback, runMethodId);
+            env->CallVoidMethod(callback, runMethodId, (jint) type);
         }
         if (env->ExceptionCheck()) {
             env->ExceptionDescribe();
@@ -79,7 +108,8 @@ struct EventHandler {
     }
 
     void stop() {
-        settingsChangedSignalConnection.disconnect();
+        gtk_settingsChangedSignalConnection.disconnect();
+        gio_settingsChangedSignalConnection.disconnect();
         quitDispatcher->emit();
         loopThread.join();
     }
@@ -106,9 +136,14 @@ struct EventHandler {
             std::lock_guard < std::mutex > lock(cv_mutex);
 
             app = Gtk::Application::create();
-            settings = Gtk::Settings::get_default();
-            settingsChangedSignalConnection = settings->property_gtk_theme_name().signal_changed().connect(
-                    sigc::mem_fun(this, &EventHandler::runCallBack));
+
+            gtk_settings = Gtk::Settings::get_default();
+            gio_settings = Gio::Settings::create(SETTINGS_SCHEMA_NAME);
+
+            gtk_settingsChangedSignalConnection = gtk_settings->property_gtk_theme_name().signal_changed().connect(
+                    sigc::mem_fun(this, &EventHandler::gtk_runCallBack));
+            gio_settingsChangedSignalConnection = gio_settings->signal_changed(THEME_NAME_KEY).connect(
+                    sigc::mem_fun(this, &EventHandler::gio_runCallBack));
         }
         cv.notify_all();
 
@@ -150,6 +185,7 @@ Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_deleteEventHandler(J
 }
 
 JNIEXPORT void JNICALL
-Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_init(JNIEnv *env, jclass obj) {
+Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_init(JNIEnv *env, jclass obj, jboolean isGnomeHint) {
+    g_last_signal_type = isGnomeHint ? SignalType::GIO : SignalType::GTK;
     ensure_gio_init();
 }

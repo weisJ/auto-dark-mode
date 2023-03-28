@@ -24,11 +24,19 @@
  */
 package com.github.weisj.darkmode.platform.linux.gtk
 
+import com.github.weisj.darkmode.platform.Compatibility
+import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.NativePointer
+import com.github.weisj.darkmode.platform.PluginLogger
 import com.github.weisj.darkmode.platform.ThemeMonitorService
 import com.github.weisj.darkmode.platform.linux.gtk.GtkVariants.guessFrom
+import java.util.*
 
 class GtkThemeMonitorService : ThemeMonitorService {
+
+    companion object {
+        val LOGGER = PluginLogger<GtkThemeMonitorService>()
+    }
 
     init {
         GtkLibrary.get()
@@ -37,6 +45,7 @@ class GtkThemeMonitorService : ThemeMonitorService {
     override val isDarkThemeEnabled: Boolean
         get() {
             val currentTheme = currentGtkTheme
+            LOGGER.info("Checking whether dark mode is enabled. The current theme is '$currentTheme'")
             return if (GtkSettings.guessLightAndDarkThemes) {
                 currentTheme == guessFrom(currentTheme)[GtkVariants.Variant.Night]
             } else {
@@ -47,15 +56,22 @@ class GtkThemeMonitorService : ThemeMonitorService {
         get() {
             if (GtkSettings.guessLightAndDarkThemes) return false
             val currentTheme = currentGtkTheme
+            LOGGER.info("Checking whether high contrast mode is enabled. The current theme is '$currentTheme'")
             return GtkSettings.highContrastGtkTheme.name == currentTheme
         }
-    override val isSupported: Boolean
-        get() = GtkLibrary.get().isLoaded
+    override val compatibility: Compatibility = if (GtkLibrary.get().isLoaded) {
+        Compatibility(true, "")
+    } else {
+        Compatibility(false, "Desktop environment isn't one of GNOME, Xfce, I3")
+    }
     val currentGtkTheme: String
         get() = GtkNative.getCurrentTheme()
 
     override fun createEventHandler(callback: () -> Unit): NativePointer? {
-        return NativePointer(GtkNative.createEventHandler(callback))
+        return NativePointer(GtkNative.createEventHandler { signalType ->
+            LOGGER.info("Received notification of type $signalType")
+            callback()
+        })
     }
 
     override fun deleteEventHandler(eventHandle: NativePointer) {
@@ -63,6 +79,6 @@ class GtkThemeMonitorService : ThemeMonitorService {
     }
 
     override fun install() {
-        GtkNative.init()
+        GtkNative.init(LibraryUtil.isGNOME)
     }
 }
