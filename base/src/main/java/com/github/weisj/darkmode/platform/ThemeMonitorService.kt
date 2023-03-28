@@ -26,13 +26,15 @@ package com.github.weisj.darkmode.platform
 
 
 interface ThemeMonitorServiceProvider {
-    fun create() : ThemeMonitorService
+    fun create(): ThemeMonitorService
 }
+
+class Compatibility(val isSupported: Boolean, val reason: String)
 
 interface ThemeMonitorService {
     val isDarkThemeEnabled: Boolean
     val isHighContrastEnabled: Boolean
-    val isSupported: Boolean
+    val compatibility: Compatibility
     fun createEventHandler(callback: () -> Unit): NativePointer?
     fun deleteEventHandler(eventHandle: NativePointer)
 

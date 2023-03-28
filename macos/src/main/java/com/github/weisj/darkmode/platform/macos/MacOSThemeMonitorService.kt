@@ -24,6 +24,7 @@
  */
 package com.github.weisj.darkmode.platform.macos
 
+import com.github.weisj.darkmode.platform.Compatibility
 import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.NativePointer
 import com.github.weisj.darkmode.platform.ThemeMonitorService
@@ -39,8 +40,11 @@ class MacOSThemeMonitorService : ThemeMonitorService {
         get() = MacOSNative.isDarkThemeEnabled()
     override val isHighContrastEnabled: Boolean
         get() = MacOSNative.isHighContrastEnabled()
-    override val isSupported: Boolean
-        get() = MacOSLibrary.get().isLoaded
+    override val compatibility: Compatibility = if (MacOSLibrary.get().isLoaded) {
+        Compatibility(true, "")
+    } else {
+        Compatibility(false, "MacOS Library couldn't be loaded")
+    }
 
     override fun createEventHandler(callback: () -> Unit): NativePointer? {
         return NativePointer(MacOSNative.createPreferenceChangeListener(callback))

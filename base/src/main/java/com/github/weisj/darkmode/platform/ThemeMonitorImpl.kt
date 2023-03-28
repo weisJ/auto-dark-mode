@@ -43,7 +43,11 @@ class ThemeMonitorImpl(
         }
 
     init {
-        check(monitorService.isSupported) { "Monitoring is not supported." }
+        monitorService.compatibility.let {
+            check(it.isSupported) {
+                "Monitoring is not supported. (reason = ${it.reason})"
+            }
+        }
         monitorService.install()
     }
 
