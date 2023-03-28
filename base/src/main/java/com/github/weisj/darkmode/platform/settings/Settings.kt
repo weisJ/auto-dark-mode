@@ -27,19 +27,24 @@ package com.github.weisj.darkmode.platform.settings
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty0
 
+data class SettingsState(var entries: List<Entry> = emptyList())
+
+data class Entry(var groupIdentifier: String = "", var name: String = "", var value: String = "")
+
 @DslMarker
 annotation class PropertyMarker
 
 interface SettingsContainerProvider {
-    val enabled: Boolean
+    fun isEnabled(state: SettingsState): Boolean
     fun create(): SettingsContainer
 }
 
 open class SingletonSettingsContainerProvider(
     provider: () -> SettingsContainer,
-    override val enabled: Boolean = true
+    private val enabled: Boolean = true
 ) : SettingsContainerProvider {
     private val container by lazy(provider)
+    override fun isEnabled(state: SettingsState) = enabled
     override fun create(): SettingsContainer = container
 }
 
