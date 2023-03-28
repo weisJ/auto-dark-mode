@@ -30,10 +30,8 @@ import com.github.weisj.darkmode.platform.NativePointer
 import com.github.weisj.darkmode.platform.PluginLogger
 import com.github.weisj.darkmode.platform.ThemeMonitorService
 import com.github.weisj.darkmode.platform.linux.gtk.GtkVariants.guessFrom
-import java.util.*
 
-class GtkThemeMonitorService : ThemeMonitorService {
-
+class GtkThemeMonitorService(useLaxLoadingMode: Boolean) : ThemeMonitorService {
     companion object {
         val LOGGER = PluginLogger<GtkThemeMonitorService>()
     }

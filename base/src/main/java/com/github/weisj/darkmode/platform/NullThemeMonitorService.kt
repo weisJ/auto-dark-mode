@@ -37,7 +37,7 @@ package com.github.weisj.darkmode.platform
 class NullThemeMonitorService : ThemeMonitorService {
     override val isDarkThemeEnabled: Boolean = false
     override val isHighContrastEnabled: Boolean = false
-    override val isSupported: Boolean = false
+    override val compatibility: Compatibility = Compatibility(false, "Null implementation")
 
     override fun createEventHandler(callback: () -> Unit): NativePointer? = null
     override fun deleteEventHandler(eventHandle: NativePointer) {}

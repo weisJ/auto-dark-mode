@@ -24,6 +24,7 @@
  */
 package com.github.weisj.darkmode.platform.windows
 
+import com.github.weisj.darkmode.platform.Compatibility
 import com.github.weisj.darkmode.platform.NativePointer
 import com.github.weisj.darkmode.platform.ThemeMonitorService
 import com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider
@@ -37,8 +38,11 @@ class WindowsThemeMonitorService : ThemeMonitorService {
         get() = WindowsNative.isDarkThemeEnabled()
     override val isHighContrastEnabled: Boolean
         get() = WindowsNative.isHighContrastEnabled()
-    override val isSupported: Boolean
-        get() = WindowsLibrary.get().isLoaded
+    override val compatibility: Compatibility = if (WindowsLibrary.get().isLoaded) {
+        Compatibility(true, "")
+    } else {
+        Compatibility(false, "MacOS Library couldn't be loaded")
+    }
 
     override fun createEventHandler(callback: () -> Unit): NativePointer? {
         return NativePointer(WindowsNative.createEventHandler(callback))
