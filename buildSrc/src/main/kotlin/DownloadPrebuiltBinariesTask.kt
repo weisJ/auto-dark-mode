@@ -107,7 +107,7 @@ open class DownloadPrebuiltBinariesTask @Inject constructor(
             ?: return fetchFailed("Could not find matching artifact for $variantName")
         val artifactDownloadUrl = URL(downloadUrl).getJson()["archive_download_url"]?.toString()
             ?: return fetchFailed("Could not get download url")
-        val artifact = downloadBinary(artifactDownloadUrl)
+        val artifact = downloadBinary(branch ?: "", artifactDownloadUrl)
         if (artifact != null) {
             LOCK.write {
                 val mutableCache = cache.toMutableMap()
@@ -124,13 +124,13 @@ open class DownloadPrebuiltBinariesTask @Inject constructor(
         return artifact
     }
 
-    private fun downloadBinary(url: String): File? {
+    private fun downloadBinary(branch: String, url: String): File? {
         infoLog("Downloading binary for variant '$variantName' from $url")
         return URL(url).fetch {
-            val artifact = fileOf(tempFilePath("$variantName.zip"))
+            val artifact = fileOf(tempFilePath("${variantName}_$branch.zip"))
             Files.copy(it.inputStream, artifact.toPath(), StandardCopyOption.REPLACE_EXISTING)
             infoLog("Finished download for variant '$variantName'")
-            ZipFile(artifact).unzip(directoryOf(prebuiltDirectoryPath)).firstOrNull()
+            ZipFile(artifact).unzip(directoryOf("$prebuiltDirectoryPath/$branch")).firstOrNull()
         }
     }
 
