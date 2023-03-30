@@ -36,8 +36,11 @@ class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
     override fun create(): ThemeMonitorService = createCompatibleMonitorService()
 
     private fun createCompatibleMonitorService(): ThemeMonitorService {
-        val xdgThemeMonitorService = XdgThemeMonitorService()
-        if (xdgThemeMonitorService.compatibility.isSupported) return xdgThemeMonitorService
+        if (AdvancedLinuxSettings.enableXdgImplementation) {
+            val xdgThemeMonitorService = XdgThemeMonitorService()
+            if (xdgThemeMonitorService.compatibility.isSupported) return xdgThemeMonitorService
+        }
+
         if (LibraryUtil.isGtk || AdvancedLinuxSettings.overrideGtkDetection) {
             return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection)
         }

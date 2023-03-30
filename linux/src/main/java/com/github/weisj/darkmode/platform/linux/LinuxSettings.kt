@@ -6,6 +6,7 @@ import com.github.weisj.darkmode.platform.OneTimeAction
 import com.github.weisj.darkmode.platform.settings.DefaultSettingsContainer
 import com.github.weisj.darkmode.platform.settings.SettingsContainerProvider
 import com.github.weisj.darkmode.platform.settings.SingletonSettingsContainerProvider
+import com.github.weisj.darkmode.platform.settings.activeIf
 import com.github.weisj.darkmode.platform.settings.group
 import com.github.weisj.darkmode.platform.settings.hidden
 import com.github.weisj.darkmode.platform.settings.persistentBooleanProperty
@@ -15,7 +16,7 @@ import com.google.auto.service.AutoService
 class AdvancedLinuxSettingsProvider :
     SingletonSettingsContainerProvider(
         { AdvancedLinuxSettings },
-        enabled = LibraryUtil.isLinux && !LibraryUtil.isGtk
+        enabled = LibraryUtil.isLinux
     )
 
 object AdvancedLinuxSettings : DefaultSettingsContainer(identifier = "advanced_linux_settings") {
@@ -32,12 +33,19 @@ object AdvancedLinuxSettings : DefaultSettingsContainer(identifier = "advanced_l
     }
 
     var overrideGtkDetection = false
+    var enableXdgImplementation = false
 
     init {
         group("Advanced") {
+            if (!LibraryUtil.isGtk) {
+                persistentBooleanProperty(
+                    description = "Override Gtk detection (Enforce using Gtk implementation)",
+                    value = ::overrideGtkDetection
+                ).activeIf(::enableXdgImplementation.isFalse())
+            }
             persistentBooleanProperty(
-                description = "Override Gtk detection (Enforce using Gtk implementation)",
-                value = ::overrideGtkDetection
+                description = "Enable Xdg-Desktop implementation (Will take precedence over Gtk)",
+                value = ::enableXdgImplementation
             )
         }
 
