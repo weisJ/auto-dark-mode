@@ -27,6 +27,7 @@ package com.github.weisj.darkmode.platform.linux.gtk
 import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.Notifications
 import com.github.weisj.darkmode.platform.OneTimeAction
+import com.github.weisj.darkmode.platform.PluginLogger
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 
@@ -93,8 +94,14 @@ object GtkSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
     }
 
     init {
-        if (!GtkLibrary.get().isLoaded) {
-            throw IllegalStateException("Gtk library not loaded.")
+        initSettings()
+    }
+
+    private fun initSettings() {
+        // If we are here then lax loading is enabled iff we aren't a known supported GTK version.
+        if (!GtkLibrary.get(!LibraryUtil.isGtk).isLoaded) {
+            PluginLogger<GtkSettings>().error("Gtk library not loaded.")
+            return
         }
         group("Gtk Theme") {
             val installedGtkThemesProvider = { loadInstalledGtkThemes() }

@@ -38,7 +38,6 @@ class GtkThemeMonitorService(useLaxLoadingMode: Boolean = false) : ThemeMonitorS
 
     init {
         GtkLibrary.setLaxLoadingMode(useLaxLoadingMode)
-        GtkLibrary.get()
     }
 
     override val isDarkThemeEnabled: Boolean
@@ -58,7 +57,7 @@ class GtkThemeMonitorService(useLaxLoadingMode: Boolean = false) : ThemeMonitorS
             LOGGER.info("Checking whether high contrast mode is enabled. The current theme is '$currentTheme'")
             return GtkSettings.highContrastGtkTheme.name == currentTheme
         }
-    override val compatibility: Compatibility = if (GtkLibrary.get().isLoaded) {
+    override val compatibility: Compatibility = if (GtkLibrary.get(useLaxLoadingMode).isLoaded) {
         Compatibility(true, "")
     } else {
         Compatibility(false, "Desktop environment isn't one of GNOME, Xfce, I3")

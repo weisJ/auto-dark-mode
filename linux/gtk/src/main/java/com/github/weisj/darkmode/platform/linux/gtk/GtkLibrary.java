@@ -39,7 +39,10 @@ public class GtkLibrary extends AbstractPluginLibrary {
         instance.laxLoadingModeEnabled = useLaxLoadingMode;
     }
 
-    static GtkLibrary get() {
+    static GtkLibrary get(boolean useLaxLoadingMode) {
+        if (useLaxLoadingMode && !instance.isLoaded()) {
+            setLaxLoadingMode(true);
+        }
         instance.updateLibrary();
         return instance;
     }

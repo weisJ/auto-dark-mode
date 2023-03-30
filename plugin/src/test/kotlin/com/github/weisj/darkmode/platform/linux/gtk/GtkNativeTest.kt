@@ -48,14 +48,14 @@ class GtkNativeTest {
     @EnabledOnOs(OS.LINUX)
     fun testLibraryLoading() {
         assumeTrue(LibraryUtil.isGtk && LibraryUtil.isX64)
-        assertTrue(GtkLibrary.get().isLoaded)
+        assertTrue(GtkLibrary.get(false).isLoaded)
     }
 
     @Test
     @EnabledOnOs(OS.LINUX)
     fun testThemeChange() {
         assumeTrue(LibraryUtil.isGtk && LibraryUtil.isX64)
-        GtkLibrary.get()
+        GtkLibrary.get(false)
 
         themeChanger.currentTheme = "Adwaita-dark"
 
