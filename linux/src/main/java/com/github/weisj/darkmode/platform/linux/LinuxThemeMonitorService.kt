@@ -35,13 +35,18 @@ import com.github.weisj.darkmode.platform.linux.xdg.XdgThemeMonitorService
 class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
     override fun create(): ThemeMonitorService = createCompatibleMonitorService()
 
+    private val useXdgImpl
+        get() = AdvancedLinuxSettings.enableXdgImplementation
+    private val useGtkImpl
+        get() = LibraryUtil.isGtk || AdvancedLinuxSettings.overrideGtkDetection
+
     private fun createCompatibleMonitorService(): ThemeMonitorService {
-        if (AdvancedLinuxSettings.enableXdgImplementation) {
+        if (useXdgImpl) {
             val xdgThemeMonitorService = XdgThemeMonitorService()
             if (xdgThemeMonitorService.compatibility.isSupported) return xdgThemeMonitorService
         }
 
-        if (LibraryUtil.isGtk || AdvancedLinuxSettings.overrideGtkDetection) {
+        if (useGtkImpl) {
             return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection)
         }
 
@@ -49,6 +54,15 @@ class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
             message = "This plugin currently only supports Gtk based desktop environment on Linux."
         )
         return NullThemeMonitorService()
+    }
+
+    override fun isStillValid(impl: ThemeMonitorService?): Boolean {
+        return when (impl) {
+            is XdgThemeMonitorService -> useXdgImpl
+            is GtkThemeMonitorService -> useGtkImpl
+            is NullThemeMonitorService, null -> !useXdgImpl && !useGtkImpl
+            else -> true
+        }
     }
 }
 

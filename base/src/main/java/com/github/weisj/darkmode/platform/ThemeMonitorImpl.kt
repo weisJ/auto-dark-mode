@@ -81,6 +81,9 @@ class ThemeMonitorImpl(
         listenerHandle?.let { monitorService.deleteEventHandler(it) }
     }
 
+    override fun isStillValid(implProvider : ThemeMonitorServiceProvider):Boolean =
+        implProvider.isStillValid(monitorService)
+
     companion object {
         private val LOGGER = PluginLogger<ThemeMonitorImpl>()
     }

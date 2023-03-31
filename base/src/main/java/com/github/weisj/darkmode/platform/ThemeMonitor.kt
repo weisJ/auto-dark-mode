@@ -26,5 +26,7 @@ package com.github.weisj.darkmode.platform
 
 interface ThemeMonitor {
     var running: Boolean
+
     fun requestUpdate()
+    fun isStillValid(implProvider: ThemeMonitorServiceProvider): Boolean
 }

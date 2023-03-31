@@ -42,11 +42,13 @@ import javax.swing.UIManager.LookAndFeelInfo
  */
 class AutoDarkMode : Disposable, ThemeCallback {
     private val alarm = Alarm(Alarm.ThreadToUse.SWING_THREAD, this)
+    private val implProvider by lazy {
+        ApplicationManager.getApplication().getService(ThemeMonitorServiceProvider::class.java)
+    }
     private var monitor = lazy { createMonitor() }
 
     private fun createMonitor(): ThemeMonitor = try {
-        val serviceProvider = ApplicationManager.getApplication().getService(ThemeMonitorServiceProvider::class.java)
-        val service = serviceProvider.create()
+        val service = implProvider.create()
         ThemeMonitorImpl(service, this)
     } catch (e: IllegalStateException) {
         LOGGER.error(e)
@@ -62,9 +64,15 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun onSettingsChange() {
-        if (monitor.value is NullMonitor) {
-            monitor = lazyOf(createMonitor())
+        monitor.ifPresent {
+            if (!it.isStillValid(implProvider)) {
+                LOGGER.info("Current implementation is no longer valid for settings. Swapping implementation")
+
+                it.running = false
+                monitor = lazyOf(createMonitor())
+            }
         }
+
         monitor.letValue { it.requestUpdate() }
     }
 

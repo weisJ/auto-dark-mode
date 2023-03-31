@@ -29,5 +29,9 @@ class NullMonitor : ThemeMonitor {
         /* default: do nothing */
     }
 
+    override fun isStillValid(implProvider: ThemeMonitorServiceProvider): Boolean {
+        return implProvider.isStillValid(null)
+    }
+
     override var running: Boolean = false
 }

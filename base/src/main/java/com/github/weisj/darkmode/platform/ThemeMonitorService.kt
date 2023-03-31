@@ -27,6 +27,8 @@ package com.github.weisj.darkmode.platform
 
 interface ThemeMonitorServiceProvider {
     fun create(): ThemeMonitorService
+
+    fun isStillValid(impl : ThemeMonitorService?):Boolean = true
 }
 
 class Compatibility(val isSupported: Boolean, val reason: String)
@@ -37,8 +39,6 @@ interface ThemeMonitorService {
     val compatibility: Compatibility
     fun createEventHandler(callback: () -> Unit): NativePointer?
     fun deleteEventHandler(eventHandle: NativePointer)
-
-    fun uninstall() {}
 
     fun install() {}
 }
