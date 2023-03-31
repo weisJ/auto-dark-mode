@@ -49,6 +49,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
 
     private fun createMonitor(): ThemeMonitor = try {
         val service = implProvider.create()
+        LOGGER.info("Using service implementation: $service")
         ThemeMonitorImpl(service, this)
     } catch (e: IllegalStateException) {
         LOGGER.error(e)
