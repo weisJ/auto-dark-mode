@@ -164,6 +164,18 @@ fun <T> ValueProperty<T>.activeIf(condition: Condition) {
     activeCondition = condition
 }
 
+inline fun <reified T : Any, reified K : Any> TransformingValueProperty<T, K>.mirrorPreview() {
+    mirrorPreviewImpl<T, K>()
+}
+
+inline fun <reified K : Any, reified T : Any> ValueProperty<T>.mirrorPreviewImpl() {
+    effective<K>().apply {
+        registerListener(ValueProperty<K>::preview) { _, newValue ->
+            value = newValue
+        }
+    }
+}
+
 /**
  * Property with a backing value that has a different type than the exposed value.
  */

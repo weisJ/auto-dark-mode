@@ -59,7 +59,7 @@ class GtkNativeTest {
 
         themeChanger.currentTheme = "Adwaita-dark"
 
-        val service = GtkThemeMonitorService()
+        val service = GtkThemeMonitorService(signalType = SignalType.GTK)
         assertTrue(service.compatibility.isSupported)
         service.install()
 

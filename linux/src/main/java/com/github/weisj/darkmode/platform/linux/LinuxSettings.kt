@@ -6,47 +6,74 @@ import com.github.weisj.darkmode.platform.OneTimeAction
 import com.github.weisj.darkmode.platform.settings.DefaultSettingsContainer
 import com.github.weisj.darkmode.platform.settings.SettingsContainerProvider
 import com.github.weisj.darkmode.platform.settings.SingletonSettingsContainerProvider
-import com.github.weisj.darkmode.platform.settings.activeIf
 import com.github.weisj.darkmode.platform.settings.group
 import com.github.weisj.darkmode.platform.settings.hidden
+import com.github.weisj.darkmode.platform.settings.mirrorPreview
 import com.github.weisj.darkmode.platform.settings.persistentBooleanProperty
+import com.github.weisj.darkmode.platform.settings.persistentChoiceProperty
+import com.github.weisj.darkmode.platform.settings.transformerOf
 import com.google.auto.service.AutoService
 
 @AutoService(SettingsContainerProvider::class)
 class AdvancedLinuxSettingsProvider :
     SingletonSettingsContainerProvider(
         { AdvancedLinuxSettings },
-        enabled = LibraryUtil.isLinux
+        enabled = LibraryUtil.isLinux || true
     )
+
+enum class ImplementationType(val displayString : String) {
+    GTK_XSETTINGS("GTK (xsettings)"),
+    GTK_GSETTINGS("GTK-Gnome v.<42 (gsettings)"),
+    XDG_DESKTOP("Xdg-Desktop")
+}
 
 object AdvancedLinuxSettings : DefaultSettingsContainer(identifier = "advanced_linux_settings") {
 
     private val advancedSettingsLogAction = OneTimeAction {
         Notifications.dispatchNotification(
             """
-            Theme monitoring is currently not supported for your platform.
-            If you are sure that you are using a desktop environment supporting gsettings you can enforce the usage of
-            the GTK based implementation in the settings.
+            A guess has been made for the monitoring implementation.
+            Please select an appropriate value in the settings, which works for you.
             """.trimIndent(),
             showSettingsLink = true
         )
     }
 
+    private fun readImplType(type : ImplementationType) = type.toString()
+    private fun parseImplType(typeStr : String) = runCatching {
+        ImplementationType.valueOf(typeStr)
+    }.getOrElse { guessImplType() }
+
+    private fun guessImplType() = when {
+        LibraryUtil.isGNOME -> ImplementationType.GTK_GSETTINGS
+        LibraryUtil.isGtk -> ImplementationType.GTK_XSETTINGS
+        else -> ImplementationType.XDG_DESKTOP
+    }
+
+    private fun supportedImplementations() = buildList {
+        if (LibraryUtil.isGtk || overrideGtkDetection) add(ImplementationType.GTK_XSETTINGS)
+        if (LibraryUtil.isGNOME || overrideGtkDetection) add(ImplementationType.GTK_GSETTINGS)
+        add(ImplementationType.XDG_DESKTOP)
+    }
+
+    var implType = guessImplType()
+
     var overrideGtkDetection = false
-    var enableXdgImplementation = false
 
     init {
         group("Advanced") {
+            persistentChoiceProperty(
+                description = "Implementation Type",
+                value = ::implType,
+                transformer = transformerOf(write = ::parseImplType, read = ::readImplType)
+            ) { choicesProvider = ::supportedImplementations; renderer = ImplementationType::displayString; }
+
             if (!LibraryUtil.isGtk) {
                 persistentBooleanProperty(
-                    description = "Override Gtk detection (Enforce using Gtk implementation)",
+                    description = "Override Gtk detection (Enforce availability of Gtk implementations)",
                     value = ::overrideGtkDetection
-                ).activeIf(::enableXdgImplementation.isFalse())
+                ).mirrorPreview()
             }
-            persistentBooleanProperty(
-                description = "Enable Xdg-Desktop implementation (Will take precedence over Gtk)",
-                value = ::enableXdgImplementation
-            )
         }
 
         hidden {

@@ -31,7 +31,15 @@ import com.github.weisj.darkmode.platform.PluginLogger
 import com.github.weisj.darkmode.platform.ThemeMonitorService
 import com.github.weisj.darkmode.platform.linux.gtk.GtkVariants.guessFrom
 
-class GtkThemeMonitorService(useLaxLoadingMode: Boolean = false) : ThemeMonitorService {
+enum class SignalType(internal val id : Int) {
+    GTK(0),
+    GIO(1)
+}
+
+class GtkThemeMonitorService(
+    useLaxLoadingMode: Boolean = false,
+    val signalType: SignalType
+) : ThemeMonitorService {
     companion object {
         val LOGGER = PluginLogger<GtkThemeMonitorService>()
     }
@@ -63,11 +71,11 @@ class GtkThemeMonitorService(useLaxLoadingMode: Boolean = false) : ThemeMonitorS
         Compatibility(false, "Desktop environment isn't one of GNOME, Xfce, I3")
     }
     val currentGtkTheme: String
-        get() = GtkNative.getCurrentTheme()
+        get() = GtkNative.getCurrentTheme(signalType.id)
 
     override fun createEventHandler(callback: () -> Unit): NativePointer? {
-        return NativePointer(GtkNative.createEventHandler { signalType ->
-            LOGGER.info("Received notification of type $signalType")
+        return NativePointer(GtkNative.createEventHandler(signalType.id) {
+            LOGGER.info("Received notification")
             callback()
         })
     }
@@ -77,6 +85,6 @@ class GtkThemeMonitorService(useLaxLoadingMode: Boolean = false) : ThemeMonitorS
     }
 
     override fun install() {
-        GtkNative.init(LibraryUtil.isGNOME)
+        GtkNative.init()
     }
 }

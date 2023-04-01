@@ -22,17 +22,17 @@ package com.github.weisj.darkmode.platform.linux.gtk;
 
 public class GtkNative {
 
-    public interface EventHandlerCallback { void settingChanged(int signalType); }
+    public interface EventHandlerCallback { void settingChanged(); }
 
     private GtkNative() {
         throw new IllegalStateException("Native methods holder");
     }
 
-    static native String getCurrentTheme();
+    static native String getCurrentTheme(final int signalType);
 
-    static native long createEventHandler(final EventHandlerCallback callback);
+    static native long createEventHandler(final int signalType, final EventHandlerCallback callback);
 
     static native void deleteEventHandler(final long handle);
 
-    static native void init(boolean isGnomeHint);
+    static native void init();
 }

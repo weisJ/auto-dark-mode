@@ -30,38 +30,46 @@ import com.github.weisj.darkmode.platform.NullThemeMonitorService
 import com.github.weisj.darkmode.platform.ThemeMonitorService
 import com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider
 import com.github.weisj.darkmode.platform.linux.gtk.GtkThemeMonitorService
+import com.github.weisj.darkmode.platform.linux.gtk.SignalType
 import com.github.weisj.darkmode.platform.linux.xdg.XdgThemeMonitorService
 
 class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
     override fun create(): ThemeMonitorService = createCompatibleMonitorService()
 
-    private val useXdgImpl
-        get() = AdvancedLinuxSettings.enableXdgImplementation
-    private val useGtkImpl
-        get() = LibraryUtil.isGtk || AdvancedLinuxSettings.overrideGtkDetection
-
     private fun createCompatibleMonitorService(): ThemeMonitorService {
-        if (useXdgImpl) {
-            val xdgThemeMonitorService = XdgThemeMonitorService()
-            if (xdgThemeMonitorService.compatibility.isSupported) return xdgThemeMonitorService
-        }
+        when (AdvancedLinuxSettings.implType) {
+            ImplementationType.GTK_XSETTINGS ->
+                return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection, SignalType.GTK)
 
-        if (useGtkImpl) {
-            return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection)
+            ImplementationType.GTK_GSETTINGS ->
+                return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection, SignalType.GIO)
+
+            ImplementationType.XDG_DESKTOP -> {
+                val xdgThemeMonitorService = XdgThemeMonitorService()
+                if (xdgThemeMonitorService.compatibility.isSupported) {
+                    return xdgThemeMonitorService
+                }
+            }
         }
 
         Notifications.dispatchNotification(
-            message = "This plugin currently only supports Gtk based desktop environment on Linux."
+            message = "No appropriate implementation could be selected. Please check the settings",
+            showSettingsLink = true
         )
         return NullThemeMonitorService()
     }
 
     override fun isStillValid(impl: ThemeMonitorService?): Boolean {
-        return when (impl) {
-            is XdgThemeMonitorService -> useXdgImpl
-            is GtkThemeMonitorService -> useGtkImpl
-            is NullThemeMonitorService, null -> !useXdgImpl && !useGtkImpl
-            else -> true
+        val implType = AdvancedLinuxSettings.implType
+        return when {
+            impl is GtkThemeMonitorService && impl.signalType == SignalType.GTK ->
+                implType == ImplementationType.GTK_XSETTINGS
+
+            impl is GtkThemeMonitorService && impl.signalType == SignalType.GIO ->
+                implType == ImplementationType.GTK_GSETTINGS
+
+            impl is XdgThemeMonitorService -> implType == ImplementationType.XDG_DESKTOP
+            else -> false
         }
     }
 }

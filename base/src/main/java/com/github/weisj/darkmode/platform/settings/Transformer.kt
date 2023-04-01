@@ -54,6 +54,10 @@ fun <R, T> Transformer<R?, T>.writeFallback(fallback: R): Transformer<R, T> {
     return transformerOf<R, R?>({ t -> t ?: fallback }, { t -> t }) andThen this
 }
 
+fun <R, T> Transformer<R?, T>.writeFallback(fallbackProvider: () -> R): Transformer<R, T> {
+    return transformerOf<R, R?>({ t -> t ?: fallbackProvider() }, { t -> t }) andThen this
+}
+
 object IdentityTransformer : Transformer<Any, Any> by DefaultTransformer({ t -> t }, { t -> t })
 
 fun <T : Any> identityTransformer(): Transformer<T, T> =
