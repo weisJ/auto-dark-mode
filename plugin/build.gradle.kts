@@ -21,6 +21,12 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
+        v1.8.0
+        <ul>
+            <li> Add implementation using Xdg-Desktop, which should support even
+                 more desktops. Gnome/GTK based desktops that experience issues with
+                 previous version have to enable this option manually.
+        </ul>
         v1.7.2
         <ul>
             <li>Allowed forced usage of GTK implementation on Linux.</li>
