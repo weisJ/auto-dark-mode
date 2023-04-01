@@ -54,7 +54,7 @@ class DefaultCondition(initial: Boolean, private val cond: () -> Boolean = { ini
     }
 }
 
-class LazyCondition<T : Any>(private val valueProp: Lazy<ValueProperty<T>>, private val expected: T) :
+class LazyCondition<T : Any>(private val valueProp: Lazy<ValueProperty<T>>, private val condition: (T) -> Boolean) :
     Condition, Observable<Condition> by DefaultObservable() {
     override var value: Boolean by observable(true)
 
@@ -62,11 +62,12 @@ class LazyCondition<T : Any>(private val valueProp: Lazy<ValueProperty<T>>, priv
         return value
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun build() {
         valueProp.value.effective<Any>().let {
-            value = it.preview == expected
+            value = condition(it.preview as T)
             it.registerListener(ValueProperty<Any>::preview) { _, _ ->
-                value = it.preview == expected
+                value = condition(it.preview as T)
             }
         }
     }
@@ -112,7 +113,9 @@ fun conditionOf(valueProp: ValueProperty<Boolean>): Condition = conditionOf(valu
 
 fun conditionOf(valueProp: Lazy<ValueProperty<Boolean>>): Condition = DefaultCondition(true) { valueProp.value.value }
 
-fun <T : Any> isEqual(valueProp: Lazy<ValueProperty<T>>, expected: T) = LazyCondition(valueProp, expected)
+fun <T : Any> isEqual(valueProp: Lazy<ValueProperty<T>>, expected: T) = satisfies(valueProp) { it == expected }
+fun <T : Any> satisfies(valueProp: Lazy<ValueProperty<T>>, condition: (T) -> Boolean) =
+    LazyCondition(valueProp, condition)
 
 fun isTrue(valueProp: Lazy<ValueProperty<Boolean>>): Condition = isEqual(valueProp, true)
 

@@ -48,6 +48,8 @@ class SettingsGroupBuilder(group: SettingsGroup) : SettingsGroup by group {
     fun KMutableProperty0<Boolean>.isTrue() = isTrue(getWithProperty(this))
     fun KMutableProperty0<Boolean>.isFalse() = isFalse(getWithProperty(this))
     fun <T : Any> KMutableProperty0<T>.isEqual(expected: T) = isEqual(getWithProperty(this), expected)
+    fun <T : Any> KMutableProperty0<T>.satisfies(condition: (T) -> Boolean) =
+        satisfies(getWithProperty(this), condition)
 }
 
 fun SettingsGroupBuilder.activeIf(condition: Condition) {

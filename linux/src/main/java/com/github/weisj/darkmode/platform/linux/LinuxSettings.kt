@@ -6,6 +6,7 @@ import com.github.weisj.darkmode.platform.OneTimeAction
 import com.github.weisj.darkmode.platform.settings.DefaultSettingsContainer
 import com.github.weisj.darkmode.platform.settings.SettingsContainerProvider
 import com.github.weisj.darkmode.platform.settings.SingletonSettingsContainerProvider
+import com.github.weisj.darkmode.platform.settings.activeIf
 import com.github.weisj.darkmode.platform.settings.group
 import com.github.weisj.darkmode.platform.settings.hidden
 import com.github.weisj.darkmode.platform.settings.mirrorPreview
@@ -18,10 +19,10 @@ import com.google.auto.service.AutoService
 class AdvancedLinuxSettingsProvider :
     SingletonSettingsContainerProvider(
         { AdvancedLinuxSettings },
-        enabled = LibraryUtil.isLinux || true
+        enabled = LibraryUtil.isLinux
     )
 
-enum class ImplementationType(val displayString : String) {
+enum class ImplementationType(val displayString: String) {
     GTK_XSETTINGS("GTK (xsettings)"),
     GTK_GSETTINGS("GTK-Gnome v.<42 (gsettings)"),
     XDG_DESKTOP("Xdg-Desktop")
@@ -39,8 +40,8 @@ object AdvancedLinuxSettings : DefaultSettingsContainer(identifier = "advanced_l
         )
     }
 
-    private fun readImplType(type : ImplementationType) = type.toString()
-    private fun parseImplType(typeStr : String) = runCatching {
+    private fun readImplType(type: ImplementationType) = type.toString()
+    private fun parseImplType(typeStr: String) = runCatching {
         ImplementationType.valueOf(typeStr)
     }.getOrElse { guessImplType() }
 
@@ -72,7 +73,12 @@ object AdvancedLinuxSettings : DefaultSettingsContainer(identifier = "advanced_l
                 persistentBooleanProperty(
                     description = "Override Gtk detection (Enforce availability of Gtk implementations)",
                     value = ::overrideGtkDetection
-                ).mirrorPreview()
+                ).apply {
+                    mirrorPreview()
+                    activeIf(::implType.satisfies {
+                        it != ImplementationType.GTK_GSETTINGS && it != ImplementationType.GTK_XSETTINGS
+                    })
+                }
             }
         }
 

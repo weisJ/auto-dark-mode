@@ -49,6 +49,7 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ComponentPredicate
+import java.awt.event.ItemEvent
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener
 import javax.swing.event.PopupMenuEvent
@@ -95,7 +96,7 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
         }
         maybeNamedRow(rowName) {
             when {
-                choiceProperty != null -> addChoiceProperty(choiceProperty)
+                choiceProperty != null -> addChoiceProperty(choiceProperty, effectiveProp)
                 prop is Boolean ->
                     checkBox(valueProp.description)
                         .bindSelected(effectiveProp::value.withType()!!)
@@ -124,7 +125,7 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
         }
     }
 
-    private fun Row.addChoiceProperty(choiceProperty: ChoiceProperty<Any, Any>) {
+    private fun Row.addChoiceProperty(choiceProperty: ChoiceProperty<Any, Any>, effectiveProp: ValueProperty<Any>) {
         val choiceModel = CollectionComboBoxModel(choiceProperty.choicesProvider().toMutableList())
         comboBox(
             choiceModel,
@@ -140,6 +141,10 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
                         selected ?: if (choiceModel.isEmpty) null else choiceModel.getElementAt(0)
                 }
             })
+            addItemListener {
+                if (it.stateChange != ItemEvent.SELECTED) return@addItemListener
+                effectiveProp.preview = choiceModel.selectedItem ?: return@addItemListener
+            }
         }
     }
 
