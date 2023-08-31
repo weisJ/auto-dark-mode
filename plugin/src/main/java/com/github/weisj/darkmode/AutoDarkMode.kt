@@ -35,6 +35,7 @@ import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.util.Alarm
+import com.jetbrains.rd.util.getThrowableText
 import javax.swing.UIManager.LookAndFeelInfo
 
 /**
@@ -52,7 +53,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
         LOGGER.info("Using service implementation: $service")
         ThemeMonitorImpl(service, this)
     } catch (e: IllegalStateException) {
-        LOGGER.error(e)
+        LOGGER.warn("Not compatible. Monitoring is not supported." + e.getThrowableText())
         NullMonitor()
     }
 
