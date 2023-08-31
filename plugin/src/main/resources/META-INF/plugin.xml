@@ -62,7 +62,6 @@
         <applicationService serviceInterface="com.github.weisj.darkmode.platform.ThemeMonitorServiceProvider"
                             serviceImplementation="com.github.weisj.darkmode.platform.linux.LinuxThemeMonitorServiceProvider"
                             os="linux"/>
-        <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkMode"/>
         <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"/>
         <applicationConfigurable instance="com.github.weisj.darkmode.DarkModeConfigurable"
                                  dynamic="true"/>
