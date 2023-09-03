@@ -68,6 +68,11 @@ object GtkVariants {
         val variants: MutableMap<Variant, String> = EnumMap(Variant::class.java)
         variants[Variant.Original] = themeName
         when {
+            themeName == "default" || themeName == "prefer-dark" -> {
+                // For GNOME these values have to be handled separately
+                variants[Variant.Day] = "default"
+                variants[Variant.Night] = "prefer-dark"
+            }
             themeName.contains("Adapta") -> {
                 variants[Variant.Day] = themeName.replace("-Nokto", "")
                 variants[Variant.Night] = variants[Variant.Day]!!.replace("Adapta", "Adapta-Nokto")
