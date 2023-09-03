@@ -24,7 +24,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Build & Test
-        uses: eskatos/gradle-command-action@v1
+        uses: eskatos/gradle-command-action@v2
         with:
           arguments: build test -PskipSpotless -PgithubAccessToken=${{ secrets.GITHUB_TOKEN }} --no-daemon
           distributions-cache-enabled: true
@@ -73,7 +73,7 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Build & Test
-        uses: eskatos/gradle-command-action@v1
+        uses: eskatos/gradle-command-action@v2
         with:
           arguments: build test -PskipSpotless -PmacOSciModeFix -PgithubAccessToken=${{ secrets.GITHUB_TOKEN }} --no-daemon
           distributions-cache-enabled: true
