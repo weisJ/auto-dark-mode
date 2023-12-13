@@ -67,12 +67,13 @@ allprojects {
                 ktlint("ktlint".v)
             }
             format("markdown") {
-                target("**/*.md")
+                target("*.md")
                 endWithNewline()
                 trimTrailingWhitespace()
             }
             format("svg") {
                 target("**/*.svg")
+                targetExclude("**/build/**/*.svg")
                 endWithNewline()
                 trimTrailingWhitespace()
                 eclipseWtp(com.diffplug.spotless.extra.wtp.EclipseWtpFormatterStep.XML)
