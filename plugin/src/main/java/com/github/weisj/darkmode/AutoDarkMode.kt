@@ -85,7 +85,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
         resetRequests()
         scheduleRequest {
             if (GeneralThemeSettings.changeIdeTheme &&
-                lafTarget != LafManager.getInstance().currentLookAndFeel
+                lafTarget != LafManager.getInstance().currentUIThemeLookAndFeel
             ) {
                 updateLaf(lafTarget)
             }
@@ -112,7 +112,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     private fun updateEditorScheme(colorsScheme: EditorColorsScheme) {
-        EditorColorsManager.getInstance().globalScheme = colorsScheme
+        EditorColorsManager.getInstance().setGlobalScheme(colorsScheme)
     }
 
     private fun resetRequests() {
