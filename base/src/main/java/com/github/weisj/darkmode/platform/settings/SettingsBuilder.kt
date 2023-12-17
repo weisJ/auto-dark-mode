@@ -137,7 +137,7 @@ fun <T : Any> SettingsGroup.choiceProperty(
     value: KMutableProperty0<T>,
     init: ChoiceProperty<T, T>.() -> Unit = {}
 ): ChoiceProperty<T, T> =
-    TransformingChoiceProperty<T, T>(
+    TransformingChoiceProperty(
         SimpleValueProperty(name, description, value, this),
         identityTransformer()
     ).also { it.init(); add(it) }
