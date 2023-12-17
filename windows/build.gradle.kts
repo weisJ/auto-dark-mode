@@ -23,8 +23,11 @@ library {
                         when (it) {
                             is Gcc, is Clang -> listOf(
                                 "--std=c++17",
-                                "-Wall", "-Wextra", "-pedantic",
-                                "-Wno-language-extension-token", "-Wno-ignored-attributes"
+                                "-Wall",
+                                "-Wextra",
+                                "-pedantic",
+                                "-Wno-language-extension-token",
+                                "-Wno-ignored-attributes"
                             )
                             is VisualCpp -> listOf("/std:c++17", "/EHsc", "/W4", "/permissive", "/WX")
                             else -> emptyList()
