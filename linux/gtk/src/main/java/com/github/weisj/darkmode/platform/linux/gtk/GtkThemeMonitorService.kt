@@ -25,7 +25,6 @@
 package com.github.weisj.darkmode.platform.linux.gtk
 
 import com.github.weisj.darkmode.platform.Compatibility
-import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.NativePointer
 import com.github.weisj.darkmode.platform.PluginLogger
 import com.github.weisj.darkmode.platform.ThemeMonitorService
@@ -37,15 +36,10 @@ enum class SignalType(internal val id : Int) {
 }
 
 class GtkThemeMonitorService(
-    useLaxLoadingMode: Boolean = false,
     val signalType: SignalType
 ) : ThemeMonitorService {
     companion object {
         val LOGGER = PluginLogger<GtkThemeMonitorService>()
-    }
-
-    init {
-        GtkLibrary.setLaxLoadingMode(useLaxLoadingMode)
     }
 
     override val isDarkThemeEnabled: Boolean
@@ -65,7 +59,7 @@ class GtkThemeMonitorService(
             LOGGER.info("Checking whether high contrast mode is enabled. The current theme is '$currentTheme'")
             return GtkSettings.highContrastGtkTheme.name == currentTheme
         }
-    override val compatibility: Compatibility = if (GtkLibrary.get(useLaxLoadingMode).isLoaded) {
+    override val compatibility: Compatibility = if (GtkLibrary.get().isLoaded) {
         Compatibility(true, "")
     } else {
         Compatibility(false, "Desktop environment isn't one of GNOME, Xfce, I3")

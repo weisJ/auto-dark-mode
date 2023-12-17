@@ -34,6 +34,11 @@ import com.google.auto.service.AutoService
 @AutoService(SettingsContainerProvider::class)
 class GtkSettingsProvider : SingletonSettingsContainerProvider({ GtkSettings }, enabled = LibraryUtil.isLinux) {
     override fun isEnabled(state: SettingsState): Boolean {
+        if (shouldBeEnabled(state)) return checkGtkLibrary()
+        return false
+    }
+
+    private fun shouldBeEnabled(state: SettingsState): Boolean {
         if (!super.isEnabled(state)) return false
         if (LibraryUtil.isGtk) return true
         return Entry(
@@ -42,6 +47,15 @@ class GtkSettingsProvider : SingletonSettingsContainerProvider({ GtkSettings }, 
             value = "true"
         ) in state.entries
     }
+}
+
+private fun checkGtkLibrary() : Boolean {
+    // If we are here then lax loading is enabled iff we aren't a known supported GTK version.
+    if (!GtkLibrary.get().isLoaded) {
+        PluginLogger<GtkSettings>().error("Gtk library not loaded.")
+        return false
+    }
+    return true
 }
 
 data class GtkTheme(val name: String) : Comparable<GtkTheme> {
@@ -98,11 +112,6 @@ object GtkSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
     }
 
     private fun initSettings() {
-        // If we are here then lax loading is enabled iff we aren't a known supported GTK version.
-        if (!GtkLibrary.get(!LibraryUtil.isGtk).isLoaded) {
-            PluginLogger<GtkSettings>().error("Gtk library not loaded.")
-            return
-        }
         group("Gtk Theme") {
             val installedGtkThemesProvider = { loadInstalledGtkThemes() }
 

@@ -3,6 +3,7 @@ package com.github.weisj.darkmode.platform.linux
 import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.Notifications
 import com.github.weisj.darkmode.platform.OneTimeAction
+import com.github.weisj.darkmode.platform.linux.gtk.GtkLibrary
 import com.github.weisj.darkmode.platform.settings.DefaultSettingsContainer
 import com.github.weisj.darkmode.platform.settings.SettingsContainerProvider
 import com.github.weisj.darkmode.platform.settings.SingletonSettingsContainerProvider
@@ -22,10 +23,10 @@ class AdvancedLinuxSettingsProvider :
         enabled = LibraryUtil.isLinux
     )
 
-enum class ImplementationType(val displayString: String) {
-    GTK_XSETTINGS("GTK (xsettings)"),
-    GTK_GSETTINGS("GTK-Gnome v.<42 (gsettings)"),
-    XDG_DESKTOP("Xdg-Desktop")
+enum class ImplementationType(val displayString: String, val needsGtkLibrary: Boolean) {
+    GTK_XSETTINGS("GTK (xsettings)", true),
+    GTK_GSETTINGS("GTK-Gnome v.<42 (gsettings)", true),
+    XDG_DESKTOP("Xdg-Desktop", false)
 }
 
 object AdvancedLinuxSettings : DefaultSettingsContainer(identifier = "advanced_linux_settings") {
@@ -57,9 +58,16 @@ object AdvancedLinuxSettings : DefaultSettingsContainer(identifier = "advanced_l
         add(ImplementationType.XDG_DESKTOP)
     }
 
-    var implType = guessImplType()
+    var implType: ImplementationType = guessImplType()
+        set(value) {
+            field = if (value.needsGtkLibrary && GtkLibrary.get().isLoaded) {
+                value
+            } else {
+                ImplementationType.XDG_DESKTOP
+            }
+        }
 
-    var overrideGtkDetection = false
+    private var overrideGtkDetection = false
 
     init {
         group("Advanced") {
