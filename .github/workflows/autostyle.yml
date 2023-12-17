@@ -14,4 +14,4 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Check
-        run: ./gradlew spotlessCheck -PspotlessRatchet=false
+        run: ./gradlew spotlessCheck -x kspKotlin -x kspTestKotlin -PspotlessRatchet=false
