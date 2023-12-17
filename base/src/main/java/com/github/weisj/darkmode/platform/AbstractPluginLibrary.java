@@ -43,6 +43,6 @@ public abstract class AbstractPluginLibrary extends AbstractLibrary {
 
     @Override
     protected void error(String message, Throwable e) {
-        pluginLogger.error(message, e);
+        pluginLogger.warn(message, e);
     }
 }

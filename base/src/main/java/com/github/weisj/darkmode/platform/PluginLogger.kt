@@ -36,6 +36,10 @@ class PluginLogger(private val logger: Logger) {
         logger.warn(msg)
     }
 
+    fun warn(msg: String?, e: Throwable?) {
+        logger.warn(msg, e)
+    }
+
     fun error(msg: String?) {
         logger.error(msg)
     }
