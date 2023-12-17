@@ -62,7 +62,7 @@ class UberJniJarPlugin : Plugin<Project> {
         }
     }
 
-    private fun CopySpec.renameLibrary(project: Project, target: dev.nokee.runtime.nativebase.TargetMachine) {
+    private fun CopySpec.renameLibrary(project: Project, target: TargetMachine) {
         rename {
             libraryFileNameFor("${project.name}-${target.architectureString}", target.operatingSystemFamily)
         }
