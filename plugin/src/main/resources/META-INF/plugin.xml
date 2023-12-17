@@ -64,7 +64,7 @@
                             os="linux"/>
         <applicationService serviceImplementation="com.github.weisj.darkmode.AutoDarkModeOptions"/>
         <applicationConfigurable instance="com.github.weisj.darkmode.DarkModeConfigurable"
-                                 dynamic="true"/>
+                                 dynamic="true" displayName="Auto Dark Mode"/>
         <notificationGroup id="com.github.weisj.darkmode" displayType="STICKY_BALLOON" isLogByDefault="true"
                            key="NotificationTitle"/>
     </extensions>
