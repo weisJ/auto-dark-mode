@@ -129,17 +129,17 @@ object GtkSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
                 persistentChoiceProperty(
                     description = "Light GTK Theme",
                     value = ::lightGtkTheme,
-                    transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.LIGHT.info)
+                    transformer = gtkThemeTransformer
                 ) { choicesProvider = installedGtkThemesProvider; renderer = gtkThemeRenderer }
                 persistentChoiceProperty(
                     description = "Dark GTK Theme",
                     value = ::darkGtkTheme,
-                    transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.DARK.info)
+                    transformer = gtkThemeTransformer
                 ) { choicesProvider = installedGtkThemesProvider; renderer = gtkThemeRenderer }
                 persistentChoiceProperty(
                     description = "High Contrast GTK Theme",
                     value = ::highContrastGtkTheme,
-                    transformer = gtkThemeTransformer.writeFallback(DefaultGtkTheme.HIGH_CONTRAST.info)
+                    transformer = gtkThemeTransformer
                 ) { choicesProvider = installedGtkThemesProvider; renderer = gtkThemeRenderer }
             }
         }
@@ -171,5 +171,5 @@ object GtkSettings : DefaultSettingsContainer(identifier = "gnome_settings") {
 
     private fun readGtkTheme(info: GtkTheme): String = info.name
 
-    private fun parseGtkTheme(name: String): GtkTheme? = GtkTheme(name)
+    private fun parseGtkTheme(name: String): GtkTheme = GtkTheme(name)
 }
