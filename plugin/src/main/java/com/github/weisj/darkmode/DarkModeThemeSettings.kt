@@ -27,12 +27,10 @@ package com.github.weisj.darkmode
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 import com.intellij.ide.ui.LafManager
-import com.intellij.ide.ui.laf.IntelliJLookAndFeelInfo
-import com.intellij.ide.ui.laf.darcula.DarculaLookAndFeelInfo
+import com.intellij.ide.ui.laf.UIThemeLookAndFeelInfo
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
-import javax.swing.UIManager
 
 @AutoService(SettingsContainerProvider::class)
 class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ GeneralThemeSettings })
@@ -44,10 +42,10 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      * Default values for the LookAndFeel which are guaranteed to be bundled with any
      * IntelliJ based product.
      */
-    private enum class DefaultLaf(val info: UIManager.LookAndFeelInfo) {
-        DARK(DarculaLookAndFeelInfo()),
-        LIGHT(searchLaf(name = "IntelliJ Light") ?: IntelliJLookAndFeelInfo()),
-        HIGH_CONTRAST(searchLaf(name = "High Contrast") ?: IntelliJLookAndFeelInfo())
+    private enum class DefaultLaf(val info: UIThemeLookAndFeelInfo) {
+        DARK(searchLaf("Darcula")),
+        LIGHT(searchLaf(id = "JetBrainsLightTheme")),
+        HIGH_CONTRAST(searchLaf(id = "JetBrainsHighContrastTheme"))
     }
 
     /**
@@ -83,8 +81,8 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
 
     init {
         group("IDE Theme") {
-            val installedLafsProvider = { LafManager.getInstance().installedLookAndFeels.asList() }
-            val lafRenderer = UIManager.LookAndFeelInfo::getName
+            val installedLafsProvider = { LafManager.getInstance().installedThemes.toList() }
+            val lafRenderer = UIThemeLookAndFeelInfo::name
             val lafTransformer = transformerOf(write = ::parseLaf, read = ::readLaf.or(""))
 
             persistentBooleanProperty(
@@ -158,12 +156,12 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         }
     }
 
-    private fun readLaf(info: UIManager.LookAndFeelInfo): String = "${info.className} ${info.name}"
+    private fun readLaf(info: UIThemeLookAndFeelInfo): String = info.id
 
     private fun readScheme(scheme: EditorColorsScheme): String = scheme.name
 
-    private fun parseLaf(name: String?): UIManager.LookAndFeelInfo? = name?.toPair(' ')?.let {
-        searchLaf(name = it.second, className = it.first)
+    private fun parseLaf(id: String?): UIThemeLookAndFeelInfo? = id?.let {
+        it.toPair(' ')?.let { p -> searchLaf(p.first) } ?: searchLaf(it)
     }
 
     private fun parseScheme(name: String?): EditorColorsScheme? =
@@ -190,9 +188,9 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      * Search for a given LookAndFeelInfo.
      * The name has to match. If the className isn't empty it also has to match.
      */
-    private fun searchLaf(name: String, className: String = ""): UIManager.LookAndFeelInfo? {
-        return LafManager.getInstance().installedLookAndFeels.firstOrNull {
-            it.name.equals(name, ignoreCase = true) && (className.isEmpty() || it.className == className)
-        }
+    private fun searchLaf(id: String): UIThemeLookAndFeelInfo {
+        return LafManager.getInstance().installedThemes.firstOrNull {
+            it.id.equals(id, ignoreCase = true)
+        } ?: LafManager.getInstance().currentUIThemeLookAndFeel
     }
 }

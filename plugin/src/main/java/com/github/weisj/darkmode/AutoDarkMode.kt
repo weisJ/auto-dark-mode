@@ -29,6 +29,7 @@ import com.github.weisj.darkmode.platform.settings.ifPresent
 import com.github.weisj.darkmode.platform.settings.letValue
 import com.intellij.ide.actions.QuickChangeLookAndFeel
 import com.intellij.ide.ui.LafManager
+import com.intellij.ide.ui.laf.UIThemeLookAndFeelInfo
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
@@ -37,7 +38,6 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.util.registry.Registry
 import com.intellij.util.Alarm
 import com.jetbrains.rd.util.getThrowableText
-import javax.swing.UIManager.LookAndFeelInfo
 
 /**
  * Automatically changes the IDEA theme based on system settings.
@@ -97,7 +97,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
         }
     }
 
-    private fun getTargetLaf(dark: Boolean, highContrast: Boolean): Pair<LookAndFeelInfo, EditorColorsScheme> {
+    private fun getTargetLaf(dark: Boolean, highContrast: Boolean): Pair<UIThemeLookAndFeelInfo, EditorColorsScheme> {
         return GeneralThemeSettings.run {
             when {
                 highContrast && checkHighContrast -> Pair(highContrastTheme, highContrastCodeScheme)
@@ -107,7 +107,7 @@ class AutoDarkMode : Disposable, ThemeCallback {
         }
     }
 
-    private fun updateLaf(targetLaf: LookAndFeelInfo) {
+    private fun updateLaf(targetLaf: UIThemeLookAndFeelInfo) {
         QuickChangeLookAndFeel.switchLafAndUpdateUI(LafManager.getInstance(), targetLaf, false)
     }
 

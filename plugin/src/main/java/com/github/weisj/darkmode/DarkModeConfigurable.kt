@@ -153,7 +153,11 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
     }
 
     private fun Panel.maybeTitledRow(name: String?, init: Panel.() -> Unit): RowsRange {
-        return if (!name.isNullOrEmpty()) groupRowsRange(name, init = init) else groupRowsRange { init() }
+        return if (!name.isNullOrEmpty() && name != UNNAMED_GROUP_TITLE) {
+            groupRowsRange(name, init = init)
+        } else {
+            groupRowsRange { init() }
+        }
     }
 
     private fun Panel.maybeNamedRow(name: String?, init: Row.() -> Unit) {
@@ -167,7 +171,7 @@ class DarkModeConfigurable : BoundConfigurable(SETTINGS_TITLE) {
 
     companion object {
         const val SETTINGS_TITLE: String = "Auto Dark Mode"
-        val UNNAMED_GROUP_TITLE: String? = null
+        const val UNNAMED_GROUP_TITLE: String = "<<unnamed>>"
     }
 }
 

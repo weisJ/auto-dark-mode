@@ -136,10 +136,9 @@ class AutoDarkModeOptions : PersistentStateComponent<SettingsState> {
         toLoad.entries.forEach {
             val identifier = PropertyIdentifier(it.groupIdentifier, it.name)
             if (keepUnused) {
-                properties.getOrPut(
-                    identifier,
-                    { PersistentValuePropertyStub(it.name, it.value, it.groupIdentifier) }
-                ).value = it.value
+                properties.getOrPut(identifier) {
+                    PersistentValuePropertyStub(it.name, it.value, it.groupIdentifier)
+                }.value = it.value
             } else {
                 properties[identifier]?.value = it.value
             }
