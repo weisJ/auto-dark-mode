@@ -29,20 +29,12 @@ public class GtkLibrary extends AbstractPluginLibrary {
     private static final String PATH = "/com/github/weisj/darkmode/auto-dark-mode-linux-gtk";
     private static final String x86_64_PATH = PATH + "/libauto-dark-mode-linux-gtk-x86-64.so";
     private static final GtkLibrary instance = new GtkLibrary();
-    private boolean laxLoadingModeEnabled = false;
 
     protected GtkLibrary() {
         super("auto-dark-mode-linux-gtk", PluginLogger.getLogger(GtkLibrary.class));
     }
 
-    static void setLaxLoadingMode(boolean useLaxLoadingMode) {
-        instance.laxLoadingModeEnabled = useLaxLoadingMode;
-    }
-
-    static GtkLibrary get(boolean useLaxLoadingMode) {
-        if (useLaxLoadingMode && !instance.isLoaded()) {
-            setLaxLoadingMode(true);
-        }
+    public static GtkLibrary get() {
         instance.updateLibrary();
         return instance;
     }
@@ -59,6 +51,6 @@ public class GtkLibrary extends AbstractPluginLibrary {
 
     @Override
     protected boolean canLoad() {
-        return LibraryUtil.isX64 && (LibraryUtil.isGtk || laxLoadingModeEnabled);
+        return LibraryUtil.isX64 && LibraryUtil.isLinux;
     }
 }

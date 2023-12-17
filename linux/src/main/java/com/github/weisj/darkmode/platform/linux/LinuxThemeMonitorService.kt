@@ -24,7 +24,6 @@
  */
 package com.github.weisj.darkmode.platform.linux
 
-import com.github.weisj.darkmode.platform.LibraryUtil
 import com.github.weisj.darkmode.platform.Notifications
 import com.github.weisj.darkmode.platform.NullThemeMonitorService
 import com.github.weisj.darkmode.platform.ThemeMonitorService
@@ -39,10 +38,10 @@ class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
     private fun createCompatibleMonitorService(): ThemeMonitorService {
         when (AdvancedLinuxSettings.implType) {
             ImplementationType.GTK_XSETTINGS ->
-                return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection, SignalType.GTK)
+                return GtkThemeMonitorService(SignalType.GTK)
 
             ImplementationType.GTK_GSETTINGS ->
-                return GtkThemeMonitorService(AdvancedLinuxSettings.overrideGtkDetection, SignalType.GIO)
+                return GtkThemeMonitorService(SignalType.GIO)
 
             ImplementationType.XDG_DESKTOP -> {
                 val xdgThemeMonitorService = XdgThemeMonitorService()
