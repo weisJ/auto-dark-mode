@@ -2,7 +2,6 @@ import dev.nokee.platform.jni.JavaNativeInterfaceLibraryComponentDependencies
 import dev.nokee.runtime.nativebase.OperatingSystemFamily
 import dev.nokee.runtime.nativebase.TargetMachine
 import dev.nokee.language.base.tasks.SourceCompile
-import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.MinimalExternalModuleDependency
