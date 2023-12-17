@@ -35,7 +35,8 @@ public class ServiceUtil {
      * Creates a new service loader for the given service type, using the
      * current appropriate Classloader. This method should be used instal of
      * {@link ServiceLoader#load(Class)} for plugins running on the IntelliJ platform.
-     * https://jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_class_loaders.html#using-serviceloader
+     * <a href=
+     * "https://jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_class_loaders.html#using-serviceloader">...</a>
      *
      * @throws ServiceConfigurationError
      *                                   if the service type is not accessible to the caller or the
