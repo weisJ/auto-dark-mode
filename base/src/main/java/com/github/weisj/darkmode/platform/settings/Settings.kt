@@ -92,6 +92,9 @@ abstract class DefaultSettingsContainer private constructor(
     override val subgroups: MutableList<NamedSettingsGroup> = mutableListOf()
 
     override fun onSettingsLoaded() { /* default : do nothing */ }
+    override fun allProperties(): List<ValueProperty<Any>> {
+        return (this as SettingsContainer).allProperties()
+    }
 }
 
 fun <T> SettingsGroup.add(property: ValueProperty<T>) {
