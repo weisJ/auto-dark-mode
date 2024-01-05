@@ -52,7 +52,7 @@ class GtkSettingsProvider : SingletonSettingsContainerProvider({ GtkSettings }, 
 private fun checkGtkLibrary() : Boolean {
     // If we are here then lax loading is enabled iff we aren't a known supported GTK version.
     if (!GtkLibrary.get().isLoaded) {
-        PluginLogger<GtkSettings>().error("Gtk library not loaded.")
+        PluginLogger<GtkSettings>().info("Gtk library not loaded.")
         return false
     }
     return true
