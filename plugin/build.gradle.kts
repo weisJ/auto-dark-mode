@@ -21,6 +21,11 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
+        v1.8.2
+        <ul>
+            <li> Fixed Theme detection in GNOME environments
+            <li> Fixed errors if the selected detection mechanism isn't available.
+        </ul>
         v1.8.0
         <ul>
             <li> Add implementation using Xdg-Desktop, which should support even
