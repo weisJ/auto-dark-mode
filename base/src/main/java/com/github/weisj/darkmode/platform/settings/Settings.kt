@@ -93,7 +93,7 @@ abstract class DefaultSettingsContainer private constructor(
 
     override fun onSettingsLoaded() { /* default : do nothing */ }
     override fun allProperties(): List<ValueProperty<Any>> {
-        return (this as SettingsContainer).allProperties()
+        return super<SettingsContainer>.allProperties()
     }
 }
 
