@@ -31,6 +31,8 @@ import com.intellij.ide.ui.laf.UIThemeLookAndFeelInfo
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
+import com.intellij.ui.ExperimentalUI
+import com.intellij.ui.NewUiValue
 
 @AutoService(SettingsContainerProvider::class)
 class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ GeneralThemeSettings })
@@ -43,9 +45,9 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      * IntelliJ based product.
      */
     private enum class DefaultLaf(val info: UIThemeLookAndFeelInfo) {
-        DARK(searchLaf("Darcula")),
-        LIGHT(searchLaf(id = "JetBrainsLightTheme")),
-        HIGH_CONTRAST(searchLaf(id = "JetBrainsHighContrastTheme"))
+        DARK(searchLaf(LafFallback.Dark, "ExperimentalDark", "Darcula")),
+        LIGHT(searchLaf(LafFallback.Light, "ExperimentalLight", "JetBrainsLightTheme")),
+        HIGH_CONTRAST(searchLaf(LafFallback.HighContrast , "JetBrainsHighContrastTheme"))
     }
 
     /**
@@ -161,7 +163,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private fun readScheme(scheme: EditorColorsScheme): String = scheme.name
 
     private fun parseLaf(id: String?): UIThemeLookAndFeelInfo? = id?.let {
-        it.toPair(' ')?.let { p -> searchLaf(p.first) } ?: searchLaf(it)
+        it.toPair(' ')?.let { p -> searchLaf(LafFallback.Current, p.first) } ?: searchLaf(LafFallback.Current, it)
     }
 
     private fun parseScheme(name: String?): EditorColorsScheme? =
@@ -184,13 +186,33 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         }
     }
 
+    enum class LafFallback {
+        Dark,
+        Light,
+        HighContrast,
+        Current
+    }
+
     /**
      * Search for a given LookAndFeelInfo.
      * The name has to match. If the className isn't empty it also has to match.
      */
-    private fun searchLaf(id: String): UIThemeLookAndFeelInfo {
-        return LafManager.getInstance().installedThemes.firstOrNull {
-            it.id.equals(id, ignoreCase = true)
-        } ?: LafManager.getInstance().currentUIThemeLookAndFeel
+    private fun searchLaf(type: LafFallback, vararg ids: String): UIThemeLookAndFeelInfo {
+        return LafManager.getInstance().run {
+            val fallback = when (type) {
+                LafFallback.Dark -> defaultDarkLaf ?: currentUIThemeLookAndFeel
+                LafFallback.Light -> defaultLightLaf ?: currentUIThemeLookAndFeel
+                LafFallback.HighContrast, LafFallback.Current -> currentUIThemeLookAndFeel
+            }
+            val experimental = ExperimentalUI.isNewUI()
+            ids.firstNotNullOfOrNull { id ->
+                if (!experimental && id.startsWith("Experimental")) {
+                    return@firstNotNullOfOrNull null
+                }
+                return@firstNotNullOfOrNull installedThemes.firstOrNull {
+                    it.id.equals(id, ignoreCase = true)
+                }
+            } ?: fallback
+        }
     }
 }
