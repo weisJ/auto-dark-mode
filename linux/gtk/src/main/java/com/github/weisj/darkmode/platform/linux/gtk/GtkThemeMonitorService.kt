@@ -32,7 +32,8 @@ import com.github.weisj.darkmode.platform.linux.gtk.GtkVariants.guessFrom
 
 enum class SignalType(internal val id : Int) {
     GTK(0),
-    GIO(1)
+    GIO(1),
+    GIO_NEW(2)
 }
 
 class GtkThemeMonitorService(
@@ -46,15 +47,20 @@ class GtkThemeMonitorService(
         get() {
             val currentTheme = currentGtkTheme
             LOGGER.info("Checking whether dark mode is enabled. The current theme is '$currentTheme'")
-            return if (GtkSettings.guessLightAndDarkThemes) {
-                currentTheme == guessFrom(currentTheme)[GtkVariants.Variant.Night]
+            return if (signalType == SignalType.GIO_NEW) {
+                currentTheme == "dark"
             } else {
-                GtkSettings.darkGtkTheme.name == currentTheme
+                if (GtkSettings.guessLightAndDarkThemes) {
+                    currentTheme == guessFrom(currentTheme)[GtkVariants.Variant.Night]
+                } else {
+                    GtkSettings.darkGtkTheme.name == currentTheme
+                }
             }
         }
     override val isHighContrastEnabled: Boolean
         get() {
             if (GtkSettings.guessLightAndDarkThemes) return false
+            if (signalType == SignalType.GIO_NEW) return false
             val currentTheme = currentGtkTheme
             LOGGER.info("Checking whether high contrast mode is enabled. The current theme is '$currentTheme'")
             return GtkSettings.highContrastGtkTheme.name == currentTheme

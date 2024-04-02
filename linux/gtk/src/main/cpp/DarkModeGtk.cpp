@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020-2023 Jannis Weis
+ * Copyright (c) 2020-2024 Jannis Weis
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -32,9 +32,10 @@
 
 static constexpr auto SETTINGS_SCHEMA_NAME = "org.gnome.desktop.interface";
 static constexpr auto THEME_NAME_KEY = "gtk-theme";
+static constexpr auto THEME_NAME_KEY_NEW = "color-scheme";
 
 enum SignalType {
-    GTK = 0, GIO = 1
+    GTK = 0, GIO = 1, GIO_NEW = 2
 };
 
 Glib::RefPtr<Gtk::Settings> gtk_settings;
@@ -55,7 +56,10 @@ Java_com_github_weisj_darkmode_platform_linux_gtk_GtkNative_getCurrentTheme(JNIE
 
     SignalType type = (SignalType) signal_type;
 
-    if (type == SignalType::GIO) {
+    if (type == SignalType::GIO_NEW) {
+        auto themeStr = gio_settings->get_string(THEME_NAME_KEY_NEW);
+        return env->NewStringUTF(themeStr.c_str());
+    } else if (type == SignalType::GIO) {
         auto themeStr = gio_settings->get_string(THEME_NAME_KEY);
         return env->NewStringUTF(themeStr.c_str());
     } else {
@@ -137,7 +141,10 @@ struct EventHandler {
             gtk_settings = Gtk::Settings::get_default();
             gio_settings = Gio::Settings::create(SETTINGS_SCHEMA_NAME);
 
-            if (signal_type == SignalType::GIO) {
+            if (signal_type == SignalType::GIO_NEW) {
+                settingsChangedSignalConnection = gio_settings->signal_changed(THEME_NAME_KEY_NEW).connect(
+                        sigc::mem_fun(this, &EventHandler::gio_runCallBack));
+            } else if (signal_type == SignalType::GIO) {
                 settingsChangedSignalConnection = gio_settings->signal_changed(THEME_NAME_KEY).connect(
                         sigc::mem_fun(this, &EventHandler::gio_runCallBack));
             } else {

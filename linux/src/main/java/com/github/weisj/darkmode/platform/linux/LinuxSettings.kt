@@ -25,7 +25,8 @@ class AdvancedLinuxSettingsProvider :
 
 enum class ImplementationType(val displayString: String, val needsGtkLibrary: Boolean) {
     GTK_XSETTINGS("GTK (xsettings)", true),
-    GTK_GSETTINGS("GTK-Gnome v.<42 (gsettings)", true),
+    GTK_GSETTINGS_NEW("GTK-Gnome (gsettings)", true),
+    GTK_GSETTINGS("GTK-Gnome legacy v.<42 (gsettings)", true),
     XDG_DESKTOP("Xdg-Desktop", false)
 }
 
@@ -44,21 +45,20 @@ object AdvancedLinuxSettings : DefaultSettingsContainer(identifier = "advanced_l
     private fun readImplType(type: ImplementationType) = type.toString()
     private fun parseImplType(typeStr: String) = runCatching {
         ImplementationType.valueOf(typeStr)
-    }.getOrElse { guessImplType() }
+    }.getOrElse { recommendedImplType() }
 
-    private fun guessImplType() = when {
-        LibraryUtil.isGNOME -> ImplementationType.GTK_GSETTINGS
-        LibraryUtil.isGtk -> ImplementationType.GTK_XSETTINGS
-        else -> ImplementationType.XDG_DESKTOP
-    }
+    private fun recommendedImplType() = ImplementationType.XDG_DESKTOP
 
     private fun supportedImplementations() = buildList {
-        if (LibraryUtil.isGtk || overrideGtkDetection) add(ImplementationType.GTK_XSETTINGS)
-        if (LibraryUtil.isGNOME || overrideGtkDetection) add(ImplementationType.GTK_GSETTINGS)
         add(ImplementationType.XDG_DESKTOP)
+        if (LibraryUtil.isGtk || overrideGtkDetection) add(ImplementationType.GTK_XSETTINGS)
+        if (LibraryUtil.isGNOME || overrideGtkDetection) {
+            add(ImplementationType.GTK_GSETTINGS_NEW)
+            add(ImplementationType.GTK_GSETTINGS)
+        }
     }
 
-    var implType: ImplementationType = guessImplType()
+    var implType: ImplementationType = recommendedImplType()
         set(value) {
             field = if (value.needsGtkLibrary && GtkLibrary.get().isLoaded) {
                 value

@@ -40,6 +40,9 @@ class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
             ImplementationType.GTK_XSETTINGS ->
                 return GtkThemeMonitorService(SignalType.GTK)
 
+            ImplementationType.GTK_GSETTINGS_NEW ->
+                return GtkThemeMonitorService(SignalType.GIO_NEW)
+
             ImplementationType.GTK_GSETTINGS ->
                 return GtkThemeMonitorService(SignalType.GIO)
 
@@ -63,6 +66,9 @@ class LinuxThemeMonitorServiceProvider : ThemeMonitorServiceProvider {
         return when {
             impl is GtkThemeMonitorService && impl.signalType == SignalType.GTK ->
                 implType == ImplementationType.GTK_XSETTINGS
+
+            impl is GtkThemeMonitorService && impl.signalType == SignalType.GIO_NEW ->
+                implType == ImplementationType.GTK_GSETTINGS_NEW
 
             impl is GtkThemeMonitorService && impl.signalType == SignalType.GIO ->
                 implType == ImplementationType.GTK_GSETTINGS
