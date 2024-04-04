@@ -21,6 +21,9 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
+        v1.8.3
+        <ul>
+            <li> New-UI themes are now used if the new UI is enabled.
         v1.8.2
         <ul>
             <li> Fixed Theme detection in GNOME environments
