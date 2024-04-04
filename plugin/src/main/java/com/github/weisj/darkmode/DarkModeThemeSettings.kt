@@ -35,6 +35,7 @@ import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
 import com.intellij.ui.ExperimentalUI
+import org.jetbrains.annotations.Contract
 import javax.swing.UIDefaults
 
 @AutoService(SettingsContainerProvider::class)
@@ -50,7 +51,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private enum class DefaultLaf(val info: UIThemeLookAndFeelInfo) {
         DARK(searchLaf(LafFallback.Dark, "ExperimentalDark", "Darcula")),
         LIGHT(searchLaf(LafFallback.Light, "ExperimentalLight", "JetBrainsLightTheme")),
-        HIGH_CONTRAST(searchLaf(LafFallback.HighContrast , "JetBrainsHighContrastTheme"))
+        HIGH_CONTRAST(searchLaf(LafFallback.HighContrast, "JetBrainsHighContrastTheme"))
     }
 
     /**
@@ -86,7 +87,14 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
 
     init {
         group("IDE Theme") {
-            val installedLafsProvider = { LafManager.getInstance().installedThemes.toList() }
+            val installedLafsProvider = {
+                val lafs = LafManager.getInstance().installedThemes.toList()
+                if (!ExperimentalUI.isNewUI()) {
+                    lafs.filter { !it.id.startsWith("Experimental") }
+                } else {
+                    lafs
+                }
+            }
             val lafRenderer = UIThemeLookAndFeelInfo::name
             val lafTransformer = transformerOf(write = ::parseLaf, read = ::readLaf.or(""))
 
@@ -166,7 +174,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private fun readScheme(scheme: EditorColorsScheme): String = scheme.name
 
     private fun parseLaf(id: String?): UIThemeLookAndFeelInfo? = id?.let {
-        it.toPair(' ')?.let { p -> searchLaf(LafFallback.Current, p.first) } ?: searchLaf(LafFallback.Current, it)
+        searchLaf(it.toPair(' ')?.first ?: it)
     }
 
     private fun parseScheme(name: String?): EditorColorsScheme? =
@@ -196,17 +204,26 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         Current
     }
 
-    /**
-     * Search for a given LookAndFeelInfo.
-     * The name has to match. If the className isn't empty it also has to match.
-     */
     private fun searchLaf(type: LafFallback, vararg ids: String): UIThemeLookAndFeelInfo {
-        return LafManager.getInstance()?.run {
-            val fallback = when (type) {
+        return searchLafImpl(*ids) ?: LafManager.getInstance()?.run {
+            when (type) {
                 LafFallback.Dark -> defaultDarkLaf ?: currentUIThemeLookAndFeel
                 LafFallback.Light -> defaultLightLaf ?: currentUIThemeLookAndFeel
                 LafFallback.HighContrast, LafFallback.Current -> currentUIThemeLookAndFeel
             }
+        } ?: HeadlessUIThemeLookAndFeelInfo()
+    }
+
+    private fun searchLaf(vararg ids: String): UIThemeLookAndFeelInfo? = searchLafImpl(*ids)
+
+
+    /**
+     * Search for a given LookAndFeelInfo.
+     * The name has to match. If the className isn't empty it also has to match.
+     */
+    private fun searchLafImpl(vararg ids: String): UIThemeLookAndFeelInfo? {
+        val manager = LafManager.getInstance() ?: return null
+        return manager.run {
             val experimental = ExperimentalUI.isNewUI()
             ids.firstNotNullOfOrNull { id ->
                 if (!experimental && id.startsWith("Experimental")) {
@@ -215,8 +232,8 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
                 return@firstNotNullOfOrNull installedThemes.firstOrNull {
                     it.id.equals(id, ignoreCase = true)
                 }
-            } ?: fallback
-        } ?: HeadlessUIThemeLookAndFeelInfo()
+            }
+        }
     }
 }
 
