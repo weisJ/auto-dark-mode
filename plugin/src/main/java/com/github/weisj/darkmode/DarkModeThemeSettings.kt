@@ -27,12 +27,13 @@ package com.github.weisj.darkmode
 import com.github.weisj.darkmode.platform.settings.*
 import com.google.auto.service.AutoService
 import com.intellij.ide.ui.LafManager
+import com.intellij.ide.ui.laf.UIThemeExportableBean
 import com.intellij.ide.ui.laf.UIThemeLookAndFeelInfo
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
 import com.intellij.ui.ExperimentalUI
-import com.intellij.ui.NewUiValue
+import javax.swing.UIDefaults
 
 @AutoService(SettingsContainerProvider::class)
 class GeneralThemeSettingsProvider : SingletonSettingsContainerProvider({ GeneralThemeSettings })
@@ -198,7 +199,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      * The name has to match. If the className isn't empty it also has to match.
      */
     private fun searchLaf(type: LafFallback, vararg ids: String): UIThemeLookAndFeelInfo {
-        return LafManager.getInstance().run {
+        return LafManager.getInstance()?.run {
             val fallback = when (type) {
                 LafFallback.Dark -> defaultDarkLaf ?: currentUIThemeLookAndFeel
                 LafFallback.Light -> defaultLightLaf ?: currentUIThemeLookAndFeel
@@ -213,6 +214,39 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
                     it.id.equals(id, ignoreCase = true)
                 }
             } ?: fallback
-        }
+        } ?: HeadlessUIThemeLookAndFeelInfo()
     }
+}
+
+private class HeadlessUIThemeLookAndFeelInfo : UIThemeLookAndFeelInfo {
+    override val author: String?
+        get() = null
+    override val editorSchemeId: String?
+        get() = null
+    override val id: String
+        get() = "headless"
+    override val isDark: Boolean
+        get() = false
+    override val isInitialized: Boolean
+        get() = false
+    override val name: String
+        get() = "Headless"
+    override val providerClassLoader: ClassLoader
+        get() = this.javaClass.classLoader
+
+    override fun describe(): UIThemeExportableBean {
+        return UIThemeExportableBean(
+            emptyMap(),
+            emptyMap(),
+            emptyMap(),
+            emptyMap()
+        )
+    }
+
+    override fun dispose() {}
+
+    override fun installEditorScheme(previousSchemeForLaf: EditorColorsScheme?) {}
+
+    override fun installTheme(defaults: UIDefaults) {}
+
 }
