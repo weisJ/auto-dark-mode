@@ -22,6 +22,8 @@
  * SOFTWARE.
  *
  */
+@file:Suppress("UnstableApiUsage")
+
 package com.github.weisj.darkmode
 
 import com.github.weisj.darkmode.platform.settings.*
