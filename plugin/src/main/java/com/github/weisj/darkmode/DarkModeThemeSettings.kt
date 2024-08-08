@@ -35,7 +35,6 @@ import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.options.Scheme
 import com.intellij.ui.ExperimentalUI
-import org.jetbrains.annotations.Contract
 import javax.swing.UIDefaults
 
 @AutoService(SettingsContainerProvider::class)
@@ -59,7 +58,7 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      * IntelliJ based product.
      */
     private enum class DefaultScheme(val scheme: EditorColorsScheme) {
-        LIGHT(searchScheme("IntelliJ Light", EditorColorsScheme.DEFAULT_SCHEME_NAME)),
+        LIGHT(searchScheme("IntelliJ Light", EditorColorsScheme.getDefaultSchemeName())),
         DARK(searchScheme("Darcula")),
 
         /*

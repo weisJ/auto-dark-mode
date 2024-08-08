@@ -40,10 +40,10 @@ open class DownloadPrebuiltBinariesTask @Inject constructor(
             URL("https://api.github.com/repos/$user/$repository/actions/workflows/$workflow/runs")
         }
 
-    private val prebuiltDirectoryPath = "${project.layout.buildDirectory}/$PRE_BUILD_PATH/$variantName"
+    private val prebuiltDirectoryPath = "${project.layout.buildDirectory.get()}/$PRE_BUILD_PATH/$variantName"
 
     private val cacheFile: File by lazy {
-        val cachePath = "${project.layout.buildDirectory}/$PRE_BUILD_PATH/$variantName/$VERSION_INFO_FILE_NAME"
+        val cachePath = "${project.layout.buildDirectory.get()}/$PRE_BUILD_PATH/$variantName/$VERSION_INFO_FILE_NAME"
         fileOf(cachePath) {
             it.writeText("{}")
         }
@@ -172,7 +172,7 @@ open class DownloadPrebuiltBinariesTask @Inject constructor(
         }
     }
 
-    private fun tempFilePath(name: String) = "${project.layout.buildDirectory}/$TEMP_PATH/${name}"
+    private fun tempFilePath(name: String) = "${project.layout.buildDirectory.get()}/$TEMP_PATH/${name}"
 
     private fun directoryOf(fileName: String) = File(fileName).also { it.mkdirs() }
 
@@ -202,9 +202,6 @@ open class DownloadPrebuiltBinariesTask @Inject constructor(
         lock()
         try {
             return action()
-        } catch (e: Exception) {
-            unlock()
-            throw e
         } finally {
             unlock()
         }
