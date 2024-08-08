@@ -20,6 +20,9 @@ val String.v: String get() = rootProject.extra["$this.version"] as String
 
 val buildVersion = "auto-dark-mode".v
 
+val githubAccessToken by props("")
+val currentBranch = System.getenv("GITHUB_HEAD_REF") ?: grgit.branch.current()?.name
+
 allprojects {
     group = "com.github.weisj"
     version = buildVersion
@@ -35,8 +38,6 @@ allprojects {
         maven { url = uri("https://cache-redirector.jetbrains.com/intellij-dependencies") }
     }
 
-    val githubAccessToken by props("")
-
     plugins.withType<UsePrebuiltBinariesWhenUnbuildablePlugin> {
         prebuiltBinaries {
             prebuiltLibrariesFolder = "pre-build-libraries"
@@ -46,7 +47,7 @@ allprojects {
                 workflow = "libs.yml"
             ) {
                 failIfLibraryIsMissing = false
-                val currentBranch = System.getenv("GITHUB_HEAD_REF") ?: grgit.branch.current()?.name
+                val currentBranch = currentBranch
                 branches = listOfNotNull(currentBranch, "master", "v$buildVersion", buildVersion)
                 accessToken = githubAccessToken
                 manualDownloadUrl =
