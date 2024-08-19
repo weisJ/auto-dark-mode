@@ -27,16 +27,17 @@ library {
                 compilerArgs.addAll(
                     toolChain.map {
                         when (it) {
-                            is Gcc, is Clang -> compilerFlagsFor(
-                                "glibmm-2.4",
-                                "giomm-2.4",
-                                "gtkmm-3.0",
-                                "sigc++-2.0",
-                                "gtk+-3.0"
-                            )
+                            is Gcc, is Clang ->
+                                compilerFlagsFor(
+                                    "glibmm-2.4",
+                                    "giomm-2.4",
+                                    "gtkmm-3.0",
+                                    "sigc++-2.0",
+                                    "gtk+-3.0",
+                                )
                             else -> emptyList()
                         }
-                    }
+                    },
                 )
 
                 // Build type not modeled yet, assuming release
@@ -46,23 +47,24 @@ library {
                             is Gcc, is Clang -> listOf("-O2")
                             else -> emptyList()
                         }
-                    }
+                    },
                 )
             }
             linkTask.configure {
                 linkerArgs.addAll(
                     toolChain.map {
                         when (it) {
-                            is Gcc, is Clang -> linkerFlagsFor(
-                                "glibmm-2.4",
-                                "giomm-2.4",
-                                "gtkmm-3.0",
-                                "sigc++-2.0",
-                                "gtk+-3.0"
-                            )
+                            is Gcc, is Clang ->
+                                linkerFlagsFor(
+                                    "glibmm-2.4",
+                                    "giomm-2.4",
+                                    "gtkmm-3.0",
+                                    "sigc++-2.0",
+                                    "gtk+-3.0",
+                                )
                             else -> emptyList()
                         }
-                    }
+                    },
                 )
             }
         }
@@ -77,9 +79,10 @@ fun linkerFlagsFor(vararg packages: String): List<String> =
 
 fun String.runCommand(): String {
     val process = ProcessBuilder(*split(" ").toTypedArray()).start()
-    val output = process.inputStream.reader(Charsets.UTF_8).use {
-        it.readText()
-    }
+    val output =
+        process.inputStream.reader(Charsets.UTF_8).use {
+            it.readText()
+        }
     process.waitFor(10, TimeUnit.SECONDS)
     return output.trim()
 }

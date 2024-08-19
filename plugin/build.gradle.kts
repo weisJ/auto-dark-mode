@@ -78,7 +78,7 @@ tasks.withType<PatchPluginXmlTask> {
         <ul>
             <li>Added option to individually choose whether the IDE/editor theme gets changed.</li>
         </ul>
-        """
+        """,
     )
     sinceBuild.set("ideaPlugin.since".v)
     untilBuild.set("ideaPlugin.until".v)

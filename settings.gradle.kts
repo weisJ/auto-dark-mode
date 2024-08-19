@@ -4,7 +4,11 @@ enableFeaturePreview("VERSION_CATALOGS")
 pluginManagement {
     plugins {
         fun String.v() = extra["$this.version"].toString()
-        fun PluginDependenciesSpec.idv(id: String, key: String = id) = id(id) version key.v()
+
+        fun PluginDependenciesSpec.idv(
+            id: String,
+            key: String = id,
+        ) = id(id) version key.v()
 
         idv("com.diffplug.spotless")
         idv("com.github.vlsi.crlf", "com.github.vlsi.vlsi-release-plugins")
@@ -27,7 +31,7 @@ include(
     "macos",
     "linux",
     "linux/gtk",
-    "linux/xdg"
+    "linux/xdg",
 )
 
 rootProject.name = "auto-dark-mode"

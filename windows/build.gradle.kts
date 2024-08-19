@@ -21,18 +21,19 @@ library {
                 compilerArgs.addAll(
                     toolChain.map {
                         when (it) {
-                            is Gcc, is Clang -> listOf(
-                                "--std=c++17",
-                                "-Wall",
-                                "-Wextra",
-                                "-pedantic",
-                                "-Wno-language-extension-token",
-                                "-Wno-ignored-attributes"
-                            )
+                            is Gcc, is Clang ->
+                                listOf(
+                                    "--std=c++17",
+                                    "-Wall",
+                                    "-Wextra",
+                                    "-pedantic",
+                                    "-Wno-language-extension-token",
+                                    "-Wno-ignored-attributes",
+                                )
                             is VisualCpp -> listOf("/std:c++17", "/EHsc", "/W4", "/permissive", "/WX")
                             else -> emptyList()
                         }
-                    }
+                    },
                 )
                 optimizedBinary()
             }
@@ -44,7 +45,7 @@ library {
                             is VisualCpp -> listOf("user32.lib", "Advapi32.lib")
                             else -> emptyList()
                         }
-                    }
+                    },
                 )
             }
         }

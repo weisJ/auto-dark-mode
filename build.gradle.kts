@@ -44,7 +44,7 @@ allprojects {
             github(
                 user = "weisj",
                 repository = "auto-dark-mode",
-                workflow = "libs.yml"
+                workflow = "libs.yml",
             ) {
                 failIfLibraryIsMissing = false
                 val currentBranch = currentBranch

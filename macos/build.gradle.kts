@@ -43,7 +43,7 @@ library {
             linkTask.configure {
                 linkerArgs.addAll(
                     "-lobjc",
-                    "-mmacosx-version-min=$minOs"
+                    "-mmacosx-version-min=$minOs",
                     // "-framework", "AppKit",
                 )
             }
