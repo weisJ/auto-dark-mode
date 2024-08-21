@@ -21,6 +21,10 @@ intellij {
 tasks.withType<PatchPluginXmlTask> {
     changeNotes.set(
         """
+        v1.8.4
+        <ul>
+            <li> Fixed an error when dispatching notifications in IDEA 2024.2
+        </ul>
         v1.8.3
         <ul>
             <li> New-UI themes are now used if the new UI is enabled.
