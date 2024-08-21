@@ -50,8 +50,8 @@ object IntellijNotificationService : NotificationsService {
     private val LOGGER = PluginLogger<IntellijNotificationService>()
     private val ICON = IconLoader.getIcon("/META-INF/pluginIcon.svg", AutoDarkMode::class.java)
 
-    private val NOTIFICATION_GROUP = NotificationGroupManager.getInstance()
-        .getNotificationGroup("com.github.weisj.darkmode")
+    private val NOTIFICATION_GROUP
+        get() = NotificationGroupManager.getInstance().getNotificationGroup("com.github.weisj.darkmode")
 
     /*
      * Notifications may not be displayed of they are dispatched before the application frame has been
