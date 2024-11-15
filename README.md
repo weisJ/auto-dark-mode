@@ -1,3 +1,5 @@
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/weisj)
+
 ### Note for Windows and macOS users:
 In IDEA versions >= 2020.3 the functionality of this plugin already exists out of the box.
 
