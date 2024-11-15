@@ -106,6 +106,8 @@ dependencies {
     testImplementation(libs.test.junit.api)
     testRuntimeOnly(libs.test.junit.launcher)
     testRuntimeOnly(libs.test.junit.engine)
+    // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-faq.html#migrateToPluginId
+    testRuntimeOnly("junit:junit:4.13.2")
 }
 
 tasks {
