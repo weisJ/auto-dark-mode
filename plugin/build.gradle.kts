@@ -85,7 +85,7 @@ tasks.withType<PatchPluginXmlTask> {
         """,
     )
     sinceBuild.set("ideaPlugin.since".v)
-    untilBuild.set("ideaPlugin.until".v)
+//    untilBuild.set("ideaPlugin.until".v)
 }
 
 dependencies {
