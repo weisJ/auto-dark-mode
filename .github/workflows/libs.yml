@@ -25,23 +25,23 @@ jobs:
     name: Windows (Java 17)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 10
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 17
       - name: Build
         run: ./gradlew :auto-dark-mode-windows:build --full-stacktrace -PskipSpotless
       - name: Upload x86 artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: windows-x86
           path: windows/build/libs/main/x86/auto-dark-mode-windows.dll
       - name: Upload x86-64 artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: windows-x86-64
           path: windows/build/libs/main/x86-64/auto-dark-mode-windows.dll
@@ -50,23 +50,23 @@ jobs:
     name: macOS (Java 17)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 10
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 17
       - name: Build
         run: ./gradlew :auto-dark-mode-macos:build --full-stacktrace -PmacOSciModeFix -PskipSpotless
       - name: Upload x86-64 artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: macos-x86-64
           path: macos/build/libs/main/x86-64/libauto-dark-mode-macos.dylib
       - name: Upload arm64 artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: macos-arm64
           path: macos/build/libs/main/arm64/libauto-dark-mode-macos.dylib
@@ -76,7 +76,7 @@ jobs:
         run: otool -l macos/build/libs/main/arm64/libauto-dark-mode-macos.dylib && file macos/build/libs/main/arm64/libauto-dark-mode-macos.dylib
       - name: Upload build log
         if: always()
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: build_logs
           path: macos/build/tmp
@@ -85,11 +85,11 @@ jobs:
     name: Linux (Gtk) (Java 17)
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 10
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 17
@@ -100,7 +100,7 @@ jobs:
       - name: Build
         run: ./gradlew :auto-dark-mode-linux-gtk:build --full-stacktrace -PskipSpotless
       - name: Upload artifact
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: linux-x86-64
           path: linux/gtk/build/libs/main/libauto-dark-mode-linux-gtk.so
