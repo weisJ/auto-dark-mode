@@ -48,8 +48,9 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
      * IntelliJ based product.
      */
     private enum class DefaultLaf(val info: UIThemeLookAndFeelInfo) {
-        DARK(searchLaf(LafFallback.Dark, "ExperimentalDark", "Darcula")),
-        LIGHT(searchLaf(LafFallback.Light, "ExperimentalLight", "JetBrainsLightTheme")),
+        // Prefer Islands themes on newer IDEs; fall back to legacy IDs
+        DARK(searchLaf(LafFallback.Dark, "Islands Dark", "ExperimentalDark", "Darcula")),
+        LIGHT(searchLaf(LafFallback.Light, "Islands Light", "ExperimentalLight", "JetBrainsLightTheme")),
         HIGH_CONTRAST(searchLaf(LafFallback.HighContrast, "JetBrainsHighContrastTheme"))
     }
 
@@ -168,12 +169,19 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
         }
     }
 
-    private fun readLaf(info: UIThemeLookAndFeelInfo): String = info.id
+    private fun readLaf(info: UIThemeLookAndFeelInfo): String = "${info.id} ${info.name}"
 
     private fun readScheme(scheme: EditorColorsScheme): String = scheme.name
 
-    private fun parseLaf(id: String?): UIThemeLookAndFeelInfo? = id?.let {
-        searchLaf(it.toPair(' ')?.first ?: it)
+    private fun parseLaf(idOrName: String?): UIThemeLookAndFeelInfo? = idOrName?.let { raw ->
+        // Try: full string, id (before first space), then name (after first space)
+        val primary = raw.trim()
+        val split = raw.toPair(' ')
+        val idPart = split?.first?.trim()
+        val namePart = split?.second?.trim()
+        searchLaf(primary)
+            ?: (idPart?.let { searchLaf(it) })
+            ?: (namePart?.let { searchLaf(it) })
     }
 
     private fun parseScheme(name: String?): EditorColorsScheme? =
@@ -228,8 +236,9 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
                 if (!experimental && id.startsWith("Experimental")) {
                     return@firstNotNullOfOrNull null
                 }
+                // Match by id first; if not found, also allow matching by display name.
                 return@firstNotNullOfOrNull installedThemes.firstOrNull {
-                    it.id.equals(id, ignoreCase = true)
+                    it.id.equals(id, ignoreCase = true) || it.name.equals(id, ignoreCase = true)
                 }
             }
         }
