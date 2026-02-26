@@ -63,7 +63,14 @@ class AutoDarkModeOptions : PersistentStateComponent<SettingsState> {
     }
 
     private var storageSettingsVersion: Double = SETTINGS_VERSION
-    var containers: List<SettingsContainer> = listOf()
+    private var _containers: List<SettingsContainer>? = null
+    val containers: List<SettingsContainer>
+        get() {
+            if (_containers == null) {
+                initContainers(SettingsState(emptyList()))
+            }
+            return _containers!!
+        }
     private val properties: MutableMap<PropertyIdentifier, PersistentValueProperty<Any>> by lazy {
         initState(containers, mutableMapOf())
     }
@@ -71,7 +78,7 @@ class AutoDarkModeOptions : PersistentStateComponent<SettingsState> {
     private var loadState = LoadState.INVALID
 
     private fun initContainers(state: SettingsState) {
-        containers = ServiceUtil.load(SettingsContainerProvider::class.java)
+        _containers = ServiceUtil.load(SettingsContainerProvider::class.java)
             .asSequence()
             .filter { it.isEnabled(state) }
             .map { it.create() }
@@ -127,7 +134,7 @@ class AutoDarkModeOptions : PersistentStateComponent<SettingsState> {
             stateAfterLoad = toLoad
             loadState = LoadState.STATE_AFTER_LOAD
         }
-        if (containers.isEmpty()) initContainers(toLoad)
+        if (_containers == null) initContainers(toLoad)
         storageSettingsVersion = toLoad.entries.find {
             it.groupIdentifier == ROOT_GROUP_NAME && it.name == SETTING_VERSION_NAME
         }?.value?.toDouble() ?: SETTINGS_VERSION
