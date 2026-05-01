@@ -31,7 +31,9 @@ import com.intellij.openapi.application.ApplicationManager
 class AutoDarkModePluginListener : DynamicPluginListener {
 
     override fun pluginLoaded(pluginDescriptor: IdeaPluginDescriptor) {
-        ApplicationManager.getApplication().getService(AutoDarkMode::class.java).pluginLoaded()
+        val application = ApplicationManager.getApplication()
+        application.getService(AutoDarkModeOptions::class.java).settingsLoaded()
+        application.getService(AutoDarkMode::class.java).pluginLoaded()
     }
 
     override fun beforePluginUnload(pluginDescriptor: IdeaPluginDescriptor, isUpdate: Boolean) {

@@ -30,7 +30,9 @@ import com.intellij.openapi.application.ApplicationManager
 class AutoDarkModeStartupListener : AppLifecycleListener {
     override fun appFrameCreated(commandLineArgs: List<String>) {
         IntellijNotificationService.initializeIfNeeded()
-        ApplicationManager.getApplication().getService(AutoDarkMode::class.java).start()
+        val application = ApplicationManager.getApplication()
+        application.getService(AutoDarkModeOptions::class.java).settingsLoaded()
+        application.getService(AutoDarkMode::class.java).start()
     }
 
     override fun appClosing() {
