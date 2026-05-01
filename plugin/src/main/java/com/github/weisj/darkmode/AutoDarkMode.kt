@@ -60,6 +60,9 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun start() {
+        ApplicationManager.getApplication()
+            .getService(AutoDarkModeOptions::class.java)
+            .settingsLoaded()
         monitor.letValue { it.running = true }
     }
 

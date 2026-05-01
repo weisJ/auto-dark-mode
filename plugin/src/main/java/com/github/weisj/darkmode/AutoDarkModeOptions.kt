@@ -152,7 +152,11 @@ class AutoDarkModeOptions : PersistentStateComponent<SettingsState> {
         }
     }
 
+    private var settingsLoaded = false
+
     fun settingsLoaded() {
+        if (settingsLoaded) return
+        settingsLoaded = true
         containers.forEach { it.onSettingsLoaded() }
     }
 
