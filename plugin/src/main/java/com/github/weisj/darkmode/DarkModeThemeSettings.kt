@@ -73,35 +73,12 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private const val DEFAULT_CHANGE_EDITOR_THEME = true
     private const val DEFAULT_CHECK_HIGH_CONTRAST = true
 
-    private var _darkTheme: UIThemeLookAndFeelInfo? = null
-    var darkTheme: UIThemeLookAndFeelInfo
-        get() = _darkTheme ?: DefaultLaf.DARK.info().also { _darkTheme = it }
-        set(value) { _darkTheme = value }
-
-    private var _lightTheme: UIThemeLookAndFeelInfo? = null
-    var lightTheme: UIThemeLookAndFeelInfo
-        get() = _lightTheme ?: DefaultLaf.LIGHT.info().also { _lightTheme = it }
-        set(value) { _lightTheme = value }
-
-    private var _highContrastTheme: UIThemeLookAndFeelInfo? = null
-    var highContrastTheme: UIThemeLookAndFeelInfo
-        get() = _highContrastTheme ?: DefaultLaf.HIGH_CONTRAST.info().also { _highContrastTheme = it }
-        set(value) { _highContrastTheme = value }
-
-    private var _lightCodeScheme: EditorColorsScheme? = null
-    var lightCodeScheme: EditorColorsScheme
-        get() = _lightCodeScheme ?: DefaultScheme.LIGHT.scheme().also { _lightCodeScheme = it }
-        set(value) { _lightCodeScheme = value }
-
-    private var _darkCodeScheme: EditorColorsScheme? = null
-    var darkCodeScheme: EditorColorsScheme
-        get() = _darkCodeScheme ?: DefaultScheme.DARK.scheme().also { _darkCodeScheme = it }
-        set(value) { _darkCodeScheme = value }
-
-    private var _highContrastCodeScheme: EditorColorsScheme? = null
-    var highContrastCodeScheme: EditorColorsScheme
-        get() = _highContrastCodeScheme ?: DefaultScheme.HIGH_CONTRAST.scheme().also { _highContrastCodeScheme = it }
-        set(value) { _highContrastCodeScheme = value }
+    var darkTheme: UIThemeLookAndFeelInfo by lazyFallback { DefaultLaf.DARK.info() }
+    var lightTheme: UIThemeLookAndFeelInfo by lazyFallback { DefaultLaf.LIGHT.info() }
+    var highContrastTheme: UIThemeLookAndFeelInfo by lazyFallback { DefaultLaf.HIGH_CONTRAST.info() }
+    var lightCodeScheme: EditorColorsScheme by lazyFallback { DefaultScheme.LIGHT.scheme() }
+    var darkCodeScheme: EditorColorsScheme by lazyFallback { DefaultScheme.DARK.scheme() }
+    var highContrastCodeScheme: EditorColorsScheme by lazyFallback { DefaultScheme.HIGH_CONTRAST.scheme() }
 
     var changeIdeTheme = DEFAULT_CHANGE_IDE_THEME
     var changeEditorTheme = DEFAULT_CHANGE_EDITOR_THEME
