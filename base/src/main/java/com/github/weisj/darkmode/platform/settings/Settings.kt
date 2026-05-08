@@ -219,7 +219,7 @@ class SimpleValueProperty<T : Any> internal constructor(
     override val description: String = description ?: property.name
     override val name: String = name ?: property.name
     override var value: T by observable(property)
-    override var preview: T by observable(value)
+    override var preview: T by observable { value }
     override var activeCondition: Condition = conditionOf(true)
 
     init {
@@ -238,7 +238,7 @@ open class SimpleTransformingValueProperty<R : Any, T : Any> internal constructo
     override val group by backingProperty::group
 
     final override var value: T by transformer.delegate(backingProp = backingProperty::value)
-    override var preview: T by observable(value)
+    override var preview: T by observable { value }
 }
 
 class SimplePersistentValueProperty<R : Any>(

@@ -89,6 +89,24 @@ class ObservableManager<T> {
             updateValue(property.name, old, value)
         }
     }
+
+    inner class WrappingLazyRWProperty<V : Any>(
+        private val provider: () -> V
+    ) : ReadWriteProperty<T, V> {
+
+        @Suppress("UNCHECKED_CAST")
+        override operator fun getValue(thisRef: T, property: KProperty<*>): V =
+            properties.getOrPut(property.name) { provider() } as V
+
+        override operator fun setValue(thisRef: T, property: KProperty<*>, value: V) {
+            val old = properties.put(property.name, value)
+            if (old != null) {
+                updateValue(property.name, old, value)
+            } else {
+                listeners[property.name]?.forEach { it(value, value) }
+            }
+        }
+    }
 }
 
 interface DelegateProvider<T, V> {
@@ -118,6 +136,16 @@ class ObservablePropertyValue<T, V : Any>(
     ): ReadWriteProperty<T, V> = delegate.WrappingDelegateRWProperty(property)
 }
 
+class ObservableLazyValue<T, V : Any>(
+    private val delegate: ObservableManager<T>,
+    private val provider: () -> V
+) : DelegateProvider<T, V> {
+    override operator fun provideDelegate(
+        thisRef: T,
+        prop: KProperty<*>
+    ): ReadWriteProperty<T, V> = delegate.WrappingLazyRWProperty(provider)
+}
+
 interface Observable<T> {
     val manager: ObservableManager<T>
 }
@@ -131,6 +159,9 @@ fun <T, V : Any> Observable<T>.observable(value: V): DelegateProvider<T, V> =
 
 fun <T, V : Any> Observable<T>.observable(prop: KMutableProperty0<V>): DelegateProvider<T, V> =
     ObservablePropertyValue(manager, prop)
+
+fun <T, V : Any> Observable<T>.observable(provider: () -> V): DelegateProvider<T, V> =
+    ObservableLazyValue(manager, provider)
 
 inline fun <T, V : Any> Observable<T>.registerListener(
     property: KProperty1<T, V>,

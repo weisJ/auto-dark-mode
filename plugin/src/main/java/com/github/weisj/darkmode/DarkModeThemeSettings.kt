@@ -73,13 +73,12 @@ object GeneralThemeSettings : DefaultSettingsContainer(identifier = "general_set
     private const val DEFAULT_CHANGE_EDITOR_THEME = true
     private const val DEFAULT_CHECK_HIGH_CONTRAST = true
 
-    var darkTheme = DefaultLaf.DARK.info()
-    var lightTheme = DefaultLaf.LIGHT.info()
-    var highContrastTheme = DefaultLaf.HIGH_CONTRAST.info()
-
-    var lightCodeScheme = DefaultScheme.LIGHT.scheme()
-    var darkCodeScheme = DefaultScheme.DARK.scheme()
-    var highContrastCodeScheme = DefaultScheme.HIGH_CONTRAST.scheme()
+    var darkTheme: UIThemeLookAndFeelInfo by lazyFallback { DefaultLaf.DARK.info() }
+    var lightTheme: UIThemeLookAndFeelInfo by lazyFallback { DefaultLaf.LIGHT.info() }
+    var highContrastTheme: UIThemeLookAndFeelInfo by lazyFallback { DefaultLaf.HIGH_CONTRAST.info() }
+    var lightCodeScheme: EditorColorsScheme by lazyFallback { DefaultScheme.LIGHT.scheme() }
+    var darkCodeScheme: EditorColorsScheme by lazyFallback { DefaultScheme.DARK.scheme() }
+    var highContrastCodeScheme: EditorColorsScheme by lazyFallback { DefaultScheme.HIGH_CONTRAST.scheme() }
 
     var changeIdeTheme = DEFAULT_CHANGE_IDE_THEME
     var changeEditorTheme = DEFAULT_CHANGE_EDITOR_THEME

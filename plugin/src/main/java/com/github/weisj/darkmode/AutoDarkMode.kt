@@ -60,6 +60,9 @@ class AutoDarkMode : Disposable, ThemeCallback {
     }
 
     fun start() {
+        ApplicationManager.getApplication()
+            .getService(AutoDarkModeOptions::class.java)
+            .settingsLoaded()
         monitor.letValue { it.running = true }
     }
 
@@ -138,10 +141,5 @@ class AutoDarkMode : Disposable, ThemeCallback {
     companion object {
         private const val INSTANT_DELAY_KEY = "ide.instant.theme.switch.delay"
         private val LOGGER = PluginLogger<AutoDarkMode>()
-        private val OPTIONS = ApplicationManager.getApplication().getService(AutoDarkModeOptions::class.java)
-
-        init {
-            OPTIONS.settingsLoaded()
-        }
     }
 }

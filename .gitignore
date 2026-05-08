@@ -8,6 +8,7 @@ repo/
 # LibreOffice locks
 .~lock.*#
 
+*.log
 *.tmp
 
 # Word temporary
