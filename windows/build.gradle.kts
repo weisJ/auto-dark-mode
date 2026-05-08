@@ -23,9 +23,6 @@ val srcFile = file("src/main/cpp/DarkModeWindows.cpp")
 
 data class WindowsTarget(val arch: String)
 
-// Converts e.g. "x86-64" -> "X8664", "x86" -> "X86" for use in task names.
-fun String.toTaskSuffix() = replace("-", "").replaceFirstChar { it.uppercase() }
-
 val windowsTargets =
     listOf(
         WindowsTarget(arch = "x86-64"),

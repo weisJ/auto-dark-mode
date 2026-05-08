@@ -37,15 +37,12 @@ tasks.named<JavaCompile>("compileJava") {
     options.headerOutputDirectory.set(layout.buildDirectory.dir("generated/jni"))
 }
 
-// Converts e.g. "x86-64" -> "X8664", "arm64" -> "Arm64" for use in task names.
-fun String.toTaskSuffix() = replace("-", "").replaceFirstChar { it.uppercase() }
-
 data class MacOSTarget(val arch: String, val minOs: String, val clangTarget: String)
 
 val macOSTargets =
     listOf(
         MacOSTarget(arch = "x86-64", minOs = "10.10", clangTarget = "x86_64-apple-macos10.10"),
-        MacOSTarget(arch = "arm64", minOs = "11.0", clangTarget = "arm64-apple-macos11"),
+        MacOSTarget(arch = "arm64", minOs = "11", clangTarget = "arm64-apple-macos11"),
     )
 
 val javaHome = Jvm.current().javaHome
