@@ -2,6 +2,9 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import java.io.File
 import java.net.HttpURLConnection
@@ -18,10 +21,18 @@ import javax.inject.Inject
 private typealias Json = Map<String, Any>
 
 @Suppress("UNCHECKED_CAST")
-open class DownloadPrebuiltBinariesTask @Inject constructor(
+abstract class DownloadPrebuiltBinariesTask @Inject constructor(
     private val variantName: String,
-    private val extension: PrebuiltBinariesExtension
+    private val extension: PrebuiltBinariesExtension,
 ) : DefaultTask() {
+
+    /**
+     * Optional path to a locally-built native library. When set and the file exists at this path,
+     * the download from GitHub is skipped and this file is used directly.
+     */
+    @get:Input
+    @get:Optional
+    abstract val localNativeLibraryPath: Property<String>
 
     companion object {
         private val LOCK: ReadWriteLock = ReentrantReadWriteLock()
@@ -77,6 +88,16 @@ open class DownloadPrebuiltBinariesTask @Inject constructor(
     }
 
     private fun fetchBinaryFile(): File? {
+        // Use locally built binary if one was wired up and already exists on disk
+        val localPath = localNativeLibraryPath.orNull
+        if (localPath != null) {
+            val localFile = File(localPath)
+            if (localFile.isFile) {
+                warnLog("Using locally built native library: ${localFile.absolutePath}")
+                return localFile
+            }
+        }
+
         val branches = githubArtifactSpec.branches.distinct()
         return if (branches.isEmpty()) {
             fetchBinaryFileForBranch(null)

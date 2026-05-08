@@ -33,18 +33,28 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: 17
-      - name: Build
-        run: ./gradlew :auto-dark-mode-windows:build --full-stacktrace -PskipSpotless
+      - name: Set up MSVC (x64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+      - name: Compile x86-64 DLL
+        run: ./gradlew :auto-dark-mode-windows:compileNativeWindowsX8664 --no-daemon --full-stacktrace -PskipSpotless
+      - name: Set up MSVC (x86)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+      - name: Compile x86 DLL
+        run: ./gradlew :auto-dark-mode-windows:compileNativeWindowsX86 --no-daemon --full-stacktrace -PskipSpotless
       - name: Upload x86 artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-x86
-          path: windows/build/libs/main/x86/auto-dark-mode-windows.dll
+          path: windows/build/lib/main/release/windows-x86/auto-dark-mode-windows.dll
       - name: Upload x86-64 artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-x86-64
-          path: windows/build/libs/main/x86-64/auto-dark-mode-windows.dll
+          path: windows/build/lib/main/release/windows-x86-64/auto-dark-mode-windows.dll
 
   macOS:
     name: macOS (Java 17)
@@ -59,21 +69,21 @@ jobs:
           distribution: 'zulu'
           java-version: 17
       - name: Build
-        run: ./gradlew :auto-dark-mode-macos:build --full-stacktrace -PmacOSciModeFix -PskipSpotless
+        run: ./gradlew :auto-dark-mode-macos:build --full-stacktrace -PskipSpotless
       - name: Upload x86-64 artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-x86-64
-          path: macos/build/libs/main/x86-64/libauto-dark-mode-macos.dylib
+          path: macos/build/lib/main/release/macos-x86-64/libauto-dark-mode-macos.dylib
       - name: Upload arm64 artifact
         uses: actions/upload-artifact@v4
         with:
           name: macos-arm64
-          path: macos/build/libs/main/arm64/libauto-dark-mode-macos.dylib
+          path: macos/build/lib/main/release/macos-arm64/libauto-dark-mode-macos.dylib
       - name: Print x86-64 library information
-        run: otool -l macos/build/libs/main/x86-64/libauto-dark-mode-macos.dylib && file macos/build/libs/main/x86-64/libauto-dark-mode-macos.dylib
+        run: otool -l macos/build/lib/main/release/macos-x86-64/libauto-dark-mode-macos.dylib && file macos/build/lib/main/release/macos-x86-64/libauto-dark-mode-macos.dylib
       - name: Print arm64 library information
-        run: otool -l macos/build/libs/main/arm64/libauto-dark-mode-macos.dylib && file macos/build/libs/main/arm64/libauto-dark-mode-macos.dylib
+        run: otool -l macos/build/lib/main/release/macos-arm64/libauto-dark-mode-macos.dylib && file macos/build/lib/main/release/macos-arm64/libauto-dark-mode-macos.dylib
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
@@ -103,4 +113,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-x86-64
-          path: linux/gtk/build/libs/main/libauto-dark-mode-linux-gtk.so
+          path: linux/gtk/build/lib/main/release/linux-x86-64/libauto-dark-mode-linux-gtk.so

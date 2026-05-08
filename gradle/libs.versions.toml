@@ -1,7 +1,6 @@
 [versions]
 autoservice = "1.0.1"
 autoserviceKsp = "1.2.0"
-macOSFramework = "latest.release"
 junit = "5.9.1"
 junitlauncher = "1.9.0"
 darklaf = "3.0.1"
@@ -16,9 +15,6 @@ kotlinx-coroutines-core-jvm = {module ="org.jetbrains.kotlinx:kotlinx-coroutines
 # Linux frameworks
 linux-dbus-core = { module = "com.github.hypfvieh:dbus-java-core", version = "4.2.1" }
 linux-dbus-transport = { module = "com.github.hypfvieh:dbus-java-transport-native-unixsocket", version = "4.2.1" }
-
-# MacOS frameworks
-macos-appKit = { module = "dev.nokee.framework:AppKit", version.ref = "macOSFramework" }
 
 # Test libraries
 test-junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }

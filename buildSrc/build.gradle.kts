@@ -11,7 +11,6 @@ dependencies {
 repositories {
     mavenCentral()
     gradlePluginPortal()
-    nokee()
 }
 
 gradlePlugin {
